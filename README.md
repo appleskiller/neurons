@@ -1,1 +1,1 @@
-# neuron
+# neurons
