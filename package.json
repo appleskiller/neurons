@@ -1,0 +1,60 @@
+{
+  "name": "neurons",
+  "version": "0.1.0",
+  "description": "Neurons UI",
+  "author": "appleskiller@163.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/appleskiller/neurons.git"
+  },
+  "scripts": {
+    "test": "karma start",
+    "test-once": "karma start --single-run true",
+    "build": "node script/build.js",
+    "tag": "node script/tag.js",
+    "release": "node script/release.js"
+  },
+  "dependencies": {
+    "acorn": "^6.2.1",
+    "htmlparser2": "^4.0.0",
+    "tslib": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^3.3.16",
+    "@types/jasminewd2": "^2.0.6",
+    "@types/node": "^10.14.14",
+    "@types/webpack": "^4.32.1",
+    "awesome-typescript-loader": "^5.2.1",
+    "core-js": "^3.1.4",
+    "fs-extra": "^8.1.0",
+    "jasmine-core": "^3.3.0",
+    "jasmine-spec-reporter": "^4.2.1",
+    "karma": "^4.2.0",
+    "karma-chrome-launcher": "^3.0.0",
+    "karma-cli": "^2.0.0",
+    "karma-coverage-istanbul-reporter": "^2.1.0",
+    "karma-jasmine": "^2.0.1",
+    "karma-jasmine-html-reporter": "^1.4.2",
+    "karma-webpack": "^4.0.2",
+    "rollup": "^1.19.4",
+    "rollup-plugin-commonjs": "^10.0.2",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-uglify": "^6.0.2",
+    "shelljs": "^0.8.3",
+    "tslint": "^5.9.1",
+    "typescript": "3.5.3",
+    "webpack": "^4.26.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10",
+    "yargs": "^12.0.5"
+  },
+  "keywords": [
+    "ui",
+    "typescript",
+    "javascript"
+  ]
+}
