@@ -1,5 +1,5 @@
-import { isArray } from '../utils/typeutils';
-import { EventEmitter, IEventEmitter, IEmitter, emitter } from '../helper/emitter';
+import { isArray } from 'neurons-utils';
+import { EventEmitter, IEventEmitter, IEmitter, emitter } from 'neurons-emitter';
 import { IHierarchyNode, ChildrenAccessor, defaultChildrenAccessor, HierarchyNode } from './hierarchy';
 
 /**

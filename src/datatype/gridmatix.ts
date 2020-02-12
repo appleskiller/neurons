@@ -1,5 +1,5 @@
-import { isArray, isDefined } from '../utils/typeutils';
-import { EventEmitter, emitter, IEmitter } from '../helper/emitter';
+import { isArray, isDefined } from 'neurons-utils';
+import { EventEmitter, emitter, IEmitter } from 'neurons-emitter';
 
 export type GridLayoutBox = {x: number, y: number, width: number, height: number};
 export type GridRange = {x: number, y: number, width: number, height: number};

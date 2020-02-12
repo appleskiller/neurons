@@ -1,6 +1,6 @@
 import { ChildrenAccessor, defaultChildrenAccessor, IHierarchyNode, HierarchyNode, getParents, reduceDescendants, eachBelow, eachBelowReverse } from './hierarchy';
-import { isArray, isDefined } from '../utils/typeutils';
-import { EventEmitter, IEventEmitter, IEmitter, emitter } from '../helper/emitter';
+import { isArray, isDefined } from 'neurons-utils';
+import { EventEmitter, IEventEmitter, IEmitter, emitter } from 'neurons-emitter';
 import { SizeAccessor, defaultSizeAccessor, GridMatrix, IItemChangeEvent, IColChangeEvent, IRowChangeEvent, GridLayoutBox, GridRange } from './gridmatix';
 
 export type IGridNodeBox = {x: number, y: number, width: number, height: number};

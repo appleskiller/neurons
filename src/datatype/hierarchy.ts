@@ -1,5 +1,5 @@
-import { uniqueId } from '../utils/objectutils';
-import { EventEmitter } from '../helper/emitter';
+import { uniqueId } from 'neurons-utils';
+import { EventEmitter } from 'neurons-emitter';
 
 export interface IHierarchyNode {
     id: string;

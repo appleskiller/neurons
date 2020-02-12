@@ -1,5 +1,5 @@
-import { isBrowser, globalContext, globalCache } from '../utils';
-import { removeMe, addEventListener } from '../utils/domutils';
+import { isBrowser, globalContext, globalCache } from 'neurons-utils';
+import { removeMe, addEventListener } from 'neurons-dom';
 
 const browserGhostEnabled = isBrowser
                             && typeof window.document !== 'undefined'

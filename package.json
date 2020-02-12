@@ -1,6 +1,6 @@
 {
   "name": "neurons",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Neurons UI",
   "author": "appleskiller@163.com",
   "license": "MIT",
@@ -9,15 +9,23 @@
     "url": "https://github.com/appleskiller/neurons.git"
   },
   "scripts": {
+    "start": "node script/demo.js",
     "test": "karma start",
     "test-once": "karma start --single-run true",
     "build": "node script/build.js",
     "tag": "node script/tag.js",
+    "update-deps": "node script/update-deps.js",
     "release": "node script/release.js"
   },
   "dependencies": {
     "acorn": "^6.2.1",
     "htmlparser2": "^4.0.0",
+    "neurons-animation": "^1.0.1",
+    "neurons-dom": "^1.0.3",
+    "neurons-emitter": "^1.0.0",
+    "neurons-injector": "^1.0.0",
+    "neurons-utils": "^1.0.6",
+    "neurons-xml": "^1.0.0",
     "tslib": "^1.10.0"
   },
   "devDependencies": {
@@ -26,6 +34,7 @@
     "@types/node": "^10.14.14",
     "@types/webpack": "^4.32.1",
     "awesome-typescript-loader": "^5.2.1",
+    "babel-polyfill": "^6.26.0",
     "core-js": "^3.1.4",
     "fs-extra": "^8.1.0",
     "jasmine-core": "^3.3.0",
