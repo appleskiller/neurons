@@ -1,14 +1,12 @@
 
 
-import * as hierarchy from './hierarchy';
+import * as hierarchyExports from './hierarchy';
 // -------------------------------------------------------------------
 // datatype
 // ===================================================================
-import * as hierarchycollection from './hierarchycollection';
-import * as hierarchygrid from './hierarchygrid';
+import * as hierarchycollectionExports from './hierarchycollection';
+import * as hierarchygridExports from './hierarchygrid';
 
-export const datatype = {
-    hierarchy: hierarchy,
-    hierarchycollection: hierarchycollection,
-    hierarchygrid: hierarchygrid,
-};
+export const hierarchy = hierarchyExports;
+export const hierarchycollection = hierarchycollectionExports;
+export const hierarchygrid = hierarchygridExports;

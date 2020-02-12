@@ -6,7 +6,8 @@ export { HttpClient } from './helper/httpclient';
 // -------------------------------------------------------------------
 // datatype
 // ===================================================================
-export * from './datatype';
+import * as datatypeExports from './datatype';
+export const datatype = datatypeExports;
 // -------------------------------------------------------------------
 // binding
 // ===================================================================
