@@ -11,16 +11,56 @@ export const datatype = datatypeExports;
 // -------------------------------------------------------------------
 // binding
 // ===================================================================
-import * as bindingExports from './binding';
-export * from './binding';
+export {
+    Element,
+    Property,
+    Binding,
+    Inject,
+    Emitter,
+    bind,
+    bootstrap
+} from './binding';
 // -------------------------------------------------------------------
 // cdk
 // ===================================================================
-export * from './cdk';
+export { Animation,
+    dragManager,
+    popupManager,
+    scrollManager
+} from './cdk';
 // -------------------------------------------------------------------
 // components
 // ===================================================================
-export * from './components';
+export {
+    Button,
+    CheckItem,
+    HorizontalCheckGroup,
+    CheckBox,
+    CheckBoxGroup,
+    DropDownList,
+    SvgIcon,
+    Input,
+    NumberInput,
+    SearchInput,
+    TextArea,
+    CollapsibleList,
+    List,
+    SearchableList,
+    SortableList,
+    RadioButton,
+    RadioGroup,
+    ToolTip,
+    FileUploader,
+    ImageUploader,
+
+    alert,
+    modal,
+    sidePanel,
+    tooltip,
+
+    icons,
+    theme
+} from './components';
 // -------------------------------------------------------------------
 // utils
 // ===================================================================
