@@ -5,7 +5,9 @@ import { nativeApi } from './common/domapi';
 import { Provider, IInjector, ClassLike } from 'neurons-injector';
 import "./elements";
 
+export { BINDING_TOKENS } from './factory/injector';
 export { Element, Property, Binding, Inject, Emitter } from './factory/decorator';
+
 
 export function bind<T extends IUIState>(
     source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>,

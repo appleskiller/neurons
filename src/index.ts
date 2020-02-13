@@ -17,6 +17,9 @@ export {
     Binding,
     Inject,
     Emitter,
+
+    BINDING_TOKENS,
+
     bind,
     bootstrap
 } from './binding';
@@ -27,6 +30,8 @@ export { Animation,
     dragManager,
     popupManager,
     scrollManager,
+
+    POPUP_TOKENS,
     DropPosition
 } from './cdk';
 // -------------------------------------------------------------------
