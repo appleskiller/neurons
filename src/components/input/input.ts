@@ -71,6 +71,7 @@ export class Input {
     @Property() readonly: boolean = false;
     @Property() required: boolean = false;
     @Property() disabled: boolean = false;
+    @Property() invalid: boolean = false;
     @Property() focus: boolean = false;
     @Property() autocomplete: boolean = false;
     @Property() alwaysTriggerChange: boolean = false;
@@ -84,7 +85,6 @@ export class Input {
     
     @Element('input') input: HTMLInputElement;
     
-    invalid: boolean = false;
     private _inputing = false;
     private _mousewheelEvent = null;
     private _focused = false;

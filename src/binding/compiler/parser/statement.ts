@@ -155,7 +155,7 @@ export interface IStatementInfo {
     statement: string;
 }
 
-const statementCache = globalLimitedDictionary<IStatementInfo>('expression_statement_cache');
+const statementCache = globalLimitedDictionary<IStatementInfo>('neurons.expression_statement_cache');
 
 export function parseStatement(value): IStatementInfo {
     const rawValue = value;

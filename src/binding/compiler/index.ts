@@ -19,8 +19,8 @@ import { markChangeDetection } from '../refs/change';
 import { processPlainAttrs } from './processor/attrs';
 import { getBindingElementClass, BindingElementTypes } from '../factory/element';
 
-const templateCompileCache = globalLimitedDictionary<INeTemplate>('ui.template_compile_cache');
-const selectorCompileCache = globalLimitedDictionary<INeTemplate>('ui.selector_compile_cache');
+const templateCompileCache = globalLimitedDictionary<INeTemplate>('neurons.template_compile_cache');
+const selectorCompileCache = globalLimitedDictionary<INeTemplate>('neurons.selector_compile_cache');
 
 export function bindSource<T extends IUIState>(
     source: BindingSelector | BindingTemplate | HTMLElement | ClassLike,

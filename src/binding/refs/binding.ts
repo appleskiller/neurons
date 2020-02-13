@@ -30,7 +30,13 @@ class RootElements {
         return null;
     }
     addElement(element): void {
-        this._elements.push(element);
+        if (element instanceof DocumentFragment) {
+            for (var i: number = 0; i < element.childNodes.length; i++) {
+                this._elements.push(element.childNodes.item(i) as HTMLElement);
+            }
+        } else {
+            this._elements.push(element);
+        }
     }
     setAttribute(property: string, value: string) {
         this._elements.forEach(element => element.setAttribute(property, value));

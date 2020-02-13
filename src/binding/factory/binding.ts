@@ -4,9 +4,9 @@ import { globalLimitedDictionary, isEmpty } from 'neurons-utils';
 import { bindingInjector } from './injector';
 import { IBindingMetadata, ILogicBindingMetadata, IAttributeBindingMetadata } from '../common/interfaces';
 
-const uiBindingMetadatas = globalLimitedDictionary<IBindingMetadata>('ui.binding_metadata_dictionary');
-const uiLogicBindingMetadatas = globalLimitedDictionary<ILogicBindingMetadata>('ui.logic_binding_metadata_dictionary');
-const uiAttributeBindingMetadatas = globalLimitedDictionary<IAttributeBindingMetadata>('ui.attr_binding_metadata_dictionary');
+const uiBindingMetadatas = globalLimitedDictionary<IBindingMetadata>('neurons.binding_metadata_dictionary');
+const uiLogicBindingMetadatas = globalLimitedDictionary<ILogicBindingMetadata>('neurons.logic_binding_metadata_dictionary');
+const uiAttributeBindingMetadatas = globalLimitedDictionary<IAttributeBindingMetadata>('neurons.attr_binding_metadata_dictionary');
 
 export function isUISelector(selector: any): boolean {
     return typeof selector === 'string' && hasUIBindingMetadata(selector);
