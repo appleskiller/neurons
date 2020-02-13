@@ -26,7 +26,8 @@ export {
 export { Animation,
     dragManager,
     popupManager,
-    scrollManager
+    scrollManager,
+    DropPosition
 } from './cdk';
 // -------------------------------------------------------------------
 // components
