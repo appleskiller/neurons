@@ -5,7 +5,6 @@ export { CheckItem } from './check/check';
 export { HorizontalCheckGroup } from './check/checkhgroup';
 export { CheckBox } from './checkbox/checkbox';
 export { CheckBoxGroup } from './checkbox/checkboxgroup';
-export { alert, modal, sidePanel, tooltip } from './dialog';
 export { DropDownList } from './dropdown/dropdown';
 export { SvgIcon } from './icon/svgicon';
 export { Input } from './input/input';
@@ -21,6 +20,9 @@ export { RadioGroup } from './radio/radiogroup';
 export { ToolTip } from './tooltip/tooltip';
 export { FileUploader } from './uploader/file';
 export { ImageUploader } from './uploader/image';
+
+export { alert, modal, sidePanel, tooltip } from './dialog';
+export { stepperModal } from './stepper/stepper';
 
 import * as iconBase from './icon/icons';
 export const icons: { [name: string]: ISVGIcon} = { ...iconBase }

@@ -57,6 +57,7 @@ export {
     modal,
     sidePanel,
     tooltip,
+    stepperModal,
 
     icons,
     theme
