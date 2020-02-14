@@ -17,6 +17,7 @@ export {
     Binding,
     Inject,
     Emitter,
+    Style,
 
     BINDING_TOKENS,
 
