@@ -59,6 +59,7 @@ export {
     ToolTip,
     FileUploader,
     ImageUploader,
+    SvgImage,
 
     alert,
     modal,
