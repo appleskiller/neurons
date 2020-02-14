@@ -43,6 +43,7 @@ export {
     HorizontalCheckGroup,
     CheckBox,
     CheckBoxGroup,
+    DropDownButton,
     DropDownList,
     SvgIcon,
     Input,
