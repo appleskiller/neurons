@@ -229,7 +229,7 @@ export interface IBindingRefFactory {
 }
 // public api
 export interface IBindingRef<T> {
-    element(id: string): Node | HTMLElement | INeElement;
+    element(id: string): Node | HTMLElement | IElementRef;
     setState(state: StateObject): IBindingRef<T>;
     instance(): T;
     children(): HTMLElement[];

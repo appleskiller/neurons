@@ -50,8 +50,14 @@ export function wrapNeBindingRef<T extends IUIState>(
         getBoundingClientRect(): ClientRect {
             return bindingRef.getBoundingClientRect();
         },
-        element(id: string): Node | HTMLElement | INeElement {
-            return bindingRef.getTemplateVarible(id);
+        element(id: string): Node | HTMLElement | IElementRef {
+            const element = bindingRef.getTemplateVarible(id);
+            if (!element) return null;
+            if (element instanceof Node) {
+                return element;
+            } else {
+                return wrapElement2ElementRef(element);
+            }
         },
     }
 }
