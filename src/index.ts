@@ -3,6 +3,7 @@
 
 export { LoggerFactory } from './logger';
 export { HttpClient } from './helper/httpclient';
+export { parseXML } from './helper/xml';
 // -------------------------------------------------------------------
 // datatype
 // ===================================================================

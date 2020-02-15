@@ -1,6 +1,6 @@
 {
   "name": "neurons",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Neurons UI",
   "author": "appleskiller@163.com",
   "license": "MIT",
@@ -25,7 +25,6 @@
     "neurons-emitter": "^1.0.0",
     "neurons-injector": "^1.0.0",
     "neurons-utils": "^1.0.6",
-    "neurons-xml": "^1.0.0",
     "tslib": "^1.10.0"
   },
   "devDependencies": {
