@@ -16,11 +16,9 @@ var package = require('../package.json');
 const name = (package.name.charAt(0) === '@') ? package.name.slice(1).replace('/', '-') : package.name.replace('/', '-');
 // auto name amd id
 const amdId = package.name;
-// intro 检查全局变量，如果neurons已经存在，则停止初始化
-const intro = `
-var globalContext = (typeof window !== 'undefined') ? window : (typeof global !== 'undefined') ? global : {};
-if (!!globalContext['neurons']) return;
-`;
+// intro
+const intro = `var globalContext = (typeof window !== 'undefined') ? window : (typeof global !== 'undefined') ? global : {};
+if (!globalContext['${amdId}']) { globalContext['${amdId}'] = exports; }`;
 // input
 const inputFile = 'src/index.ts';
 const buildins = {
