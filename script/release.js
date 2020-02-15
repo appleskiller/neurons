@@ -5,6 +5,8 @@ var util = require('./util');
 
 util.required('git');
 
+// update internal deps
+util.exec('npm run update-deps');
 // test
 util.exec('npm run test-once');
 
