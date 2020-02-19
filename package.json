@@ -1,6 +1,6 @@
 {
   "name": "neurons",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Neurons UI",
   "author": "appleskiller@163.com",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "acorn": "^6.2.1",
     "htmlparser2": "^4.0.0",
     "neurons-animation": "^1.0.2",
-    "neurons-dom": "^1.0.6",
+    "neurons-dom": "^1.0.7",
     "neurons-emitter": "^1.0.1",
     "neurons-injector": "^1.0.1",
     "neurons-utils": "^1.0.7",

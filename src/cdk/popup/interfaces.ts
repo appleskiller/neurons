@@ -63,6 +63,7 @@ export interface IPopupOption<T extends StateObject> extends IPopupOptionBase {
 }
 
 export interface IPopupPanelState {
+    popupContainer?: HTMLElement;
     panelClass?: string;
     popupMode?: 'modal' | 'dropdown' | 'tooltip' | string;
     position?: 'center' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | string;

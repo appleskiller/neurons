@@ -3,7 +3,7 @@
 
 export { LoggerFactory } from './logger';
 export { HttpClient } from './helper/httpclient';
-export { parseXML } from './helper/xml';
+export { parseXML, XMLASTNodeType } from './helper/xml';
 // -------------------------------------------------------------------
 // datatype
 // ===================================================================
@@ -61,6 +61,7 @@ export {
     ToolTip,
     FileUploader,
     ImageUploader,
+    FileUploadTrigger,
     SvgImage,
 
     alert,

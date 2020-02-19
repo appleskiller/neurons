@@ -7,7 +7,7 @@ import { Animation } from '../animation';
 import { BINDING_TOKENS } from '../../binding/factory/injector';
 import { IEmitter } from 'neurons-emitter';
 import { isBrowser, isDefined, geometry } from 'neurons-utils';
-import { getPixel } from 'neurons-dom';
+import { getPixel, value2CssValue } from 'neurons-dom';
 
 const popupPosition2AnimationType = {
     [PopupPosition.center]: PopupAnimation.scaleUp,
@@ -31,6 +31,7 @@ const defaultPopupPosition = {
 @Binding({
     selector: 'ne-popup-panel',
     template: `<div
+            #panel
             [class]="{[panelClass]: true, 'ne-popup-panel': true, 'ne-click-shake-up': shakeup}" 
             [style]="getContainerStyles()"
             [popup-mode]="popupMode || ''"
@@ -77,6 +78,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
     constructor() {
 
     }
+    @Property() popupContainer: HTMLElement;
     @Property() panelClass = '';
     @Property() autoClose = true;
     @Property() shakeup = false;
@@ -93,6 +95,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
     @Property() show?: boolean = false;
 
     @Element('container') container: HTMLElement;
+    @Element('panel') panel: HTMLElement;
 
     @Emitter() hidden: IEmitter<void>;
     
@@ -266,7 +269,19 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         });
     }
     private _getBBox(): ClientRect {
-        return this.elementRef.getBoundingClientRect();
+        // 清理状态
+        this.panel.style.width = '';
+        this.panel.style.minWidth = '';
+        this.panel.style.height = '';
+        this.panel.style.minHeight = '';
+        this.panel.style.left = '';
+        this.panel.style.top = '';
+        const result = this.elementRef.getBoundingClientRect();
+        const style = this.getContainerStyles();
+        Object.keys(style).forEach(key => {
+            this.panel.style[key] = value2CssValue(key, style[key]);
+        });
+        return result;
     }
     private _fixPositionFromEnd(position, triggerSize, panelSize, maxSize, offset) {
         let result = position + triggerSize + offset;
@@ -364,7 +379,13 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         }
     }
     private _getConnectBoundingBox(connectElement: HTMLElement | MouseEvent) {
-        if (!connectElement) return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
+        if (!connectElement) {
+            if (!this.popupContainer) {
+                return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
+            } else {
+                return this.popupContainer.getBoundingClientRect();
+            }
+        }
         if ('nodeType' in connectElement) {
             return (this.connectElement as HTMLElement).getBoundingClientRect();
         } else {
@@ -618,7 +639,9 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
         nativeApi.appendChild(this._container, this._placeholder);
         const state = (option || {}) as PopupPanelState<T>;
         state.source = source;
+        state.popupContainer = this._container;
         this._oriState = {
+            popupContainer: this._container,
             panelClass: state.panelClass,
             popupMode: state.popupMode,
             position: state.position,
@@ -626,6 +649,7 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
             height: state.height,
         }
         this._ref = bindingFactory.create(PopupPanelState, state, {
+            '[popupContainer]': 'popupContainer',
             '[panelClass]': 'panelClass',
             '[autoClose]': 'autoClose',
             '[binding]': 'binding',

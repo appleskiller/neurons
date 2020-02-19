@@ -23,7 +23,7 @@ export class UIBindingFactory {
         parentInjector?: IInjector
     ): IBindingRef<T> {
         const bindingRef = bindSource(source, hostBinding, providers, parent, parentInjector);
-        bindingRef.bind(state);
+        state && bindingRef.bind(state);
         return wrapNeBindingRef<T>(bindingRef);
     }
     fromTemplate<T extends StateObject>(
@@ -34,7 +34,7 @@ export class UIBindingFactory {
         parentInjector?: IInjector
     ): IBindingRef<T> {
         const bindingRef = bindTemplate(template, providers, parent, parentInjector);
-        bindingRef.bind(state);
+        state && bindingRef.bind(state);
         return wrapNeBindingRef<T>(bindingRef);
     }
     fromSelector<T extends StateObject>(
@@ -47,7 +47,7 @@ export class UIBindingFactory {
     ): IBindingRef<T> {
         if (!hasUIBindingMetadata(selector)) return null;
         const bindingRef = bindSelector(selector, hostBinding, providers, parent, parentInjector);
-        bindingRef.bind(state);
+        state && bindingRef.bind(state);
         return wrapNeBindingRef<T>(bindingRef);
     }
     fromElement<T extends StateObject>(
@@ -59,7 +59,7 @@ export class UIBindingFactory {
         parentInjector?: IInjector
     ): IBindingRef<T> {
         const bindingRef = bindElement(element, hostBinding, providers, parent, parentInjector);
-        bindingRef.bind(state);
+        state && bindingRef.bind(state);
         return wrapNeBindingRef<T>(bindingRef);
     }
 }

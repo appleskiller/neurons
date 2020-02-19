@@ -212,21 +212,7 @@ export class DropDownList<T> {
 
     onChanges() {
         this.label = this.getItemLabel();
-        if (this.required) {
-            if (this.enableMultiSelection) {
-                if (this.dataProvider) {
-                    this.invalid = !this.selectedItems || !this.selectedItems.length;
-                } else {
-                    this.invalid = false;
-                }
-            } else {
-                if (this.dataProvider) {
-                    this.invalid = this.dataProvider.indexOf(this.selectedItem) === -1;
-                } else {
-                    this.invalid = false;
-                }
-            }
-        }
+        this.invalid = this._isInvalid();
     }
     onClick(e) {
         if (this.enableMultiSelection) {
@@ -250,6 +236,7 @@ export class DropDownList<T> {
             },
             onMultiSelectionChange: (e) => {
                 this.label = this.getItemLabel();
+                this.invalid = this._isInvalid();
                 this.multiSelectionChange.emit(e);
                 this.changeDetector.detectChanges();
             },
@@ -309,6 +296,7 @@ export class DropDownList<T> {
             },
             onSelectionChange: (e) => {
                 this.label = this.getItemLabel();
+                this.invalid = this._isInvalid();
                 this.selectionChange.emit(e);
                 this.changeDetector.detectChanges();
             },
@@ -380,6 +368,25 @@ export class DropDownList<T> {
         } else {
             if (this.labelFunction) return this.labelFunction(item);
             return defaultLabelFunction(item, this.labelField);
+        }
+    }
+    private _isInvalid() {
+        if (this.required) {
+            if (this.enableMultiSelection) {
+                if (this.dataProvider) {
+                    return !this.selectedItems || !this.selectedItems.length;
+                } else {
+                    return false;
+                }
+            } else {
+                if (this.dataProvider) {
+                    return this.dataProvider.indexOf(this.selectedItem) === -1;
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            return false;
         }
     }
 }

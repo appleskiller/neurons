@@ -1,12 +1,12 @@
 import { IHTMLASTNode } from '../parser/template';
-import { INeTemplateContextFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
+import { INeTemplateCompileFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
 import { isEmpty, isArray } from 'neurons-utils';
 import { composeCallback, invokeBindingFunction, composeGetter } from '../../common/util';
 import { domapi } from '../../common/domapi';
 import { BuildInsVaribles } from '../../common/enums';
 import { IStatementInfo } from '../parser/statement';
 
-export function processPlainClasses(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processPlainClasses(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const classes = node.classes || {};
     if (isEmpty(classes)) return;
     constructorStack.push(function (context: INeTemplateContext) {
@@ -14,7 +14,7 @@ export function processPlainClasses(node: IHTMLASTNode, constructorStack: INeTem
     });
 }
 
-export function processClassInputs(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processClassInputs(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const classInputs = node.classInputs || {};
     if (isEmpty(classInputs)) return;
     constructorStack.push(function (context: INeTemplateContext) {
@@ -29,12 +29,12 @@ export function processClassInputs(node: IHTMLASTNode, constructorStack: INeTemp
                 const keyInfo = bindingValue[0] as IStatementInfo;
                 const valueInfo = bindingValue[1];
                 const keyGetter = composeGetter(targetKey, keyInfo);
-                let previousKey, previousValue, setter, sourceKeys = Object.keys(keyInfo.chainProps), isSimpleBinding = isEmpty(keyInfo.functions);
+                let previousKey, previousValue, setter, sourceKeys = Object.keys(keyInfo.chainProps), isPlainBinding = isEmpty(keyInfo.functions);
                 if (typeof valueInfo === 'object') {
                     // 值绑定
                     const valueGetter = composeGetter(targetKey, valueInfo);
                     sourceKeys = sourceKeys.concat(Object.keys(valueInfo.chainProps));
-                    !isSimpleBinding && (isSimpleBinding = isEmpty(valueInfo.functions));
+                    !isPlainBinding && (isPlainBinding = isEmpty(valueInfo.functions));
                     setter = function (scope: INeBindingScope) {
                         const key = keyGetter(scope);
                         const value = valueGetter(scope);
@@ -67,7 +67,7 @@ export function processClassInputs(node: IHTMLASTNode, constructorStack: INeTemp
                     initializeStack.push(setter);
                     // 标记绑定
                     elementBinding.bindings[targetKey] = {
-                        isSimpleBinding: isSimpleBinding,
+                        isPlainBinding: isPlainBinding,
                         sourceKeys: sourceKeys,
                         setter: setter,
                         getter: null
@@ -91,7 +91,7 @@ export function processClassInputs(node: IHTMLASTNode, constructorStack: INeTemp
                 context.initializeStack.push(setter);
                 // 标记绑定
                 elementBinding.bindings[targetKey] = {
-                    isSimpleBinding: isEmpty(info.functions),
+                    isPlainBinding: isEmpty(info.functions),
                     sourceKeys: Object.keys(info.chainProps),
                     getter: getter,
                     setter: setter,

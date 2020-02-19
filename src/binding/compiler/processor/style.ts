@@ -1,5 +1,5 @@
 import { IHTMLASTNode } from '../parser/template';
-import { INeTemplateContextFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
+import { INeTemplateCompileFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
 import { isEmpty, isArray } from 'neurons-utils';
 import { composeCallback, invokeBindingFunction, composeGetter } from '../../common/util';
 import { domapi } from '../../common/domapi';
@@ -7,7 +7,7 @@ import { BuildInsVaribles } from '../../common/enums';
 import { IStatementInfo } from '../parser/statement';
 import { prop2CssProp, value2CssValue } from 'neurons-dom';
 
-export function processPlainStyles(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processPlainStyles(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const styles = node.styles || {};
     if (isEmpty(styles)) return;
     constructorStack.push(function (context: INeTemplateContext) {
@@ -15,7 +15,7 @@ export function processPlainStyles(node: IHTMLASTNode, constructorStack: INeTemp
     });
 }
 
-export function processStyleInputs(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processStyleInputs(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const styleInputs = node.styleInputs || {};
     if (isEmpty(styleInputs)) return;
     constructorStack.push(function (context: INeTemplateContext) {
@@ -30,12 +30,12 @@ export function processStyleInputs(node: IHTMLASTNode, constructorStack: INeTemp
                 const keyInfo = bindingValue[0] as IStatementInfo;
                 const valueInfo = bindingValue[1];
                 const keyGetter = composeGetter(targetKey, keyInfo);
-                let previousKey, previousValue, setter, sourceKeys = Object.keys(keyInfo.chainProps), isSimpleBinding = isEmpty(keyInfo.functions);
+                let previousKey, previousValue, setter, sourceKeys = Object.keys(keyInfo.chainProps), isPlainBinding = isEmpty(keyInfo.functions);
                 if (typeof valueInfo === 'object') {
                     // 值绑定
                     const valueGetter = composeGetter(targetKey, valueInfo);
                     sourceKeys = sourceKeys.concat(Object.keys(valueInfo.chainProps));
-                    !isSimpleBinding && (isSimpleBinding = isEmpty(valueInfo.functions));
+                    !isPlainBinding && (isPlainBinding = isEmpty(valueInfo.functions));
                     setter = function (scope: INeBindingScope) {
                         const key = keyGetter(scope);
                         const value = valueGetter(scope);
@@ -66,7 +66,7 @@ export function processStyleInputs(node: IHTMLASTNode, constructorStack: INeTemp
                 initializeStack.push(setter);
                 // 标记绑定
                 elementBinding.bindings[targetKey] = {
-                    isSimpleBinding: isSimpleBinding,
+                    isPlainBinding: isPlainBinding,
                     sourceKeys: sourceKeys,
                     getter: null,
                     setter: setter
@@ -89,7 +89,7 @@ export function processStyleInputs(node: IHTMLASTNode, constructorStack: INeTemp
                 initializeStack.push(setter);
                 // 标记绑定
                 elementBinding.bindings[targetKey] = {
-                    isSimpleBinding: isEmpty(info.functions),
+                    isPlainBinding: isEmpty(info.functions),
                     sourceKeys: Object.keys(info.chainProps),
                     getter: getter,
                     setter: setter

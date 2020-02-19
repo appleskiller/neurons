@@ -7,6 +7,10 @@ export function wrapNeBindingRef<T extends IUIState>(
         instance: function () {
             return bindingRef.instance();
         },
+        bind: function (instance: StateObject) {
+            bindingRef.bind(instance);
+            return this;
+        },
         setState: function (state: StateObject) {
             bindingRef.setState(state);
             return this;

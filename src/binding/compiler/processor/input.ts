@@ -1,12 +1,12 @@
 import { IHTMLASTNode } from '../parser/template';
-import { INeTemplateContextFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
+import { INeTemplateCompileFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
 import { isEmpty } from 'neurons-utils';
 import { composeGetter, invokeBindingFunction, processPlainElementAttrs } from '../../common/util';
 import { domapi } from '../../common/domapi';
 import { wrapStatementParserErrorMessage, wrapBindingErrorMessage } from '../parser/error';
 import { parseToClassMap, parseToStyleObject, createDocumentFragment, createElement } from 'neurons-dom';
 
-export function processInputs(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processInputs(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const inputs = node.inputs || {};
     if (isEmpty(inputs)) return;
     // 包含[class]="statement"和[style]="statement"的情况
@@ -113,7 +113,7 @@ export function processInputs(node: IHTMLASTNode, constructorStack: INeTemplateC
             initializeStack.push(setter);
             // 标记绑定
             elementBinding.bindings[targetKey] = {
-                isSimpleBinding: isEmpty(info.functions),
+                isPlainBinding: isEmpty(info.functions),
                 sourceKeys: Object.keys(info.chainProps),
                 getter: getter,
                 setter: setter

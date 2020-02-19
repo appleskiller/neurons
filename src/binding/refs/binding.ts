@@ -1,5 +1,5 @@
 import { RemoveEventListenerFunction, nativeApi } from '../common/domapi';
-import { INeBindingRef, INeTemplate, INeBindingScope, INeTemplateContext, INeElementBinding, INeBindingFunction, INeElement, noop, StateObject, StateChanges, INeTemplateContextFunction, IBindingRefFactory, INeLogicElement, INeTemplateBindingHook, IInvokeDetectChangeFunction } from '../common/interfaces';
+import { INeBindingRef, INeTemplate, INeBindingScope, INeTemplateContext, INeElementBinding, INeBindingFunction, INeElement, noop, StateObject, StateChanges, INeTemplateCompileFunction, IBindingRefFactory, INeLogicElement, INeTemplateBindingHook, IInvokeDetectChangeFunction } from '../common/interfaces';
 import { ObjectAccessor, isEmpty, requestFrame, merge, diffMerge, geometry } from 'neurons-utils';
 import { IInjector } from 'neurons-injector';
 import { NeContentElement } from '../elements/content';
@@ -121,7 +121,7 @@ class RootElements {
  * 3. 输出属性绑定：处理输出绑定时，如果绑定的函数变量本身发生的改变，则会执行重新绑定(移除上次的监听，建立新的监听)
  */
 export class NeBindingRef implements INeBindingRef {
-    constructor(constructorStack: INeTemplateContextFunction[], parent?: INeBindingRef, parentInjector?: IInjector, hooks?: INeTemplateBindingHook) {
+    constructor(constructorStack: INeTemplateCompileFunction[], parent?: INeBindingRef, parentInjector?: IInjector, hooks?: INeTemplateBindingHook) {
         this._parent = parent;
         this._initializeStack = [];
         this._destroyStack = [];
@@ -134,6 +134,7 @@ export class NeBindingRef implements INeBindingRef {
         this.inited = false;
         this.destroyed = false;
         this.attached = false;
+        this.isPlainTemplate = true;
         
         const rootElements = [];
         this._rootElements = new RootElements(rootElements);
@@ -167,13 +168,14 @@ export class NeBindingRef implements INeBindingRef {
             constructorStack.forEach(func => {
                 func(context);
             });
-            this._bindings = this._bindings.filter(b => !!Object.keys(b.bindings).length)
-            // console.log(this._bindings);
+            this._bindings = this._bindings.filter(b => !!Object.keys(b.bindings).length);
+            this.isPlainTemplate = !this._listeners.length && !this._bindings.length;
         }
     }
     inited: boolean;
     destroyed: boolean;
     attached: boolean;
+    isPlainTemplate: boolean;
 
     protected _parent: INeBindingRef;
     private _context: any;
@@ -570,7 +572,7 @@ export class NeImplicitsBindingRef extends NeBindingRef {
 
 export class NeAttributeBindingRef extends NeBindingRef {
     constructor(
-        constructorStack: INeTemplateContextFunction[],
+        constructorStack: INeTemplateCompileFunction[],
         hostElement: HTMLElement,
         parent?: INeBindingRef,
         parentInjector?: IInjector,

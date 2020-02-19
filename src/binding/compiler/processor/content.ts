@@ -1,12 +1,12 @@
 
 import { IHTMLASTNode } from '../parser/template';
-import { INeTemplateContextFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
+import { INeTemplateCompileFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
 import { nativeApi } from '../../common/domapi';
 import { isEmpty } from 'neurons-utils';
 import { composeGetter, invokeBindingFunction } from '../../common/util';
 
 const contentExpresionRegexp = /\{\{(.+?)\}\}/;
-export function processContent(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processContent(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const contents = typeof node.contents === 'string' ? [node.contents] : (node.contents || []);
     if (!contents.length) return;
     // binding
@@ -47,7 +47,7 @@ export function processContent(node: IHTMLASTNode, constructorStack: INeTemplate
                 initializeStack.push(setter);
                 // 标记绑定
                 elementBinding.bindings[targetKey] = {
-                    isSimpleBinding: isEmpty(text.functions),
+                    isPlainBinding: isEmpty(text.functions),
                     sourceKeys: Object.keys(text.chainProps),
                     getter: getter,
                     setter: setter

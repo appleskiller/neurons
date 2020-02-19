@@ -1,11 +1,11 @@
 import { IHTMLASTNode } from '../parser/template';
-import { INeTemplateContextFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
+import { INeTemplateCompileFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
 import { isEmpty } from 'neurons-utils';
 import { composeCallback, invokeBindingFunction, processPlainElementEvent } from '../../common/util';
 import { domapi } from '../../common/domapi';
 import { BuildInsVaribles } from '../../common/enums';
 
-export function processOutputs(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processOutputs(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const outputs = node.outputs || {};
     if (isEmpty(outputs)) return;
     constructorStack.push(function (context: INeTemplateContext) {
@@ -48,7 +48,7 @@ export function processOutputs(node: IHTMLASTNode, constructorStack: INeTemplate
             initializeStack.push(bindingCallback);
             // 属性变更后进行重新注册
             // context.current.bindings[targetKey] = {
-            //     isSimpleBinding: isEmpty(info.functions),
+            //     isPlainBinding: isEmpty(info.functions),
             //     sourceKeys: Object.keys(info.chainProps),
             //     getter: null,
             //     setter: bindingCallback

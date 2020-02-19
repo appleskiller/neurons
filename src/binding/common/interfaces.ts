@@ -137,14 +137,14 @@ export interface INeLogicElement {
     implicits(datas: any[]): void;
 }
 
-export type INeTemplateContextFunction = (context: INeTemplateContext) => void;
+export type INeTemplateCompileFunction = (context: INeTemplateContext) => void;
 export type INeBindingFunction = (scope: INeBindingScope) => any;
 
 export interface INeElementBinding {
     element: HTMLElement | INeElement;
     bindings: {
         [targetKey: string]: {
-            isSimpleBinding: boolean;
+            isPlainBinding: boolean;
             sourceKeys: string[];
             setter: INeBindingFunction;
             // 某些情况无法获得单一值的getter，如class和style的动态key绑定，此时getter为undefined
@@ -183,14 +183,14 @@ export interface INeTemplateContext {
 }
 
 export interface INeTemplate {
-    isPlainTemplate: boolean;
-    constructorStack: INeTemplateContextFunction[];
+    constructorStack: INeTemplateCompileFunction[];
 }
 
 export interface INeBindingRef {
     readonly inited: boolean;
     readonly destroyed: boolean;
     readonly attached: boolean;
+    readonly isPlainTemplate: boolean;
     
     bind(context: any, implicits?: any[]): void;
     implicits(data?: any[]): void;
@@ -230,6 +230,7 @@ export interface IBindingRefFactory {
 // public api
 export interface IBindingRef<T> {
     element(id: string): Node | HTMLElement | IElementRef;
+    bind(instance: StateObject): IBindingRef<T>;
     setState(state: StateObject): IBindingRef<T>;
     instance(): T;
     children(): HTMLElement[];

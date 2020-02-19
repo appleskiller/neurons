@@ -59,21 +59,6 @@ export interface IHTMLASTRoot {
     startIndex: number;
     endIndex: number;
     childNodes: IHTMLASTNode[];
-    isPlainTemplate: boolean;
-}
-
-function isPlainNode(node: IHTMLASTNode) {
-    if (!node) return true;
-    return isEmpty(node.classInputs)
-        && isEmpty(node.styleInputs)
-        && isEmpty(node.inputs)
-        && isEmpty(node.outputs)
-        && isEmpty(node.twoWays)
-        && isEmpty(node.logics)
-        && isEmpty(node.varibles)
-}
-function isPlainContentNode(node: IHTMLASTNode) {
-    return !node.contents || typeof node.contents === 'string'
 }
 
 /**
@@ -89,7 +74,6 @@ export function parseHTML(content: string): IHTMLASTRoot {
         startIndex: 0,
         endIndex: content.length - 1,
         childNodes: [],
-        isPlainTemplate: true,
     };
     let parent: any = result;
     let current;
@@ -108,7 +92,6 @@ export function parseHTML(content: string): IHTMLASTRoot {
                 attrs: attribs || {},
                 childNodes: []
             });
-            result.isPlainTemplate = result.isPlainTemplate && isPlainNode(current);
             if (name === 'svg') {
                 current.xmlns = current.attrs.xmlns || parent.xmlns || 'http://www.w3.org/2000/svg';
             } else {
@@ -132,7 +115,6 @@ export function parseHTML(content: string): IHTMLASTRoot {
                 parentNode: parent,
                 content: text,
             });
-            result.isPlainTemplate = result.isPlainTemplate && isPlainContentNode(current);
             parent.childNodes.push(current);
         },
         oncomment: function (data) {
@@ -151,7 +133,6 @@ export function parseHTML(content: string): IHTMLASTRoot {
                 parentNode: parent,
                 content: cdata,
             });
-            result.isPlainTemplate = result.isPlainTemplate && isPlainContentNode(current);
             parent.childNodes.push(current);
         },
         onerror: function (error) {
@@ -353,7 +334,22 @@ function parseClassInput(key, value, inputs, classes, classInputs) {
             catch (error) { throw wrapStatementParserErrorMessage(error, null, `[class]=${value}`); }
         } else {
             // [class]="statement"
-            inputs.class = parseStatement(value);
+            info = parseStatement(value);
+            if (info.isPlainValue) {
+                value = calcPlainValue(value);
+                let classMap = {};
+                if (typeof value === 'string') {
+                    value = value.trim();
+                    classMap = parseToClassMap(value);
+                } else if (typeof value === 'object') {
+                    classMap = value;
+                }
+                Object.keys(classMap).forEach(className => {
+                    classes[className] = string2Boolean(classMap[className] + '');
+                });
+            } else {
+                inputs.class = info;
+            }
             return;
         }
     } else if (key.indexOf('class.') !== -1) {
@@ -420,7 +416,22 @@ function parseStyleInput(key, value, inputs, styles, styleInputs) {
             catch (error) { throw wrapStatementParserErrorMessage(error, null, `[style]=${value}`); }
         } else {
             // [style]="statement"
-            inputs.style = parseStatement(value);
+            info = parseStatement(value);
+            if (info.isPlainValue) {
+                value = calcPlainValue(value);
+                let styleSheet;
+                if (typeof value === 'string') {
+                    value = value.trim();
+                    styleSheet = parseToStyleObject(value);
+                } else if (typeof value === 'object') {
+                    styleSheet = value;
+                }
+                Object.keys(styleSheet).forEach(key => {
+                    styles[key] = styleSheet[key];
+                });
+            } else {
+                inputs.style = info;
+            }
             return;
         }
     } else if (key.indexOf('style.') !== -1) {

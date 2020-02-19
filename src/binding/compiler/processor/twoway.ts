@@ -1,11 +1,11 @@
 import { IHTMLASTNode } from '../parser/template';
-import { INeTemplateContextFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
+import { INeTemplateCompileFunction, INeTemplateContext, INeBindingScope } from '../../common/interfaces';
 import { isEmpty } from 'neurons-utils';
 import { composeCallback, invokeBindingFunction, composeGetter, processPlainElementAttrs, processPlainElementEvent } from '../../common/util';
 import { BuildInsVaribles } from '../../common/enums';
 import { domapi } from '../../common/domapi';
 
-export function processTwoWays(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processTwoWays(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const twoWays = node.twoWays || {};
     if (isEmpty(twoWays)) return;
     constructorStack.push(function (context: INeTemplateContext) {
@@ -66,7 +66,7 @@ export function processTwoWays(node: IHTMLASTNode, constructorStack: INeTemplate
             });
             // 标记绑定
             elementBinding.bindings[targetKey] = {
-                isSimpleBinding: isEmpty(info.functions),
+                isPlainBinding: isEmpty(info.functions),
                 sourceKeys: Object.keys(info.chainProps),
                 getter: getter,
                 setter: setter,

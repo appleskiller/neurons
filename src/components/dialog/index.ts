@@ -220,8 +220,8 @@ export function sidePanel(option: ISidePanelOption): IPopupRef<any> {
         overlayClass: 'overlayClass' in option ? option.overlayClass : '',
         overlayBackgroundColor: 'overlayBackgroundColor' in option ? option.overlayBackgroundColor : '',
         panelClass: 'panelClass' in option ? `ne-side-panel-modal ${option.panelClass}` : 'ne-side-panel-modal',
-        width: 'width' in option ? option.width : 700,
-        height: 'height' in option ? option.height : 400,
+        width: 'width' in option ? option.width : null,
+        height: 'height' in option ? option.height : null,
         popupMode: 'sidepanel',
         position: 'position' in option ? option.position : 'right',
         state: {

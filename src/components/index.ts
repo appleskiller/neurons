@@ -21,6 +21,7 @@ export { RadioGroup } from './radio/radiogroup';
 export { ToolTip } from './tooltip/tooltip';
 export { FileUploader } from './uploader/file';
 export { ImageUploader } from './uploader/image';
+export { FileUploadTrigger } from './uploader/trigger';
 export { SvgImage } from './image/svgimage';
 
 export { alert, modal, sidePanel, tooltip } from './dialog';

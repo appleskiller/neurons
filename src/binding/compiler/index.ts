@@ -1,6 +1,6 @@
 import { parseHTML, IHTMLASTRoot, IHTMLASTNode, HTMLASTNodeType, parseNode } from './parser/template';
 import { globalLimitedDictionary } from 'neurons-utils';
-import { INeTemplateContextFunction, INeTemplate, INeTemplateContext, IUIState, INeBindingScope, IBindingRefFactory, IBindingDefinition, INeBindingRef, INeTemplateBindingHook, IAttributeBindingMetadata, INeElementBinding, INeElement, BindingSelector, BindingTemplate } from '../common/interfaces';
+import { INeTemplateCompileFunction, INeTemplate, INeTemplateContext, IUIState, INeBindingScope, IBindingRefFactory, IBindingDefinition, INeBindingRef, INeTemplateBindingHook, IAttributeBindingMetadata, INeElementBinding, INeElement, BindingSelector, BindingTemplate } from '../common/interfaces';
 import { nativeApi, domapi } from '../common/domapi';
 import { processContent } from './processor/content';
 import { isEmpty } from 'neurons-utils';
@@ -57,6 +57,8 @@ export function bindTemplate(
     let injector = parentInjector || bindingInjector;
     providers && (injector = injector.create(providers));
     const ref = new NeBindingRef(tpl.constructorStack, parent, injector);
+    // 如果为简单模板则直接执行绑定
+    ref.isPlainTemplate && ref.bind({});
     return ref;
 }
 
@@ -94,7 +96,6 @@ export function compile(content: string): INeTemplate {
     if (template) return template;
     const root = parseHTML(content);
     template = {
-        isPlainTemplate: root.isPlainTemplate,
         constructorStack: [],
     };
     processNode(root, template.constructorStack);
@@ -112,7 +113,6 @@ export function compileSelector(selector: string, hostBinding: IBindingDefinitio
         parseNode(n, hostBinding);
     });
     template = {
-        isPlainTemplate: root.isPlainTemplate,
         constructorStack: [],
     };
     processNode(root, template.constructorStack);
@@ -120,7 +120,7 @@ export function compileSelector(selector: string, hostBinding: IBindingDefinitio
     return template;
 }
 
-export function processNode(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     if (processContentNode(node, constructorStack)) return;
     if (processDynamicBindingNode(node, constructorStack as any[])) return;
     if (processLogicBindingNode(node, constructorStack as any[])) return;
@@ -239,7 +239,7 @@ function resolveNodeBindings(node: IHTMLASTNode): { attrNodes: IHTMLASTNode[], n
 // -----------------------------------------------------------
 // child nodes
 // ===========================================================
-export function processChildNodes(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processChildNodes(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     // 处理子元素
     if (node.childNodes && !!node.childNodes.length) {
         const childStack = [];
@@ -264,7 +264,7 @@ export function processChildNodes(node: IHTMLASTNode, constructorStack: INeTempl
 // -----------------------------------------------------------
 // attribute node
 // ===========================================================
-export function processAttrNodes(nodes: IHTMLASTNode[], constructorStack: INeTemplateContextFunction[]) {
+export function processAttrNodes(nodes: IHTMLASTNode[], constructorStack: INeTemplateCompileFunction[]) {
     if (nodes.length) {
         const stack = [];
         nodes.forEach(function (node) {
@@ -281,7 +281,7 @@ export function processAttrNodes(nodes: IHTMLASTNode[], constructorStack: INeTem
     }
 }
 
-export function processAttrNode(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processAttrNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     constructorStack.push(function (context: INeTemplateContext) {
         const host = context.host;
         // TODO 尚未支持自定义元素
@@ -314,7 +314,7 @@ export function processAttrNode(node: IHTMLASTNode, constructorStack: INeTemplat
     return true;
 }
 
-export function processAttributes(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processAttributes(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     // 处理attrs
     processPlainAttrs(node, constructorStack);
     // 处理classes
@@ -363,7 +363,7 @@ function createAttributEBindingRefFactory(
 // -----------------------------------------------------------
 // tag binding
 // ===========================================================
-export function processTag(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+export function processTag(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const tagName = node.name;
     const xmlns = node.xmlns;
     constructorStack.push(function (context: INeTemplateContext) {
@@ -386,7 +386,7 @@ export function processTag(node: IHTMLASTNode, constructorStack: INeTemplateCont
 // -----------------------------------------------------------
 // dom binding
 // ===========================================================
-export function processElement(element: HTMLElement | INeElement, hostBinding: IBindingDefinition, constructorStack: INeTemplateContextFunction[]) {
+export function processElement(element: HTMLElement | INeElement, hostBinding: IBindingDefinition, constructorStack: INeTemplateCompileFunction[]) {
     constructorStack.push(function (context: INeTemplateContext) {
         context.rootElements.push(element);
         context.current = {
@@ -408,7 +408,7 @@ export function processElement(element: HTMLElement | INeElement, hostBinding: I
 // -----------------------------------------------------------
 // content node
 // ===========================================================
-function processContentNode(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+function processContentNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     if (node.name !== 'content') return false;
     constructorStack.push(function (context: INeTemplateContext) {
         const clazz = getBindingElementClass(BindingElementTypes.CONTENT);
@@ -443,7 +443,7 @@ function matchUIBindingNode(node: IHTMLASTNode) {
     // TODO tag[attr] & [attr]
     return null;
 }
-function processUIBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+function processUIBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const match = matchUIBindingNode(node);
     if (!match) return false;
     // 分析节点绑定和属性绑定 TODO
@@ -506,7 +506,7 @@ function processUIBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateC
 // -----------------------------------------------------------
 // dynamic node
 // ===========================================================
-function processDynamicBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+function processDynamicBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     if (node.name !== 'ne-binding') return false;
     constructorStack.push(function (context: INeTemplateContext) {
         const clazz = getBindingElementClass(BindingElementTypes.DYNAMIC);
@@ -540,7 +540,7 @@ function processDynamicBindingNode(node: IHTMLASTNode, constructorStack: INeTemp
 // -----------------------------------------------------------
 // logic binding node
 // ===========================================================
-function processLogicBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+function processLogicBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     if (isEmpty(node.logics)) return false;
     // TODO 暂时一个dom上只支持一个logic
     if (node.logics['*for']) {
@@ -559,7 +559,7 @@ function processLogicBindingNode(node: IHTMLASTNode, constructorStack: INeTempla
 // `*for="item, index in array"`
 // `*for="item, index in [0, 1, 2]"`
 // `*for="[0, 1, 2]" let-item let-index="$index"`
-function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const targetKey = '*for';
     const logicInfo = node.logics[targetKey];
     let statement = (logicInfo.statement || '').trim();
@@ -631,7 +631,7 @@ function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateCont
             initializeStack.push(setter);
             // 标记绑定
             context.current.bindings[targetKey] = {
-                isSimpleBinding: isEmpty(info.functions),
+                isPlainBinding: isEmpty(info.functions),
                 sourceKeys: Object.keys(info.chainProps),
                 getter: getter,
                 setter: setter
@@ -646,7 +646,7 @@ function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateCont
 // -----------------------------------------------------------
 // if node
 // ===========================================================
-function processIfNode(node: IHTMLASTNode, constructorStack: INeTemplateContextFunction[]) {
+function processIfNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const targetKey = '*if';
     const logicInfo = node.logics[targetKey];
     delete node.logics;
@@ -707,7 +707,7 @@ function processIfNode(node: IHTMLASTNode, constructorStack: INeTemplateContextF
             initializeStack.push(setter);
             // 标记绑定
             context.current.bindings[targetKey] = {
-                isSimpleBinding: isEmpty(logicInfo.functions),
+                isPlainBinding: isEmpty(logicInfo.functions),
                 sourceKeys: Object.keys(logicInfo.chainProps),
                 getter: getter,
                 setter: setter
