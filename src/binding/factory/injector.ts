@@ -16,7 +16,7 @@ export function buildinBindingProviders(bindingRef: INeBindingRef): Provider[] {
     }, {
         token: BINDING_TOKENS.CHANGE_DETECTOR,
         use: <IChangeDetector>{
-            detectChanges: () => bindingRef.detectChanges()
+            detectChanges: (recursive: boolean = false) => bindingRef.detectChanges(recursive)
         }
     }];
 }

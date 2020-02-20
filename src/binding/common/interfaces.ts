@@ -114,7 +114,7 @@ export interface INeElement {
     attach(): void;
     detach(): void;
     resize();
-    detectChanges(): void;
+    detectChanges(recursive?: boolean): void;
     destroy();
     
     appendChild<T extends Node>(newChild: T): T;
@@ -194,8 +194,8 @@ export interface INeBindingRef {
     
     bind(context: any, implicits?: any[]): void;
     implicits(data?: any[]): void;
-    setState(value: StateObject): void;
-    detectChanges(): void;
+    setState(value: StateObject, recursiveDetecting?: boolean): void;
+    detectChanges(recursive?: boolean): void;
     find(fn: (element: Node) => boolean): Node;
     children(): HTMLElement[];
     getTemplateVarible(id: string): HTMLElement | Node | INeElement;
@@ -221,7 +221,7 @@ export interface INeBindingRef {
 }
 
 export interface IChangeDetector {
-    detectChanges(): void;
+    detectChanges(recursive?: boolean): void;
 }
 
 export interface IBindingRefFactory {
@@ -240,7 +240,7 @@ export interface IBindingRef<T> {
     attach(): IBindingRef<T>;
     detach(): IBindingRef<T>;
     resize(): IBindingRef<T>;
-    detectChanges(): IBindingRef<T>;
+    detectChanges(recursive?: boolean): IBindingRef<T>;
     destroy(): void;
 
     getBoundingClientRect(): ClientRect;
@@ -251,7 +251,7 @@ export interface IElementRef {
     attach(): IElementRef;
     detach(): IElementRef;
     resize(): IElementRef;
-    detectChanges(): IElementRef;
+    detectChanges(recursive?: boolean): IElementRef;
 
     getBoundingClientRect(): ClientRect;
 }

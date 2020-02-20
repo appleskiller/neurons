@@ -46,12 +46,12 @@ export class NeIfElement implements INeLogicElement {
     implicits(datas: any[]): void {
         this._implicits = datas;
     }
-    detectChanges() {
+    detectChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         if (!this.inited) {
             this.initialize();
         } else {
-            this._applyChanges();
+            this._applyChanges(recursive);
         }
     }
     find(fn: (element: Node) => boolean): Node {
@@ -180,7 +180,7 @@ export class NeIfElement implements INeLogicElement {
     protected onDestroy() {
         this._bindingRef && this._bindingRef.destroy();
     }
-    private _applyChanges() {
+    private _applyChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         if (this._activeChanged) {
             this._activeChanged = false;
@@ -190,6 +190,7 @@ export class NeIfElement implements INeLogicElement {
                 this.onDetach();
             }
         }
+        recursive && this._actived && this._bindingRef.detectChanges(recursive);
     }
 }
 

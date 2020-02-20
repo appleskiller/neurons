@@ -41,8 +41,8 @@ export function wrapNeBindingRef<T extends IUIState>(
             bindingRef.resize();
             return this;
         },
-        detectChanges: function () {
-            bindingRef.detectChanges();
+        detectChanges: function (recursive: boolean = false) {
+            bindingRef.detectChanges(recursive);
             return this;
         },
         destroy: function () {
@@ -85,8 +85,8 @@ export function wrapElement2ElementRef(
             customElement.resize();
             return this;
         },
-        detectChanges: function () {
-            customElement.detectChanges();
+        detectChanges: function (recursive: boolean = false) {
+            customElement.detectChanges(recursive);
             return this;
         },
         getBoundingClientRect: function() {
@@ -115,8 +115,8 @@ export function wrapBindingRef2ElementRef(
             bindingRef.resize();
             return this;
         },
-        detectChanges: function () {
-            bindingRef.detectChanges();
+        detectChanges: function (recursive: boolean = false) {
+            bindingRef.detectChanges(recursive);
             return this;
         },
         getBoundingClientRect: function () {

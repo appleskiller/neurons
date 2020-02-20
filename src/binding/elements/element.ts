@@ -62,12 +62,12 @@ export class NeElement implements INeElement {
 
     private _fragment = nativeApi.createDocumentFragment();
     private _dirtyChanges: INeElementChanges = { attributes: {}, events: {}, inputs: {}, outputs: {}, twoWays: {}, attrs: {}, classes: {}, styles: {}, listeners: {} };
-    detectChanges() {
+    detectChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         if (!this.inited) {
             this.initialize();
         } else {
-            this._applyChanges();
+            this._applyChanges(recursive);
         }
     }
     find(fn: (element: Node) => boolean): Node {
@@ -231,9 +231,6 @@ export class NeElement implements INeElement {
         this.instance && this.instance['__emitter'] && this.instance['__emitter'].off();
         this._bindingRef && this._bindingRef.destroy();
     }
-    protected _setState(state: any) {
-        this._bindingRef && this._bindingRef.setState(state);
-    }
     protected _setAttribute(property: string, value: any) {
         this._bindingRef && this._bindingRef.setAttribute(property, value);
     }
@@ -249,7 +246,7 @@ export class NeElement implements INeElement {
     protected _addEventListener(eventName: string, handler: any): RemoveEventListenerFunction {
         return this._bindingRef ? this._bindingRef.addEventListener(eventName, handler) : noop;
     }
-    private _applyChanges() {
+    private _applyChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         const dirtyChanges = this._dirtyChanges;
         this._dirtyChanges = { attributes: {}, events: {}, inputs: {}, outputs: {}, twoWays: {}, attrs: {}, classes: {}, styles: {}, listeners: {} };
@@ -296,7 +293,11 @@ export class NeElement implements INeElement {
             }
         });
         // 3. 处理状态变更
-        !isEmpty(inputs) && this._setState(inputs);
+        if (!isEmpty(inputs)) {
+            this._bindingRef && this._bindingRef.setState(inputs, recursive);
+        } else if (recursive) {
+            this._bindingRef && this._bindingRef.detectChanges(recursive);
+        }
     }
     private _splitAttributess(attributes, inputs, attrs) {
         Object.keys(attributes).forEach(property => {

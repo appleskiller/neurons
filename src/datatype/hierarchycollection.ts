@@ -30,6 +30,7 @@ export class HierarchyCollection implements IHierarchyCollection {
         this.onReset = emitter('reset', this._nativeEmitter);
         this.onRefresh = emitter('refresh', this._nativeEmitter);
         this._generate();
+        this._filteredRoots = this._roots;
     }
 
     onReset: IEmitter<IHierarchyCollection>;

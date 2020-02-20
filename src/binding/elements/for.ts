@@ -63,12 +63,12 @@ export class NeForElement implements INeLogicElement {
     implicits(datas: any[]): void {
         this._implicits = datas;
     }
-    detectChanges() {
+    detectChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         if (!this.inited) {
             this.initialize();
         } else {
-            this._applyChanges();
+            this._applyChanges(recursive);
         }
     }
     find(fn: (element: Node) => boolean): Node {
@@ -231,7 +231,7 @@ export class NeForElement implements INeLogicElement {
             refs.splice(index, 1);
         }
     }
-    private _applyChanges() {
+    private _applyChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         const diffs = this._diffMembers(this._array, this._oldArray);
         if (diffs) {
@@ -265,14 +265,14 @@ export class NeForElement implements INeLogicElement {
                     if (diffs.remains.length && refs[diffs.remains[0]] === ref) {
                         // 当前位置刚好是即将调整位置的元素
                         ref.implicits((this._implicits || []).concat([this._mergeItemImplicits({}, item, i, array)]));
-                        ref.detectChanges();
+                        ref.detectChanges(recursive);
                         // placeholder置为空，以便下一轮进行重新查找
                         placeholder = null;
                     } else {
                         // 调整索引
                         ref.implicits((this._implicits || []).concat([this._mergeItemImplicits({}, item, i, array)]));
                         ref.insertTo(placeholder || this._endPlaceholder);
-                        ref.detectChanges();
+                        ref.detectChanges(recursive);
                     }
                     // 从remains中移除oldIndex
                     diffs.remains.splice(diffs.remains.indexOf(oldIndex), 1);
@@ -281,7 +281,7 @@ export class NeForElement implements INeLogicElement {
             }
         } else {
             for (var i: number = 0; i < this._refs.length; i++) {
-                this._refs[i].detectChanges();
+                this._refs[i].detectChanges(recursive);
             }
         }
     }

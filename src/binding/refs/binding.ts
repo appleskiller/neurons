@@ -180,6 +180,7 @@ export class NeBindingRef implements INeBindingRef {
     protected _parent: INeBindingRef;
     private _context: any;
     private _implicits: any[] = [];
+    private _scope: INeBindingScope = {};
     protected _pendingChanges: any = {};
 
     private _rootElements: RootElements;
@@ -202,11 +203,13 @@ export class NeBindingRef implements INeBindingRef {
         if (this.destroyed || this.inited) return;
         this._context = context || {};
         this._implicits = implicits || [];
+        this._updateScope(this._context, this._getImplicits());
         this._initialize();
     }
     implicits(data?: any[]): void {
         if (this.destroyed) return;
         this._implicits = data || [];
+        this._updateScope(this._context, this._getImplicits());
     }
     instance(): any {
         return this._context;
@@ -216,15 +219,14 @@ export class NeBindingRef implements INeBindingRef {
      * 状态变化会引起变更检测，以更新绑定并执行onChange钩子函数。
      * @param newState
      */
-    setState(newState: StateObject): void {
+    setState(newState: StateObject, recursiveDetecting: boolean = false): void {
         if (this.destroyed) return;
         if (!this.inited || !this.attached) {
             Object.assign(this._pendingChanges, newState || {});
         } else {
             const stateChanges = this._applyStateChanges(newState);
-            if (!stateChanges) return;
-            this._invokeLifeCircleHook('onChanges', stateChanges);
-            this._detectChanges();
+            stateChanges && this._invokeLifeCircleHook('onChanges', stateChanges);
+            (recursiveDetecting || stateChanges) && this._detectChanges(recursiveDetecting);
         }
     }
     resize(): void {
@@ -283,7 +285,7 @@ export class NeBindingRef implements INeBindingRef {
         cancelChangeDetection(this);
         this._resizeListening && this._resizeListening();
         this._listeners.forEach(fn => fn());
-        const scope = this._composeScope();
+        const scope = this._scope;
         this._destroyStack.forEach(func => {
             func(scope);
         });
@@ -291,8 +293,8 @@ export class NeBindingRef implements INeBindingRef {
         this.destroyed = true;
         this._invokeLifeCircleHook('onDestroy');
     }
-    detectChanges() {
-        this._detectChanges();
+    detectChanges(recursive: boolean = false) {
+        this._detectChanges(recursive);
     }
     elements() {
         return this._rootElements.elements();
@@ -380,7 +382,7 @@ export class NeBindingRef implements INeBindingRef {
             this._logicElements.forEach(element => {
                 element.bind(context, implicits);
             });
-            const scope = this._composeScope();
+            const scope = this._scope;
             // 1. 插入文档
             this._firstAttach();
             this._customElements.forEach(customElement => {
@@ -451,8 +453,8 @@ export class NeBindingRef implements INeBindingRef {
         }
         return null;
     }
-    protected _detectChanges(): void {
-        const scope = this._composeScope();
+    protected _detectChanges(recursive: boolean = false): void {
+        const scope = this._scope;
         this._logicElements.forEach(element => element.implicits(this._getImplicits()));
         this._bindings.forEach(item => {
             const bindings = item.bindings;
@@ -461,7 +463,7 @@ export class NeBindingRef implements INeBindingRef {
                 bindings[targetKey].setter(scope);
             });
         });
-        this._customElements.forEach(element => element.detectChanges());
+        this._customElements.forEach(element => element.detectChanges(recursive));
     }
     protected _firstAttach() {
         if (this._placeholder) {
@@ -542,18 +544,15 @@ export class NeBindingRef implements INeBindingRef {
             this._invokeLifeCircleHook('onDetach');
         }
     }
-    private _composeScope(): INeBindingScope {
-        const scope: INeBindingScope = {
-            context: this._context
-        };
-        const implicits = this._getImplicits();
-        if (implicits.length) {
-            scope.implicits = {}
+    private _updateScope(context: any, implicits?: any[]): void {
+        this._scope.context = context;
+        delete this._scope.implicits;
+        if (implicits && implicits.length) {
+            this._scope.implicits = {}
             implicits.forEach(object => {
-                object && Object.assign(scope.implicits, object);
+                object && Object.assign(this._scope.implicits, object);
             });
         }
-        return scope;
     }
     private _getImplicits() {
         return (this._implicits || []).concat([this._templateVaribles || {}])

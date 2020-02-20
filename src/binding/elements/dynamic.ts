@@ -44,12 +44,12 @@ export class NeDynamicElement implements INeElement {
 
     private _fragment = nativeApi.createDocumentFragment();
     private _dirtyChanges = {}
-    detectChanges() {
+    detectChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         if (!this.inited) {
             this.initialize();
         } else {
-            this._applyChanges();
+            this._applyChanges(recursive);
         }
     }
     find(fn: (element: Node) => boolean): Node {
@@ -163,7 +163,7 @@ export class NeDynamicElement implements INeElement {
     protected onDestroy() {
         this._bindingRef && this._bindingRef.destroy();
     }
-    private _applyChanges() {
+    private _applyChanges(recursive: boolean = false) {
         if (this.destroyed && isEmpty(this._dirtyChanges)) return;
         const dirtyChanges = this._dirtyChanges;
         this._dirtyChanges = {};
@@ -191,7 +191,9 @@ export class NeDynamicElement implements INeElement {
         if (rebind) {
             this._rebinding();
         } else if (changed) {
-            this._bindingRef && this._bindingRef.setState(this._state);
+            this._bindingRef && this._bindingRef.setState(this._state, recursive);
+        } else if (recursive) {
+            this._bindingRef && this._bindingRef.detectChanges(recursive);
         }
     }
     private _destroyBinding() {

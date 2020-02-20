@@ -69,7 +69,7 @@ export class NeContentElement implements INeElement {
         nativeApi.remove(this.placeholder);
         this.destroyed = true;
     }
-    detectChanges() {}
+    detectChanges(recursive: boolean = false) {}
     find(fn: (element: Node) => boolean): Node {
         return null;
     }
