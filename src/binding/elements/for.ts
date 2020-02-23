@@ -205,24 +205,24 @@ export class NeForElement implements INeLogicElement {
     }
     protected onAttach() {
         let last;
-        this._refs.forEach(ref => {
+        this._refs && this._refs.forEach(ref => {
             last = last || this.placeholder;
             ref.attachTo(last)
             last = this._getLastChild(ref);
         });
     }
     protected onDetach() {
-        this._refs.forEach(ref => {
+        this._refs && this._refs.forEach(ref => {
             ref.detach();
         });
     }
     protected onResize() {
-        this._refs.forEach(ref => {
+        this._refs && this._refs.forEach(ref => {
             ref.resize();
         });
     }
     protected onDestroy() {
-        this._refs.forEach(ref => ref.destroy());
+        this._refs && this._refs.forEach(ref => ref.destroy());
         nativeApi.remove(this._endPlaceholder);
     }
     private _removeRefFrom(refs: INeBindingRef[], ref: INeBindingRef) {

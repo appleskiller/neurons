@@ -221,7 +221,9 @@ export class NeBindingRef implements INeBindingRef {
      */
     setState(newState: StateObject, recursiveDetecting: boolean = false): void {
         if (this.destroyed) return;
-        if (!this.inited || !this.attached) {
+        // 如果尚未绑定上下文对象则直接返回
+        if (!this._context) return;
+        if (!this.attached) {
             Object.assign(this._pendingChanges, newState || {});
         } else {
             const stateChanges = this._applyStateChanges(newState);

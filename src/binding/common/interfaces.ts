@@ -231,7 +231,7 @@ export interface IBindingRefFactory {
 export interface IBindingRef<T> {
     element(id: string): Node | HTMLElement | IElementRef;
     bind(instance: StateObject): IBindingRef<T>;
-    setState(state: StateObject): IBindingRef<T>;
+    setState(state: StateObject, mergeValue?: boolean): IBindingRef<T>;
     instance(): T;
     children(): HTMLElement[];
     appendTo(parent: Node): IBindingRef<T>;

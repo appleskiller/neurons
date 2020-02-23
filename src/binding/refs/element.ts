@@ -1,4 +1,5 @@
 import { StateObject, INeBindingRef, IBindingRef, INeElement, IElementRef, IUIState } from '../common/interfaces';
+import { merge } from 'neurons-utils';
 
 export function wrapNeBindingRef<T extends IUIState>(
     bindingRef: INeBindingRef
@@ -11,8 +12,19 @@ export function wrapNeBindingRef<T extends IUIState>(
             bindingRef.bind(instance);
             return this;
         },
-        setState: function (state: StateObject) {
-            bindingRef.setState(state);
+        setState: function (state: StateObject, mergeValue: boolean = false) {
+            if (!state) return;
+            const instance = bindingRef.instance();
+            if (!instance) return;
+            if (mergeValue) {
+                const merged = {};
+                Object.keys(state).forEach(key => {
+                    merged[key] = merge(true, instance[key], state[key]);
+                });
+                bindingRef.setState(merged);
+            } else {
+                bindingRef.setState(state);
+            }
             return this;
         },
         children: function () {
