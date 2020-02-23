@@ -12,11 +12,11 @@ export function wrapNeBindingRef<T extends IUIState>(
             bindingRef.bind(instance);
             return this;
         },
-        setState: function (state: StateObject, mergeValue: boolean = false) {
+        setState: function (state: StateObject, deepMerge: boolean = false) {
             if (!state) return;
             const instance = bindingRef.instance();
             if (!instance) return;
-            if (mergeValue) {
+            if (deepMerge) {
                 const merged = {};
                 Object.keys(state).forEach(key => {
                     merged[key] = merge(true, instance[key], state[key]);
