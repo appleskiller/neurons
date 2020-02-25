@@ -1,5 +1,5 @@
 import { Binding, Element, Property } from '../../binding/factory/decorator';
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 import { Input } from './input';
 import { theme } from '../style/theme';

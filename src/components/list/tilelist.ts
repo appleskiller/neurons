@@ -1,4 +1,4 @@
-import { ISVGIcon, getMaxHeight } from 'neurons-dom';
+import { getMaxHeight } from 'neurons-dom';
 import { IEmitter } from 'neurons-emitter';
 import { IChangeDetector, IBindingRef, StateChanges } from '../../binding/common/interfaces';
 import { bind } from '../../binding';
@@ -7,6 +7,7 @@ import { BINDING_TOKENS } from '../../binding/factory/injector';
 import { IItemClickEvent, IItemStateStatic, IMultiSelectionChangeEvent, ISelectionChangeEvent } from '../interfaces';
 import { DefaultItemState, defaultLabelFunction } from './list';
 import { isDefined, findAValidValue } from 'neurons-utils';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 
 @Binding({
     selector: 'ne-tile-item-wrapper',

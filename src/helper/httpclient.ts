@@ -1,5 +1,6 @@
-import { ObservableLike, isEmpty, isDefined, isFormData, isBlob, isArrayBuffer } from 'neurons-utils';
+import { isEmpty, isDefined, isFormData, isBlob, isArrayBuffer } from 'neurons-utils';
 import { IEmitter, EventEmitter, emitter } from 'neurons-emitter';
+import { ObservableLike } from 'neurons-utils/utils/asyncutils';
 
 export interface IRequestOption {
     body?: any;

@@ -1,8 +1,9 @@
 import { IElementRef } from '../../binding/common/interfaces';
 import { IModalOption, modal } from '../dialog';
 import { IPopupRef } from '../../cdk/popup/interfaces';
-import { ISVGIcon, createElement, appendCSSTagOnce } from 'neurons-dom';
+import { createElement, appendCSSTagOnce } from 'neurons-dom';
 import { IEmitter, EventEmitter, emitter } from 'neurons-emitter';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 
 export interface ISteperControl {
     stepIndex: number;

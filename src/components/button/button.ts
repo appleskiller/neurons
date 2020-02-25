@@ -2,7 +2,8 @@ import { Binding, Property, Element } from '../../binding/factory/decorator';
 import { StateChanges } from '../../binding/common/interfaces';
 import { theme } from '../style/theme';
 import { uniqueId, color } from 'neurons-utils';
-import { replaceCSSString, IHTMLWidgetStyleSheet } from 'neurons-dom';
+import { replaceCSSString } from 'neurons-dom';
+import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
 
 @Binding({
     selector: 'ne-button',

@@ -1,4 +1,4 @@
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 import { IChangeDetector, IBindingRef, StateChanges } from '../../binding/common/interfaces';
 import { bind } from '../../binding';

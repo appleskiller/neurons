@@ -1,6 +1,6 @@
 
 import { Binding, Property } from '../../binding/factory/decorator';
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 import { StateChanges } from '../../binding/common/interfaces';
 

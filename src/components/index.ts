@@ -1,4 +1,4 @@
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 
 export { Button } from "./button/button";
 export { CheckItem } from './check/check';

@@ -3,7 +3,7 @@ import { Binding, Property, Element, Emitter } from '../../binding/factory/decor
 import { dragManager } from '../../cdk/dragdrop/manager';
 import { bind } from '../../binding';
 import { IDragSource, DropPosition, DragValidator, DropValidator, DropDetecting, DroppingLifeHook } from '../../cdk/dragdrop/interfaces';
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 import { moveIndexTo } from 'neurons-utils';
 import { IBindingRef } from '../../binding/common/interfaces';

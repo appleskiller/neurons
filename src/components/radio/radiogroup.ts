@@ -1,7 +1,7 @@
 import { Binding, Property, Emitter } from '../../binding/factory/decorator';
 import { RadioButton } from './radiobutton';
 import { StateChanges } from '../../binding/common/interfaces';
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 import { ISelectionChangeEvent, IItemStateStatic, IItemState } from '../interfaces';
 import { List, defaultLabelFunction } from '../list/list';

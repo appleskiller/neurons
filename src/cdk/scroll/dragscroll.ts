@@ -1,8 +1,9 @@
 import { IDragScrollOption } from './interfaces';
 import { bind } from '../../binding';
-import { addEventListener, getScrollSize, getClientSize, IHTMLWidgetStyleSheet, naturalScrolling, stopScrolling, appendCSSTagOnce } from 'neurons-dom';
+import { addEventListener, getScrollSize, getClientSize, naturalScrolling, stopScrolling, appendCSSTagOnce } from 'neurons-dom';
 import { arrow_up, arrow_down, arrow_left, arrow_right } from '../../components/icon/icons';
 import { scrollController } from './scrollcontrol';
+import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
 
 export interface IDragScrollApi {
     shouldBeScroll(direction: string, start: MouseEvent, current: MouseEvent, distance?: number);

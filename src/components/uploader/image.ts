@@ -1,11 +1,12 @@
 import { Binding, Element, Property, Inject } from '../../binding/factory/decorator';
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 import { StateChanges, IChangeDetector } from '../../binding/common/interfaces';
 import { BINDING_TOKENS } from '../../binding/factory/injector';
 import { theme } from '../style/theme';
 import { image } from '../icon/icons';
-import { asPromise, ObservableLike } from 'neurons-utils';
+import { asPromise } from 'neurons-utils';
+import { ObservableLike } from 'neurons-utils/utils/asyncutils';
 
 @Binding({
     selector: 'ne-image-uploader',

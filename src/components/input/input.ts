@@ -1,9 +1,10 @@
 import { Binding, Element, Property, Emitter } from '../../binding/factory/decorator';
-import { ISVGIcon, addEventListener, getCursorSelection, getCursorRange, replaceCursorTextRange } from 'neurons-dom';
+import { addEventListener, getCursorSelection, getCursorRange, replaceCursorTextRange } from 'neurons-dom';
 import { IEmitter } from 'neurons-emitter';
 import { theme } from '../style/theme';
 import { StateChanges } from '../../binding/common/interfaces';
 import { math, isDefined } from 'neurons-utils';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 
 @Binding({
     selector: 'ne-input',

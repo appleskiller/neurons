@@ -4,7 +4,8 @@ import { SvgIcon } from '../icon/svgicon';
 import { checkbox_uncheck, checkbox_check, radio_check, radio_uncheck, check, empty_icon } from '../icon/icons';
 import { theme } from '../style/theme';
 import { IEmitter } from 'neurons-emitter';
-import { insert, ISVGIcon } from 'neurons-dom';
+import { insert } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 
 const icons = {
     checkbox: {

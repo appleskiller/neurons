@@ -1,7 +1,7 @@
 import { Binding, Property, Emitter } from '../../binding/factory/decorator';
 import { IMultiSelectionChangeEvent, IItemState, IItemStateStatic } from '../interfaces';
 import { List, defaultLabelFunction } from '../list/list';
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 
 @Binding({

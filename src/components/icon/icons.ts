@@ -1,4 +1,4 @@
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 
 export const checkbox_uncheck: ISVGIcon = {
     prefix: 'ne-icon',

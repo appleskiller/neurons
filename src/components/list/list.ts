@@ -1,5 +1,5 @@
 import { Binding, Property, Element, Emitter, Inject } from '../../binding/factory/decorator';
-import { ISVGIcon, getMaxHeight, createElement, removeMe } from 'neurons-dom';
+import { getMaxHeight, createElement, removeMe } from 'neurons-dom';
 import { IEmitter } from 'neurons-emitter';
 import { StateChanges, IChangeDetector } from '../../binding/common/interfaces';
 import { ISelectionChangeEvent, IItemStateStatic, IItemState, IItemClickEvent, IMultiSelectionChangeEvent } from '../interfaces';
@@ -7,6 +7,7 @@ import { bind } from '../../binding';
 import { BINDING_TOKENS } from '../../binding/factory/injector';
 import { isDefined, isDate, ObjectAccessor, findAValidValue } from 'neurons-utils';
 import { theme } from '../style/theme';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 
 export function defaultLabelFunction(item, labelField): string {
     if (isDefined(item)) {

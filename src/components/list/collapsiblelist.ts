@@ -1,5 +1,5 @@
 import { Binding, Property, Element, Emitter } from '../../binding/factory/decorator';
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 import { StateChanges, IBindingRef, IChangeDetector } from '../../binding/common/interfaces';
 import { ISelectionChangeEvent, IItemStateStatic, IItemState, IItemClickEvent, IMultiSelectionChangeEvent } from '../interfaces';

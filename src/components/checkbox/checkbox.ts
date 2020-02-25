@@ -3,7 +3,7 @@ import { Property, Binding, Emitter } from '../../binding/factory/decorator';
 import { SvgIcon } from '../icon/svgicon';
 import { checkbox_uncheck, checkbox_check } from '../icon/icons';
 import { theme } from '../style/theme';
-import { ISVGIcon } from 'neurons-dom';
+import { ISVGIcon } from 'neurons-dom/dom/element';
 
 @Binding({
     selector: 'ne-check-box',
