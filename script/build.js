@@ -17,8 +17,16 @@ const name = (package.name.charAt(0) === '@') ? package.name.slice(1).replace('/
 // auto name amd id
 const amdId = package.name;
 // intro
-const intro = `var __globalContext = (typeof window !== 'undefined') ? window : (typeof global !== 'undefined') ? global : {};
-if (!__globalContext['${amdId}']) { __globalContext['${amdId}'] = exports; }`;
+const intro = `
+var __globalContext = (typeof window !== 'undefined') ? window : (typeof global !== 'undefined') ? global : {};
+if (!__globalContext['${amdId}']) {
+    __globalContext['${amdId}'] = exports;
+} else {
+    var __exports = __globalContext['${amdId}'];
+    for (var __p in __exports) { if (__exports.hasOwnProperty(__p)) { exports[__p] = __exports[__p] } }
+    Object.defineProperty(exports, '__esModule', { value: true });
+    return;
+};`;
 // input
 const inputFile = 'src/index.ts';
 const buildins = {
