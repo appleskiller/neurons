@@ -19,8 +19,9 @@ const amdId = package.name;
 // intro
 const intro = `
 var __globalContext = (typeof window !== 'undefined') ? window : (typeof global !== 'undefined') ? global : {};
-if (!__globalContext['${amdId}']) {
+if (!__globalContext['${amdId}'] || !__globalContext['${amdId}'].__loaded) {
     __globalContext['${amdId}'] = exports;
+    __globalContext['${amdId}'].__loaded = true;
 } else {
     var __exports = __globalContext['${amdId}'];
     for (var __p in __exports) { if (__exports.hasOwnProperty(__p)) { exports[__p] = __exports[__p] } }
