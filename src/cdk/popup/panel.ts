@@ -455,7 +455,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         const width = window.innerWidth;
         const height = window.innerHeight;
         const panelBox = this._getBBox();
-        const panelWidth = isDefined(this.width) ? getPixel(this.width, width) : Math.min(panelBox.width, box.width);
+        const panelWidth = isDefined(this.width) ? getPixel(this.width, width) : Math.max(panelBox.width, box.width);
         let relativeTop = null, relativeLeft = null, relativeMinWidth = null, relativeWidth = null;
         if (position.indexOf('bottom') !== -1) {
             connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
@@ -494,7 +494,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             relativeMinWidth = '';
             relativeWidth = this.width;
         } else {
-            relativeMinWidth = (panelWidth || 0);
+            relativeMinWidth = (box.width || 0);
             relativeWidth = '';
         }
         return {

@@ -295,7 +295,7 @@ export class List<T> {
         if (this.content.children.length > 1) {
             const child = this.content.children.item(0);
             const size = child.getBoundingClientRect();
-            this._typicalHeight = size.height;
+            this._typicalHeight = Math.ceil(size.height);
         } else {
             const typicalData = findAValidValue(this.dataProvider);
             const container = createElement('div', 'ne-list-item');
@@ -315,7 +315,7 @@ export class List<T> {
                 }
             })
             const size = container.getBoundingClientRect();
-            this._typicalHeight = size.height;
+            this._typicalHeight = Math.ceil(size.height);
             typicalRef.destroy();
             removeMe(container);
         }
