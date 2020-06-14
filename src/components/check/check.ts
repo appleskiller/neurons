@@ -196,7 +196,8 @@ export class CheckItem {
         }
     }
 
-    onClicked(e) {
+    onClicked(e: MouseEvent) {
+        if (e.defaultPrevented) return;
         if (this.disabled || this.readonly) {
             e.preventDefault();
             e.stopImmediatePropagation();
