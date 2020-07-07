@@ -1,7 +1,7 @@
 
 import { Property, Binding, Element, Emitter } from '../../binding/factory/decorator';
 import { SvgIcon } from '../icon/svgicon';
-import { checkbox_uncheck, checkbox_check, radio_check, radio_uncheck, check, empty_icon } from '../icon/icons';
+import { checkbox_uncheck, checkbox_check, radio_check, radio_uncheck, check, empty_icon, toggle_on, toggle_off } from '../icon/icons';
 import { theme } from '../style/theme';
 import { IEmitter } from 'neurons-emitter';
 import { insert } from 'neurons-dom';
@@ -19,6 +19,10 @@ const icons = {
     check: {
         check: check,
         uncheck: empty_icon,
+    },
+    toggle: {
+        check: toggle_on,
+        uncheck: toggle_off,
     },
 }
 
@@ -161,7 +165,7 @@ export class CheckItem {
     @Property() disabled = false;
     @Property() checked = false;
     @Property() checkMode: 'multi' | 'single' = 'multi';
-    @Property() checkStyle: 'checkbox' | 'radio' | 'check' | 'highlight' | 'background' | 'capsule' | 'edge' | 'v-edge'= 'check';
+    @Property() checkStyle: 'checkbox' | 'radio' | 'toggle' | 'check' | 'highlight' | 'background' | 'capsule' | 'edge' | 'v-edge'= 'check';
     @Property() checkPosition: 'before' | 'after' = 'before';
 
     @Element('container') container: HTMLElement;

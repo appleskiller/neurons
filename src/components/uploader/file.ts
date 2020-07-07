@@ -10,7 +10,7 @@ import { ObservableLike } from 'neurons-utils/utils/asyncutils';
 
 @Binding({
     selector: 'ne-file-uploader',
-    template: `<div [class]="{'ne-file-uploader': true, 'uploading': uploading}" >
+    template: `<div [class]="{'ne-file-uploader': true, 'uploading': uploading, 'disabled': disabled }" >
         <div [class]="{'ne-file-uploader-file': true, 'ne-ring-spinning-center': uploading, 'error': !!uploadError, 'no-file': !filename}">
             <ne-icon [icon]="iconPlaceholder"/>
         </div>
@@ -29,9 +29,9 @@ import { ObservableLike } from 'neurons-utils/utils/asyncutils';
             cursor: pointer;
             box-sizing: border-box;
             background-Color: transparent;
-            transition: ${theme.transition.normal('background-color')};
+            transition: ${theme.transition.normal('background-color', 'opacity')};
         }
-        .ne-file-uploader:hover {
+        .ne-file-uploader:not(.disabled):hover {
             background-color: ${theme.gray.normal};
         }
         .ne-file-uploader.uploading {
@@ -97,6 +97,9 @@ import { ObservableLike } from 'neurons-utils/utils/asyncutils';
             font-size: 12px;
             line-height: 12px;
         }
+        .ne-file-uploader .ne-file-uploader-content {
+            transition: ${theme.transition.normal('opacity')};
+        }
         .ne-file-uploader .ne-file-uploader-content.error .ne-file-uploader-label {
             color: ${theme.color.error}
         }
@@ -117,6 +120,16 @@ import { ObservableLike } from 'neurons-utils/utils/asyncutils';
         .ne-file-uploader .ne-file-uploader-content.no-hint .ne-file-uploader-hint {
             display: none;
         }
+        .ne-file-uploader.disabled {
+            cursor: default;
+        }
+        .ne-file-uploader.disabled .ne-file-uploader-content {
+            opacity: 0.3;
+        }
+        .ne-file-uploader.disabled input[type="file"] {
+            cursor: default;
+            display: none;
+        }
     `
 })
 export class FileUploader {
@@ -124,6 +137,7 @@ export class FileUploader {
     @Property() accept: string = '';
     @Property() label: string = '本地上传';
     @Property() hint: string = '';
+    @Property() disabled: boolean = false;
     @Property() iconPlaceholder: ISVGIcon = file;
     @Property() uploadApi: (input: HTMLInputElement) => Promise<string> | ObservableLike<string>;
 
@@ -137,7 +151,7 @@ export class FileUploader {
     onInit() {
         const self = this;
         this.uploadInput.onchange = function () {
-            if (self.uploading) return;
+            if (self.uploading || self.disabled) return;
             self.uploading = true;
             self.label = '上传中，请稍后...';
             self.errorMessage = '';

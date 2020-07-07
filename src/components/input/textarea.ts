@@ -9,7 +9,8 @@ import { theme } from '../style/theme';
     template: `<textarea #input
         [class]="{'ne-textarea': true, 'invalid': invalid}"
         [resize]="resize"
-        [name]="name" [placeholder]="placeholder"
+        [name]="name"
+        [placeholder]="placeholder"
         [autocomplete]="autocomplete ? 'on' : 'off'"
         (propertychange)="onInputChange($event)"
         (keyup)="onKeyUp($event)"
