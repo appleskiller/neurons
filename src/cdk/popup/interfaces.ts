@@ -1,5 +1,6 @@
 import { IEmitter } from 'neurons-emitter';
 import { BindingSelector, BindingTemplate, IUIStateStatic, IBindingDefinition, StateObject } from '../../binding/common/interfaces';
+import { ClassLike } from 'neurons-injector';
 
 export const TOKENS = {
     POPUP_REF: 'POPUP_REF'
@@ -58,6 +59,8 @@ export interface IPopupOptionBase {
     connectElement?: HTMLElement | MouseEvent;
     binding?: IBindingDefinition;
     state?: StateObject;
+
+    requirements?: ClassLike[];
 }
 
 export interface IPopupOption<T extends StateObject> extends IPopupOptionBase {

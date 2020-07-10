@@ -86,8 +86,9 @@ register({
         }, {
             title: 'ne-check-item & ne-check-h-group',
             bootstrap: container => {
-                const checkStyles = ['checkbox', 'radio', 'check', 'highlight', 'background', 'capsule', 'edge', 'v-edge'];
+                const checkStyles = ['checkbox', 'radio', 'check', 'toggle', 'highlight', 'background', 'capsule', 'edge', 'v-edge'];
                 const checkPositions = ['before', 'after'];
+                const checkAligns = ['left', 'right', 'justify'];
                 bind(`
                     <div>
                         风格：
@@ -100,18 +101,25 @@ register({
                             [dataProvider]="checkPositions"
                             [(selectedItem)]="checkPosition"
                         />
+                        对齐：
+                        <ne-check-h-group
+                            [dataProvider]="checkAligns"
+                            [(selectedItem)]="checkAlign"
+                        />
                     </div>
-                    <ne-check-item [checkStyle]="checkStyle" [checkPosition]="checkPosition">项目 1</ne-check-item>
-                    <ne-check-item [checkStyle]="checkStyle" [checkPosition]="checkPosition">项目 2222</ne-check-item>
-                    <ne-check-item [checkStyle]="checkStyle" [checkPosition]="checkPosition">项目 3</ne-check-item>
+                    <ne-check-item [checkAlign]="checkAlign" [checkStyle]="checkStyle" [checkPosition]="checkPosition">项目 1</ne-check-item>
+                    <ne-check-item [checkAlign]="checkAlign" [checkStyle]="checkStyle" [checkPosition]="checkPosition">项目 2222</ne-check-item>
+                    <ne-check-item [checkAlign]="checkAlign" [checkStyle]="checkStyle" [checkPosition]="checkPosition">项目 3</ne-check-item>
                 `, {
                     requirements: [HorizontalCheckGroup],
                     container: container,
                     state: {
                         checkStyles: checkStyles,
                         checkPositions: checkPositions,
+                        checkAligns: checkAligns,
                         checkStyle: 'radio',
                         checkPosition: 'before',
+                        checkAlign: 'left',
                     }
                 })
             }

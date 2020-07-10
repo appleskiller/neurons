@@ -32,13 +32,21 @@ const icons = {
         <div [class]="{'ne-check-item': true, 'checked': checked, 'disabled': disabled}"
             [check-style]="checkStyle"
             [check-position]="checkPosition"
+            [check-align]="checkAlign"
             (click)="onClicked($event)"
         >
             <div #container class="ne-check-item-inffix">
-                <span #iconDom class="ne-check-item-icon">
+                <span #iconDom class="ne-check-item-icon"
+                    [style.width]="iconWidth"
+                    [style.left]="iconLeft"
+                    [style.right]="iconRight"
+                >
                     <ne-icon class="check-icon" [icon]="icon"></ne-icon>
                 </span>
-                <span><content/></span>
+                <span class="ne-check-item-content"
+                    [style.paddingLeft]="contentLeft"
+                    [style.paddingRight]="contentRight"
+                ><content/></span>
             </div>
         </div>
     `,
@@ -155,6 +163,36 @@ const icons = {
         .ne-check-item[check-style=background] .ne-check-item-icon {
             display: none;
         }
+
+        .ne-check-item[check-align=left] .ne-check-item-inffix {
+            text-align: left;
+        }
+        .ne-check-item[check-align=right] .ne-check-item-inffix {
+            text-align: right;
+        }
+        .ne-check-item[check-align=justify] .ne-check-item-icon {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+        }
+        .ne-check-item[check-align=justify] .ne-check-item-content {
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .ne-check-item[check-align=justify][check-position=before] .ne-check-item-content {
+            text-align: right;
+        }
+        .ne-check-item[check-align=justify][check-position=after] .ne-check-item-content {
+            text-align: left;
+        }
+        .ne-check-item[check-style=highlight][check-align=justify] .ne-check-item-content,
+        .ne-check-item[check-style=background][check-align=justify] .ne-check-item-content,
+        .ne-check-item[check-style=capsule][check-align=justify] .ne-check-item-content,
+        .ne-check-item[check-style=v-edge][check-align=justify] .ne-check-item-content,
+        .ne-check-item[check-style=edge][check-align=justify] .ne-check-item-content {
+            text-align: center;
+        }
     `,
     requirements: [
         SvgIcon
@@ -167,6 +205,7 @@ export class CheckItem {
     @Property() checkMode: 'multi' | 'single' = 'multi';
     @Property() checkStyle: 'checkbox' | 'radio' | 'toggle' | 'check' | 'highlight' | 'background' | 'capsule' | 'edge' | 'v-edge'= 'check';
     @Property() checkPosition: 'before' | 'after' = 'before';
+    @Property() checkAlign: 'left' | 'right' | 'justify' = 'left';
 
     @Element('container') container: HTMLElement;
     @Element('iconDom') iconDom: HTMLElement;
@@ -177,6 +216,12 @@ export class CheckItem {
     checkIcon = empty_icon;
     uncheckIcon = empty_icon;
     icon;
+
+    iconWidth = '';
+    iconLeft = '';
+    iconRight = '';
+    contentLeft = '';
+    contentRight = '';
 
     onChanges(changes) {
         if (!changes || 'checkStyle' in changes) {
@@ -196,6 +241,41 @@ export class CheckItem {
                 insert(this.container, this.iconDom);
             } else {
                 this.container.appendChild(this.iconDom);
+            }
+        }
+        if (!changes || 'checkAlign' in changes || 'checkPosition' in changes || 'checkStyle' in changes) {
+            if (this.checkAlign === 'justify'
+                && this.checkStyle !== 'background'
+                && this.checkStyle !== 'capsule'
+                && this.checkStyle !== 'edge'
+                && this.checkStyle !== 'highlight'
+                && this.checkStyle !== 'v-edge'
+            ) {
+                const ww = this.iconDom.style.width;
+                const dd = this.iconDom.style.display;
+                this.iconDom.style.width = '';
+                this.iconDom.style.display = 'inline-block';
+                const iconBox = this.iconDom.getBoundingClientRect();
+                this.iconDom.style.width = ww;
+                this.iconDom.style.display = dd;
+                this.iconWidth = iconBox.width + 'px';
+                if (this.checkPosition === 'after') {
+                    this.iconLeft = '';
+                    this.iconRight = '0';
+                    this.contentLeft = '';
+                    this.contentRight = iconBox.width + 6 + 'px';
+                } else {
+                    this.iconLeft = '0';
+                    this.iconRight = '';
+                    this.contentLeft = iconBox.width + 6 + 'px';
+                    this.contentRight = '';
+                }
+            } else {
+                this.iconWidth = '';
+                this.iconLeft = '';
+                this.iconRight = '';
+                this.contentLeft = '';
+                this.contentRight = '';
             }
         }
     }
