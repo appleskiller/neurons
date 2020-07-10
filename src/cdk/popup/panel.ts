@@ -19,6 +19,10 @@ const popupPosition2AnimationType = {
     [PopupPosition.topRight]: PopupAnimation.slideLeft,
     [PopupPosition.bottomLeft]: PopupAnimation.slideRight,
     [PopupPosition.bottomRight]: PopupAnimation.slideLeft,
+    [PopupPosition.leftTop]: PopupAnimation.slideRight,
+    [PopupPosition.rightTop]: PopupAnimation.slideLeft,
+    [PopupPosition.leftBottom]: PopupAnimation.slideRight,
+    [PopupPosition.rightBottom]: PopupAnimation.slideLeft,
 }
 
 const defaultPopupPosition = {
@@ -45,7 +49,7 @@ const defaultPopupPosition = {
                 'ne-animation-fast': animationFast,
                 ['ne-animation-' + animationType]: animationType ? true : false,
             }">
-                <ne-binding [source]="source" [hostBinding]="binding" [state]="state"/>
+                <ne-binding #viewElement [source]="source" [hostBinding]="binding" [state]="state"/>
             </div>
         </div>
     `,
@@ -96,6 +100,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
 
     @Element('container') container: HTMLElement;
     @Element('panel') panel: HTMLElement;
+    @Element('viewElement') viewElement;
 
     @Emitter() hidden: IEmitter<void>;
     
@@ -133,6 +138,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
                 const height = window.innerHeight;
                 const panelBox = this._getBBox();
                 const panelWidth = isDefined(this.width) ? getPixel(this.width, width) : Math.max(panelBox.width, box.width);
+                // TODO
                 if (position.indexOf('bottom') !== -1) {
                     this._connectPosition = (top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
                 } else if (position.indexOf('top') !== -1) {
@@ -401,28 +407,8 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         const height = window.innerHeight;
         const panelBox = this._getBBox();
         const panelWidth = isDefined(this.width) ? getPixel(this.width, width) : Math.max(panelBox.width, box.width);
+        const panelHeight = isDefined(this.height) ? getPixel(this.height, height) : Math.max(panelBox.height, box.height);
         let relativeTop = null, relativeLeft = null, relativeMinWidth = null, relativeWidth = null;
-        if (position.indexOf('bottom') !== -1) {
-            connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
-            relativeTop = this._fixPositionFromEnd(box.top, box.height, panelBox.height, height, offset);
-            if (position.indexOf('Right') !== -1) {
-                relativeLeft = Math.max(0, Math.min(width - panelWidth, box.left + box.width - panelWidth));
-            } else if (position.indexOf('Left') !== -1) {
-                relativeLeft = Math.max(0, Math.min(box.left, width - panelWidth));
-            } else {
-                relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
-            }
-        } else if (position.indexOf('top') !== -1) {
-            connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
-            relativeTop = this._fixPositionFromStart(box.top, box.height, panelBox.height, height, offset);
-            if (position.indexOf('Right') !== -1) {
-                relativeLeft = Math.max(0, Math.min(width - panelWidth, box.left + box.width - panelWidth));
-            } else if (position.indexOf('Left') !== -1) {
-                relativeLeft = Math.max(0, Math.min(box.left, width - panelWidth));
-            } else {
-                relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
-            }
-        }
         if (position === 'left') {
             connectPosition = (box.left - panelWidth - offset) ? 'right' : 'left';
             relativeLeft = this._fixPositionFromStart(box.left, box.width, panelWidth, width, offset);
@@ -434,6 +420,46 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         } else if (position === 'center') {
             relativeTop = this._fixPositionFromCenterTop(box.top, box.height, panelBox.height, height, offset);
             relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
+        } else if (position === 'top') {
+            connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
+            relativeTop = this._fixPositionFromStart(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
+        } else if (position === 'topLeft') {
+            connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
+            relativeTop = this._fixPositionFromStart(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = Math.max(0, Math.min(box.left, width - panelWidth));
+        } else if (position === 'leftTop') {
+            connectPosition = (box.left - panelWidth - offset) ? 'right' : 'left';
+            relativeLeft = this._fixPositionFromStart(box.left, box.width, panelWidth, width, offset);
+            relativeTop = Math.max(0, Math.min(box.top, height - panelHeight));
+        } else if (position === 'topRight') {
+            connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
+            relativeTop = this._fixPositionFromStart(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = Math.max(0, Math.min(width - panelWidth, box.left + box.width - panelWidth));
+        } else if (position === 'rightTop') {
+            connectPosition = (box.left + box.width + offset + panelWidth > width) ? 'left' : 'right';
+            relativeLeft = this._fixPositionFromEnd(box.left, box.width, panelWidth, width, offset);
+            relativeTop = Math.max(0, Math.min(box.top, height - panelHeight));
+        } else if (position === 'bottom') {
+            connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
+            relativeTop = this._fixPositionFromEnd(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
+        } else if (position === 'bottomLeft') {
+            connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
+            relativeTop = this._fixPositionFromEnd(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = Math.max(0, Math.min(box.left, width - panelWidth));
+        } else if (position === 'leftBottom') {
+            connectPosition = (box.left - panelWidth - offset) ? 'right' : 'left';
+            relativeLeft = this._fixPositionFromStart(box.left, box.width, panelWidth, width, offset);
+            relativeTop = Math.max(0, Math.min(box.top + box.height, height - panelHeight));
+        } else if (position === 'bottomRight') {
+            connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
+            relativeTop = this._fixPositionFromEnd(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = Math.max(0, Math.min(width - panelWidth, box.left + box.width - panelWidth));
+        } else if (position === 'rightBottom') {
+            connectPosition = (box.left + box.width + offset + panelWidth > width) ? 'left' : 'right';
+            relativeLeft = this._fixPositionFromEnd(box.left, box.width, panelWidth, width, offset);
+            relativeTop = Math.max(0, Math.min(box.top + box.height, height - panelHeight));
         }
         if (isDefined(this.width)) {
             relativeMinWidth = '';
@@ -456,28 +482,8 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         const height = window.innerHeight;
         const panelBox = this._getBBox();
         const panelWidth = isDefined(this.width) ? getPixel(this.width, width) : Math.max(panelBox.width, box.width);
+        const panelHeight = isDefined(this.height) ? getPixel(this.height, height) : Math.max(panelBox.height, box.height);
         let relativeTop = null, relativeLeft = null, relativeMinWidth = null, relativeWidth = null;
-        if (position.indexOf('bottom') !== -1) {
-            connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
-            relativeTop = this._fixPositionFromEnd(box.top, box.height, panelBox.height, height, offset);
-            if (position.indexOf('Right') !== -1) {
-                relativeLeft = Math.max(0, Math.min(width - panelWidth, box.left + box.width - panelWidth));
-            } else if (position.indexOf('Left') !== -1) {
-                relativeLeft = Math.max(0, Math.min(box.left, width - panelWidth));
-            } else {
-                relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
-            }
-        } else if (position.indexOf('top') !== -1) {
-            connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
-            relativeTop = this._fixPositionFromStart(box.top, box.height, panelBox.height, height, offset);
-            if (position.indexOf('Right') !== -1) {
-                relativeLeft = Math.max(0, Math.min(width - panelWidth, box.left + box.width - panelWidth));
-            } else if (position.indexOf('Left') !== -1) {
-                relativeLeft = Math.max(0, Math.min(box.left, width - panelWidth));
-            } else {
-                relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
-            }
-        }
         if (position === 'left') {
             connectPosition = (box.left - panelWidth - offset) ? 'right' : 'left';
             relativeLeft = this._fixPositionFromStart(box.left, box.width, panelWidth, width, offset);
@@ -489,6 +495,46 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         } else if (position === 'center') {
             relativeTop = this._fixPositionFromCenterTop(box.top, box.height, panelBox.height, height, offset);
             relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
+        } else if (position === 'top') {
+            connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
+            relativeTop = this._fixPositionFromStart(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
+        } else if (position === 'topLeft') {
+            connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
+            relativeTop = this._fixPositionFromStart(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = Math.max(0, Math.min(box.left, width - panelWidth));
+        } else if (position === 'leftTop') {
+            connectPosition = (box.left - panelWidth - offset) ? 'right' : 'left';
+            relativeLeft = this._fixPositionFromStart(box.left, box.width, panelWidth, width, offset);
+            relativeTop = Math.max(0, Math.min(box.top, height - panelHeight));
+        } else if (position === 'topRight') {
+            connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
+            relativeTop = this._fixPositionFromStart(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = Math.max(0, Math.min(width - panelWidth, box.left + box.width - panelWidth));
+        } else if (position === 'rightTop') {
+            connectPosition = (box.left + box.width + offset + panelWidth > width) ? 'left' : 'right';
+            relativeLeft = this._fixPositionFromEnd(box.left, box.width, panelWidth, width, offset);
+            relativeTop = Math.max(0, Math.min(box.top, height - panelHeight));
+        } else if (position === 'bottom') {
+            connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
+            relativeTop = this._fixPositionFromEnd(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = this._fixPositionFromCenter(box.left, box.width, panelWidth, width);
+        } else if (position === 'bottomLeft') {
+            connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
+            relativeTop = this._fixPositionFromEnd(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = Math.max(0, Math.min(box.left, width - panelWidth));
+        } else if (position === 'leftBottom') {
+            connectPosition = (box.left - panelWidth - offset) ? 'right' : 'left';
+            relativeLeft = this._fixPositionFromStart(box.left, box.width, panelWidth, width, offset);
+            relativeTop = Math.max(0, Math.min(box.top + box.height, height - panelHeight));
+        } else if (position === 'bottomRight') {
+            connectPosition = (box.top + box.height + offset + panelBox.height > height) ? 'top' : 'bottom';
+            relativeTop = this._fixPositionFromEnd(box.top, box.height, panelBox.height, height, offset);
+            relativeLeft = Math.max(0, Math.min(width - panelWidth, box.left + box.width - panelWidth));
+        } else if (position === 'rightBottom') {
+            connectPosition = (box.left + box.width + offset + panelWidth > width) ? 'left' : 'right';
+            relativeLeft = this._fixPositionFromEnd(box.left, box.width, panelWidth, width, offset);
+            relativeTop = Math.max(0, Math.min(box.top + box.height, height - panelHeight));
         }
         if (isDefined(this.width)) {
             relativeMinWidth = '';
@@ -513,25 +559,6 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         const panelWidth = isWidthDefined ? getPixel(this.width, box.width) : box.width;
         const panelHeight = isHeightDefined ? getPixel(this.height, box.height) : box.height;
         let relativeTop = null, relativeLeft = null, relativeMinWidth = null, relativeWidth = null, relativeMinHeight = null, relativeHeight = null;
-        if (position.indexOf('bottom') !== -1) {
-            relativeTop = Math.max(0, box.height - panelHeight);
-            if (position.indexOf('Right') !== -1) {
-                relativeLeft = Math.max(0, box.width - panelWidth);
-            } else if (position.indexOf('Left') !== -1) {
-                relativeLeft = 0;
-            } else {
-                relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
-            }
-        } else if (position.indexOf('top') !== -1) {
-            relativeTop = 0;
-            if (position.indexOf('Right') !== -1) {
-                relativeLeft = Math.max(0, box.width - panelWidth);
-            } else if (position.indexOf('Left') !== -1) {
-                relativeLeft = 0;
-            } else {
-                relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
-            }
-        }
         if (position === 'left') {
             relativeLeft = 0;
             relativeTop = Math.max(0, (box.height - panelHeight) / 2);
@@ -541,6 +568,24 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         } else if (position === 'center') {
             relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
             relativeTop = Math.max(0, (box.height - panelHeight) / 2);
+        } else if (position === 'top') {
+            relativeTop = 0;
+            relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
+        } else if (position === 'topLeft' || position === 'leftTop') {
+            relativeTop = 0;
+            relativeLeft = 0;
+        } else if (position === 'topRight' || position === 'rightTop') {
+            relativeTop = 0;
+            relativeLeft = Math.max(0, box.width - panelWidth);
+        } else if (position === 'bottom') {
+            relativeTop = Math.max(0, box.height - panelHeight);
+            relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
+        } else if (position === 'bottomLeft' || position === 'leftBottom') {
+            relativeTop = Math.max(0, box.height - panelHeight);
+            relativeLeft = 0;
+        } else if (position === 'bottomRight' || position === 'rightBottom') {
+            relativeTop = Math.max(0, box.height - panelHeight);
+            relativeLeft = Math.max(0, box.width - panelWidth);
         }
         if (isDefined(this.width)) {
             relativeMinWidth = '';
@@ -574,25 +619,6 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         const panelWidth = isWidthDefined ? getPixel(this.width, box.width) : Math.min(panelBox.width, box.width);
         const panelHeight = isHeightDefined ? getPixel(this.height, box.height) : Math.min(panelBox.height, box.height);
         let relativeTop = null, relativeLeft = null, relativeMinWidth = null, relativeWidth = null, relativeMinHeight = null, relativeHeight = null;
-        if (position.indexOf('bottom') !== -1) {
-            relativeTop = Math.max(0, box.height - panelHeight);
-            if (position.indexOf('Right') !== -1) {
-                relativeLeft = Math.max(0, box.width - panelWidth);
-            } else if (position.indexOf('Left') !== -1) {
-                relativeLeft = 0;
-            } else {
-                relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
-            }
-        } else if (position.indexOf('top') !== -1) {
-            relativeTop = 0;
-            if (position.indexOf('Right') !== -1) {
-                relativeLeft = Math.max(0, box.width - panelWidth);
-            } else if (position.indexOf('Left') !== -1) {
-                relativeLeft = 0;
-            } else {
-                relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
-            }
-        }
         if (position === 'left') {
             relativeLeft = 0;
             relativeTop = Math.max(0, (box.height - panelHeight) / 2);
@@ -602,6 +628,24 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         } else if (position === 'center') {
             relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
             relativeTop = Math.max(0, (box.height - panelHeight) / 2);
+        } else if (position === 'top') {
+            relativeTop = 0;
+            relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
+        } else if (position === 'topLeft' || position === 'leftTop') {
+            relativeTop = 0;
+            relativeLeft = 0;
+        } else if (position === 'topRight' || position === 'rightTop') {
+            relativeTop = 0;
+            relativeLeft = Math.max(0, box.width - panelWidth);
+        } else if (position === 'bottom') {
+            relativeTop = Math.max(0, box.height - panelHeight);
+            relativeLeft = Math.max(0, (box.width - panelWidth) / 2);
+        } else if (position === 'bottomLeft' || position === 'leftBottom') {
+            relativeTop = Math.max(0, box.height - panelHeight);
+            relativeLeft = 0;
+        } else if (position === 'bottomRight' || position === 'rightBottom') {
+            relativeTop = Math.max(0, box.height - panelHeight);
+            relativeLeft = Math.max(0, box.width - panelWidth);
         }
         if (isDefined(this.width)) {
             relativeMinWidth = '';
@@ -717,6 +761,6 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
         this._ref.resize();
     }
     detectChanges(): void {
-        this._ref.detectChanges();
+        this._ref.detectChanges(true);
     }
 }

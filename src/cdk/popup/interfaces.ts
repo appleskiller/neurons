@@ -8,11 +8,18 @@ export const TOKENS = {
 export enum PopupPosition {
     center = 'center',
     top = 'top',
-    left = 'left',
-    bottom = 'bottom',
-    right = 'right',
     topLeft = 'topLeft',
     topRight = 'topRight',
+
+    left = 'left',
+    leftTop = 'leftTop',
+    leftBottom = 'leftBottom',
+
+    right = 'right',
+    rightTop = 'rightTop',
+    rightBottom = 'rightBottom',
+
+    bottom = 'bottom',
     bottomLeft = 'bottomLeft',
     bottomRight = 'bottomRight',
 }

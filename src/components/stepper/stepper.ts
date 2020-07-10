@@ -6,12 +6,14 @@ import { IEmitter, EventEmitter, emitter } from 'neurons-emitter';
 import { ISVGIcon } from 'neurons-dom/dom/element';
 
 export interface ISteperControl {
+    step: IStepModal;
     stepIndex: number;
     stepCount: number;
     stepVisited: boolean;
 
-    forward(result: any): void;
-    jump(index, result: any): void;
+    forward(data?: any): void;
+    back(data?: any): void;
+    jump(index, data?: any): void;
     closeModal: () => void;
     updatePosition: () => void;
 
@@ -54,7 +56,7 @@ export interface IStepModal extends IStep {
 }
 
 export function stepperModal(option: IStepperModalOption, steps: IStepModal[], initialData?: any): ISteperControl {
-    let ref: IPopupRef<any>, initeds = [];
+    let ref: IPopupRef<any>, initeds = [], datas = [];
     const container = createElement('div', 'ne-stepper-modal');
     const _nativeEmitter = new EventEmitter();
     let isCompleted = false;
@@ -67,6 +69,7 @@ export function stepperModal(option: IStepperModalOption, steps: IStepModal[], i
         stepIndex: -1,
         stepCount: steps.length,
         stepVisited: false,
+        step: null,
 
         onCompleted: emitter('completed', _nativeEmitter),
 
@@ -76,52 +79,84 @@ export function stepperModal(option: IStepperModalOption, steps: IStepModal[], i
         updatePosition: () => {
             ref.updatePosition()
         },
-        forward: (result?: any) => {
+        forward: function (data?: any) {
             if (isCompleted) return;
             const previousStep = steps[controller.stepIndex];
             controller.previousIndex = controller.stepIndex;
             controller.stepIndex += 1;
             previousStep && previousStep.deactive(controller);
             if (controller.stepIndex >= controller.stepCount) {
-                controller.onCompleted.emit(result);
+                controller.onCompleted.emit(data);
                 complete();
             } else {
+                datas[controller.stepIndex] = arguments.length ? data : datas[controller.stepIndex];
+                data = datas[controller.stepIndex];
                 const currentStep = steps[controller.stepIndex];
+                controller.step = currentStep;
                 if (currentStep) {
                     if (initeds.indexOf(currentStep) === -1) {
                         initeds.push(currentStep);
                         controller.stepVisited = false;
-                        currentStep.init(result, container, controller);
-                    } else {
-                        controller.stepVisited = true;
-                        currentStep.active(result, controller);
+                        currentStep.init(data, container, controller);
                     }
+                    controller.stepVisited = true;
+                    currentStep.active(data, controller);
                     ref.panel.changeState({
                         panelClass: currentStep.panelClass,
                         width: currentStep.width
                     });
                 } else {
-                    controller.forward(result);
+                    controller.forward(data);
                 }
             }
         },
-        jump(index, result: any): void {
+        back: function (data?: any) {
+            if (isCompleted) return;
+            const previousStep = steps[controller.stepIndex];
+            controller.previousIndex = controller.stepIndex;
+            controller.stepIndex -= 1;
+            previousStep && previousStep.deactive(controller);
+            if (controller.stepIndex >= 0){
+                datas[controller.stepIndex] = arguments.length ? data : datas[controller.stepIndex];
+                data = datas[controller.stepIndex];
+                const currentStep = steps[controller.stepIndex];
+                controller.step = currentStep;
+                if (currentStep) {
+                    if (initeds.indexOf(currentStep) === -1) {
+                        initeds.push(currentStep);
+                        controller.stepVisited = false;
+                        currentStep.init(data, container, controller);
+                    }
+                    controller.stepVisited = true;
+                    currentStep.active(data, controller);
+                    ref.panel.changeState({
+                        panelClass: currentStep.panelClass,
+                        width: currentStep.width
+                    });
+                } else {
+                    controller.back(data);
+                }
+            }
+        },
+        jump: function (index, data?: any) {
             if (isCompleted) return;
             if (controller.stepIndex !== index && index >= 0 && index < controller.stepCount) {
                 const previousStep = steps[controller.stepIndex];
                 controller.previousIndex = controller.stepIndex;
                 controller.stepIndex = index;
                 previousStep && previousStep.deactive(controller);
+                datas[controller.stepIndex] = arguments.length >= 2 ? data : datas[controller.stepIndex];
+                data = datas[controller.stepIndex];
                 const currentStep = steps[controller.stepIndex];
+                controller.step = currentStep;
                 if (currentStep) {
                     if (initeds.indexOf(currentStep) === -1) {
                         initeds.push(currentStep)
                         controller.stepVisited = false;
-                        currentStep.init(result, container, controller);
-                    } else {
-                        controller.stepVisited = true;
-                        currentStep.active(result, controller);
+                        currentStep.init(data, container, controller);
                     }
+                    controller.stepVisited = true;
+                    currentStep.active(data, controller);
                     ref.panel.changeState({
                         panelClass: currentStep.panelClass,
                         width: currentStep.width
