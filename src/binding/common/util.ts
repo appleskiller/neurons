@@ -112,6 +112,8 @@ const plainAttrsProcessor = {
 export function processPlainElementAttrs(element, key, value) {
     if (plainAttrsProcessor[key] && plainAttrsProcessor[key].filter(element)) {
         plainAttrsProcessor[key].set(element, value);
+    } else if (value === undefined || value === null) {
+        element.removeAttribute(key);
     } else {
         element.setAttribute(key, value);
     }

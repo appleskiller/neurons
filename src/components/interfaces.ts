@@ -33,4 +33,22 @@ export interface IItemClickEvent<T> {
     causeEvent: MouseEvent;
 }
 
+export interface ISVGShape {
+    prefix: string;
+    shapeName: string;
+    // [width height ligatures unicode path]
+    shape: [number, number, string[], string, string];
+
+    fill?: string;
+    fillRule?: 'nonzero' | 'evenodd';
+    stroke?: string;
+    strokeWidth?: number;
+    strokeLinecap?: 'butt' | 'round' | 'square';
+    strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'miter-clip' | 'arcs';
+    strokeDasharray?: string;
+    strokeDashoffset?: number;
+
+    [key: string]: any;
+}
+
 export function noop() {};

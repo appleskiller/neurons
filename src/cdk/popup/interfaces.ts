@@ -53,7 +53,7 @@ export interface IPopupManagerConfig {
 
 export interface IPopupOptionBase {
     panelClass?: string;
-    position?: 'center' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | string;
+    position?: 'center' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom' | string;
     width?: number | string;
     height?: number | string;
     connectElement?: HTMLElement | MouseEvent;
@@ -76,7 +76,7 @@ export interface IPopupPanelState {
     popupContainer?: HTMLElement;
     panelClass?: string;
     popupMode?: 'modal' | 'dropdown' | 'tooltip' | string;
-    position?: 'center' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | string;
+    position?: 'center' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom' | string;
     width?: number | string;
     height?: number | string;
     binding?: IBindingDefinition;
@@ -84,7 +84,7 @@ export interface IPopupPanelState {
 }
 
 export interface IToolTipOption extends IPopupOptionBase {
-    position?: 'mouse' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | string;
+    position?: 'mouse' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom' | string;
     delayTime?: number;
 }
 

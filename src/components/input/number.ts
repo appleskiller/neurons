@@ -30,6 +30,7 @@ import { ISVGIcon } from 'neurons-dom/dom/element';
             padding: 4px 6px;
             font-size: inherit;
             transition: border-color 280ms cubic-bezier(.4,0,.2,1);
+            box-sizing: border-box;
         }
         .ne-number-input[readonly] {
             cursor: default;

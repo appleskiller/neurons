@@ -47,6 +47,7 @@ export {
     CheckBoxGroup,
     DropDownButton,
     DropDownList,
+    DropDownTrigger,
     SvgIcon,
     Input,
     NumberInput,
@@ -63,6 +64,7 @@ export {
     ImageUploader,
     FileUploadTrigger,
     SvgImage,
+    SvgShape,
 
     alert,
     modal,
@@ -71,5 +73,6 @@ export {
     stepperModal,
 
     icons,
+    shapes,
     theme
 } from './components';

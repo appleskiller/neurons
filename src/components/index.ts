@@ -7,6 +7,7 @@ export { CheckBox } from './checkbox/checkbox';
 export { CheckBoxGroup } from './checkbox/checkboxgroup';
 export { DropDownButton } from './dropdown/dropdown';
 export { DropDownList } from './dropdown/dropdown';
+export { DropDownTrigger } from './dropdown/trigger';
 export { SvgIcon } from './icon/svgicon';
 export { Input } from './input/input';
 export { NumberInput } from './input/number';
@@ -30,3 +31,6 @@ export { stepperModal } from './stepper/stepper';
 import * as iconBase from './icon/icons';
 export const icons: { [name: string]: ISVGIcon} = { ...iconBase }
 export { theme } from './style/theme';
+
+export { SvgShape } from './shape';
+export { shapes } from './shape';
