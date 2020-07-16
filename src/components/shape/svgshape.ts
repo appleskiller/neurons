@@ -34,7 +34,7 @@ const sizings = {
                 <path
                     [d]="shapePath"
                     [fill]="fill"
-                    [fillRule]="fillRule"
+                    [fill-rule]="fillRule"
                     [stroke]="stroke"
                     [stroke-width]="strokeWidth"
                     [stroke-linecap]="strokeLinecap"
@@ -54,6 +54,7 @@ const sizings = {
         .ne-svg-shape > svg {
             width: 100%;
             height: 100%;
+            vertical-align: top;
         }
     `
 })
@@ -92,6 +93,7 @@ export class SvgShape {
             this.viewBox = shapeConfig[0] && shapeConfig[1] ? '0 0 ' + (shapeConfig[0] || 0) + ' ' + (shapeConfig[1] || 0) : undefined;
         
             this.fill = shape.fill || 'currentColor';
+            this.fill === 'transparent' && (this.fill = 'rgba(0,0,0,0)')
             this.fillRule = shape.fillRule || undefined;
             this.stroke = shape.stroke || undefined;
             this.strokeWidth = shape.strokeWidth || undefined;
