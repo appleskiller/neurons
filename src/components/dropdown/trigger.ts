@@ -1,6 +1,7 @@
 import { Binding, Element, Property, Emitter, Inject } from '../../binding/factory/decorator';
 import { IUIStateStatic, IBindingDefinition, IChangeDetector, BindingSelector, BindingTemplate, IBindingRef } from '../../binding/common/interfaces';
-import { ISVGIcon, createElement } from 'neurons-dom/dom/element';
+import { ISVGIcon } from 'neurons-dom/dom/element';
+import { createElement } from 'neurons-dom';
 import { IEmitter } from 'neurons-emitter';
 import { ISelectionChangeEvent, IItemClickEvent, IItemStateStatic, IMultiSelectionChangeEvent } from '../interfaces';
 import { BINDING_TOKENS } from '../../binding/factory/injector';
