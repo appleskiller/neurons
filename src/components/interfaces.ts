@@ -39,6 +39,7 @@ export interface ISVGShape {
     // [width height ligatures unicode path]
     shape: [number, number, string[], string, string];
 
+    type?: 'dataURI' | 'path';
     fill?: string;
     fillRule?: 'nonzero' | 'evenodd';
     stroke?: string;
@@ -47,6 +48,10 @@ export interface ISVGShape {
     strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'miter-clip' | 'arcs';
     strokeDasharray?: string;
     strokeDashoffset?: number;
+
+    align?: 'left' | 'center' | 'right';
+    verticalAlign?: 'top' | 'middle' | 'bottom';
+    sizing?: 'contain' | 'cover' | 'scale';
 
     [key: string]: any;
 }

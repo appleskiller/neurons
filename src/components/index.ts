@@ -32,5 +32,5 @@ import * as iconBase from './icon/icons';
 export const icons: { [name: string]: ISVGIcon} = { ...iconBase }
 export { theme } from './style/theme';
 
-export { SvgShape } from './shape';
+export { SvgShape, SVGPathShape, SVGDataURIShape } from './shape';
 export { shapes } from './shape';

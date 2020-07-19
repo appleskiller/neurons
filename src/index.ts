@@ -65,6 +65,8 @@ export {
     FileUploadTrigger,
     SvgImage,
     SvgShape,
+    SVGPathShape,
+    SVGDataURIShape,
 
     alert,
     modal,

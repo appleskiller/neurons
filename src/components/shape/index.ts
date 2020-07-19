@@ -1,3 +1,3 @@
 
 export { shapes } from './shape';
-export { SvgShape } from './svgshape';
+export { SvgShape, SVGPathShape, SVGDataURIShape } from './svgshape';
