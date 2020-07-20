@@ -52,6 +52,8 @@ export interface ISVGShape {
     align?: 'left' | 'center' | 'right';
     verticalAlign?: 'top' | 'middle' | 'bottom';
     sizing?: 'contain' | 'cover' | 'scale';
+    width?: number;
+    height?: number;
 
     [key: string]: any;
 }
