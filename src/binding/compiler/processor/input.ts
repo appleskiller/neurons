@@ -11,13 +11,14 @@ export function processInputs(node: IHTMLASTNode, constructorStack: INeTemplateC
     if (isEmpty(inputs)) return;
     // 包含[class]="statement"和[style]="statement"的情况
     constructorStack.push(function (context: INeTemplateContext) {
+        const skipError = context.skipError;
         const elementBinding = context.current;
         const initializeStack = context.initializeStack;
         const element = elementBinding.element;
         Object.keys(inputs).forEach(targetKey => {
             const info = inputs[targetKey];
             const statement = info.statement;
-            const getter = composeGetter(targetKey, info);
+            const getter = composeGetter(targetKey, info, skipError);
             // 绑定函数
             let setter;
             if (targetKey === 'class') {

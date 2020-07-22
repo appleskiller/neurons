@@ -20,9 +20,10 @@ export class UIBindingFactory {
         hostBinding?: IBindingDefinition,
         providers?: Provider[],
         parent?: INeBindingRef,
-        parentInjector?: IInjector
+        parentInjector?: IInjector,
+        skipError?: boolean
     ): IBindingRef<T> {
-        const bindingRef = bindSource(source, hostBinding, providers, parent, parentInjector);
+        const bindingRef = bindSource(source, hostBinding, providers, parent, parentInjector, skipError);
         state && bindingRef.bind(state);
         return wrapNeBindingRef<T>(bindingRef);
     }
@@ -31,9 +32,10 @@ export class UIBindingFactory {
         state?: T,
         providers?: Provider[],
         parent?: INeBindingRef,
-        parentInjector?: IInjector
+        parentInjector?: IInjector,
+        skipError?: boolean
     ): IBindingRef<T> {
-        const bindingRef = bindTemplate(template, providers, parent, parentInjector);
+        const bindingRef = bindTemplate(template, providers, parent, parentInjector, skipError);
         state && bindingRef.bind(state);
         return wrapNeBindingRef<T>(bindingRef);
     }
@@ -43,10 +45,11 @@ export class UIBindingFactory {
         hostBinding?: IBindingDefinition,
         providers?: Provider[],
         parent?: INeBindingRef,
-        parentInjector?: IInjector
+        parentInjector?: IInjector,
+        skipError?: boolean
     ): IBindingRef<T> {
         if (!hasUIBindingMetadata(selector)) return null;
-        const bindingRef = bindSelector(selector, hostBinding, providers, parent, parentInjector);
+        const bindingRef = bindSelector(selector, hostBinding, providers, parent, parentInjector, skipError);
         state && bindingRef.bind(state);
         return wrapNeBindingRef<T>(bindingRef);
     }
@@ -56,9 +59,10 @@ export class UIBindingFactory {
         hostBinding?: IBindingDefinition,
         providers?: Provider[],
         parent?: INeBindingRef,
-        parentInjector?: IInjector
+        parentInjector?: IInjector,
+        skipError?: boolean
     ): IBindingRef<T> {
-        const bindingRef = bindElement(element, hostBinding, providers, parent, parentInjector);
+        const bindingRef = bindElement(element, hostBinding, providers, parent, parentInjector, skipError);
         state && bindingRef.bind(state);
         return wrapNeBindingRef<T>(bindingRef);
     }

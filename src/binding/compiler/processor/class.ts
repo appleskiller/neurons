@@ -18,6 +18,7 @@ export function processClassInputs(node: IHTMLASTNode, constructorStack: INeTemp
     const classInputs = node.classInputs || {};
     if (isEmpty(classInputs)) return;
     constructorStack.push(function (context: INeTemplateContext) {
+        const skipError = context.skipError;
         const elementBinding = context.current;
         const initializeStack = context.initializeStack;
         const element = elementBinding.element;
@@ -28,11 +29,11 @@ export function processClassInputs(node: IHTMLASTNode, constructorStack: INeTemp
                 // 动态属性绑定 [prop]: true
                 const keyInfo = bindingValue[0] as IStatementInfo;
                 const valueInfo = bindingValue[1];
-                const keyGetter = composeGetter(targetKey, keyInfo);
+                const keyGetter = composeGetter(targetKey, keyInfo, skipError);
                 let previousKey, previousValue, setter, sourceKeys = Object.keys(keyInfo.chainProps), isPlainBinding = isEmpty(keyInfo.functions);
                 if (typeof valueInfo === 'object') {
                     // 值绑定
-                    const valueGetter = composeGetter(targetKey, valueInfo);
+                    const valueGetter = composeGetter(targetKey, valueInfo, skipError);
                     sourceKeys = sourceKeys.concat(Object.keys(valueInfo.chainProps));
                     !isPlainBinding && (isPlainBinding = isEmpty(valueInfo.functions));
                     setter = function (scope: INeBindingScope) {
@@ -76,7 +77,7 @@ export function processClassInputs(node: IHTMLASTNode, constructorStack: INeTemp
             } else {
                 // 值绑定
                 const info = bindingValue as IStatementInfo;
-                const getter = composeGetter(targetKey, info);
+                const getter = composeGetter(targetKey, info, skipError);
                 let previousValue;
                 const setter = function (scope: INeBindingScope) {
                     const value = getter(scope);

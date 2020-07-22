@@ -9,6 +9,7 @@ export function processTwoWays(node: IHTMLASTNode, constructorStack: INeTemplate
     const twoWays = node.twoWays || {};
     if (isEmpty(twoWays)) return;
     constructorStack.push(function (context: INeTemplateContext) {
+        const skipError = context.skipError;
         const elementBinding = context.current;
         const initializeStack = context.initializeStack;
         const element = elementBinding.element;
@@ -18,7 +19,7 @@ export function processTwoWays(node: IHTMLASTNode, constructorStack: INeTemplate
         Object.keys(twoWays).forEach(targetKey => {
             const info = twoWays[targetKey];
             const statement = info.statement;
-            const getter = composeGetter(targetKey, info);
+            const getter = composeGetter(targetKey, info, skipError);
             const callback = composeCallback(targetKey, info);
             let listener, previousValue;
             const setter = function (scope: INeBindingScope) {

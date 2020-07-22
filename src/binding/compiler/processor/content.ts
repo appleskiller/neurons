@@ -22,6 +22,7 @@ export function processContent(node: IHTMLASTNode, constructorStack: INeTemplate
         if (typeof text === 'object') {
             const statement = text.statement;
             constructorStack.push(function (context: INeTemplateContext) {
+                const skipError = context.skipError;
                 const elementBinding = context.current;
                 const initializeStack = context.initializeStack;
                 const element = nativeApi.createTextNode('');
@@ -32,7 +33,7 @@ export function processContent(node: IHTMLASTNode, constructorStack: INeTemplate
                 }
                 // 绑定函数
                 const targetKey = `content[${index}]`;
-                const getter = composeGetter(targetKey, text);
+                const getter = composeGetter(targetKey, text, skipError);
                 let previousValue;
                 const setter = function(scope: INeBindingScope) {
                     const value = getter(scope);

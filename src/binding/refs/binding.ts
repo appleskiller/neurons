@@ -121,7 +121,7 @@ class RootElements {
  * 3. 输出属性绑定：处理输出绑定时，如果绑定的函数变量本身发生的改变，则会执行重新绑定(移除上次的监听，建立新的监听)
  */
 export class NeBindingRef implements INeBindingRef {
-    constructor(constructorStack: INeTemplateCompileFunction[], parent?: INeBindingRef, parentInjector?: IInjector, hooks?: INeTemplateBindingHook) {
+    constructor(constructorStack: INeTemplateCompileFunction[], parent?: INeBindingRef, parentInjector?: IInjector, hooks?: INeTemplateBindingHook, skipError?: boolean) {
         this._parent = parent;
         this._initializeStack = [];
         this._destroyStack = [];
@@ -144,6 +144,7 @@ export class NeBindingRef implements INeBindingRef {
         if (constructorStack && constructorStack.length) {
             const bindingRef = this;
             const context: INeTemplateContext = {
+                skipError: skipError === true,
                 rootElements: rootElements,
                 customElements: this._customElements,
                 logicElements: this._logicElements,

@@ -161,6 +161,7 @@ export interface INeTemplateBindingHook {
 }
 
 export interface INeTemplateContext {
+    skipError: boolean;
     initializeStack: INeProcessingFunction[];
     destroyStack: INeProcessingFunction[];
 
@@ -264,6 +265,7 @@ export interface IElementOptions<T> {
     providers?: Provider[];
     parentInjector?: IInjector;
     requirements?: ClassLike[];
+    skipError?: boolean;
 }
 
 export function noop() {};

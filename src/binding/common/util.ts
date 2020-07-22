@@ -4,12 +4,16 @@ import { INeBindingScope, INeBindingFunction } from './interfaces';
 import { createElement, addEventListener } from 'neurons-dom';
 import { domapi } from './domapi';
 
-export function invokeBindingFunction(func, context, implicits, targetKey: string, statement: string) {
+export function invokeBindingFunction(func, context, implicits, targetKey: string, statement: string, skipError?: boolean) {
     let v;
     try {
         v = implicits ? func.call(context, implicits) : func.call(context);
     } catch (error) {
-        throw wrapBindingErrorMessage(error, targetKey || '', statement);
+        if (skipError) {
+            return statement;
+        } else {
+            throw wrapBindingErrorMessage(error, targetKey || '', statement);
+        }
     }
     return v;
 }
@@ -37,15 +41,15 @@ export function composeVaribles(info: IStatementInfo) {
     return result;
 }
 
-export function composeGetter(key: string, info: IStatementInfo): INeBindingFunction {
+export function composeGetter(key: string, info: IStatementInfo, skipError?: boolean): INeBindingFunction {
     // this -> context, arguments[0] -> extraVaribles
     const getter = new Function('', `${composeVaribles(info)}\nreturn (${info.statement})`);
     const statement = info.statement;
     return function (scope: INeBindingScope) {
-        return invokeBindingFunction(getter, scope.context, scope.implicits, key, statement);
+        return invokeBindingFunction(getter, scope.context, scope.implicits, key, statement, skipError);
     }
 }
-export function composeCallback(key: string, info: IStatementInfo): INeBindingFunction {
+export function composeCallback(key: string, info: IStatementInfo, skipError?: boolean): INeBindingFunction {
     // this -> context, arguments[0] -> extraVaribles
     let trigger = '', assignment = '', body = '';
     let statement = info.statement.trim();
@@ -75,7 +79,7 @@ if (${statement} !== $event) {
     };
     const callback = new Function('', `${composeVaribles(fakeInfo)}\n${statement};`);
     return function (scope: INeBindingScope) {
-        return invokeBindingFunction(callback, scope.context, scope.implicits, key, statement);
+        return invokeBindingFunction(callback, scope.context, scope.implicits, key, statement, skipError);
     }
 }
 

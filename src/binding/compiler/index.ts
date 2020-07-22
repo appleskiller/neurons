@@ -27,22 +27,23 @@ export function bindSource<T extends IUIState>(
     hostBinding?: IBindingDefinition,
     providers?: Provider[],
     parent?: INeBindingRef,
-    parentInjector?: IInjector
+    parentInjector?: IInjector,
+    skipError?: boolean
 ): INeBindingRef {
     let bindingRef: INeBindingRef;
     if (typeof source === 'string' && hasUIBindingMetadata(source)) {
         // selector
-        bindingRef = bindSelector(source, hostBinding, providers, parent, parentInjector);
+        bindingRef = bindSelector(source, hostBinding, providers, parent, parentInjector, skipError);
     } else if (typeof source === 'function') {
         const finded = findUIBindingMetadata(source);
         const selector = finded[0] || 'div';
-        bindingRef = bindSelector(selector, hostBinding, providers, parent, parentInjector);
+        bindingRef = bindSelector(selector, hostBinding, providers, parent, parentInjector, skipError);
     } else if (source instanceof Node && (source.nodeType === 1)) {
         // html element
-        bindingRef = bindElement(source as HTMLElement, hostBinding, providers, parent, parentInjector);
+        bindingRef = bindElement(source as HTMLElement, hostBinding, providers, parent, parentInjector, skipError);
     } else {
         // template
-        bindingRef = bindTemplate(source, providers, parent, parentInjector);
+        bindingRef = bindTemplate(source, providers, parent, parentInjector, skipError);
     }
     return bindingRef;
 }
@@ -51,12 +52,13 @@ export function bindTemplate(
     template: string,
     providers?: Provider[],
     parent?: INeBindingRef,
-    parentInjector?: IInjector
+    parentInjector?: IInjector,
+    skipError?: boolean
 ): INeBindingRef {
     const tpl = compile(template);
     let injector = parentInjector || bindingInjector;
     providers && (injector = injector.create(providers));
-    const ref = new NeBindingRef(tpl.constructorStack, parent, injector);
+    const ref = new NeBindingRef(tpl.constructorStack, parent, injector, null, skipError);
     // 如果为简单模板则直接执行绑定
     ref.isPlainTemplate && ref.bind({});
     return ref;
@@ -67,12 +69,13 @@ export function bindSelector(
     hostBinding?: IBindingDefinition,
     providers?: Provider[],
     parent?: INeBindingRef,
-    parentInjector?: IInjector
+    parentInjector?: IInjector,
+    skipError?: boolean
 ) {
     const tpl = compileSelector(selector, hostBinding);
     let injector = parentInjector || bindingInjector;
     providers && (injector = injector.create(providers));
-    const ref = new NeBindingRef(tpl.constructorStack, parent, injector);
+    const ref = new NeBindingRef(tpl.constructorStack, parent, injector, null, skipError);
     return ref;
 }
 
@@ -81,13 +84,14 @@ export function bindElement(
     hostBinding?: IBindingDefinition,
     providers?: Provider[],
     parent?: INeBindingRef,
-    parentInjector?: IInjector
+    parentInjector?: IInjector,
+    skipError?: boolean
 ): INeBindingRef {
     const constructorStack = [];
     processElement(element, hostBinding, constructorStack);
     let injector = parentInjector || bindingInjector;
     providers && (injector = injector.create(providers));
-    const ref = new NeBindingRef(constructorStack, parent, injector);
+    const ref = new NeBindingRef(constructorStack, parent, injector, null, skipError);
     return ref;
 }
 
@@ -567,15 +571,16 @@ function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateComp
         let arr = statement.split(' in ');
         statement = arr[1].trim();
     }
-    // 处理变量声明
-    const implicitsVaribles = {};
-    Object.keys(node.varibles).forEach(key => {
-        implicitsVaribles[key] = composeGetter(`let-${key}`, node.varibles[key]);
-    });
     delete node.logics;
     constructorStack.push(function (context: INeTemplateContext) {
+        const skipError = context.skipError;
         const initializeStack = context.initializeStack;
         const destroyStack = context.destroyStack;
+        // 处理变量声明
+        const implicitsVaribles = {};
+        Object.keys(node.varibles).forEach(key => {
+            implicitsVaribles[key] = composeGetter(`let-${key}`, node.varibles[key], skipError);
+        });
         // 创建for element
         const stack = [];
         processNode(node, stack);
@@ -611,7 +616,7 @@ function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateComp
         context.bindings.push(context.current);
         // 绑定属性变更
         const info = parseStatement(statement);
-        const getter = composeGetter(targetKey, info);
+        const getter = composeGetter(targetKey, info, skipError);
         if (info.isPlainValue) {
             initializeStack.push((scope: INeBindingScope) => {
                 element.setAttribute(targetKey, getter(scope));
@@ -651,6 +656,7 @@ function processIfNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileF
     const logicInfo = node.logics[targetKey];
     delete node.logics;
     constructorStack.push(function (context: INeTemplateContext) {
+        const skipError = context.skipError;
         const initializeStack = context.initializeStack;
         const destroyStack = context.destroyStack;
         // 创建for element
@@ -687,7 +693,7 @@ function processIfNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileF
         context.logicElements.push(element);
         context.bindings.push(context.current);
         // 绑定属性变更
-        const getter = composeGetter(targetKey, logicInfo);
+        const getter = composeGetter(targetKey, logicInfo, skipError);
         if (logicInfo.isPlainValue) {
             initializeStack.push((scope: INeBindingScope) => {
                 element.setAttribute(targetKey, getter(scope));
