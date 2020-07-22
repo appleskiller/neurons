@@ -23,7 +23,8 @@ export {
     BINDING_TOKENS,
 
     bind,
-    bootstrap
+    bootstrap,
+    parseTemplate
 } from './binding';
 // -------------------------------------------------------------------
 // cdk
@@ -60,6 +61,7 @@ export {
     RadioButton,
     RadioGroup,
     ToolTip,
+    Hint,
     FileUploader,
     ImageUploader,
     FileUploadTrigger,

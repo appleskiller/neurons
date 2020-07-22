@@ -4,10 +4,14 @@ import { isBrowser } from 'neurons-utils';
 import { nativeApi } from './common/domapi';
 import { Provider, IInjector, ClassLike } from 'neurons-injector';
 import "./elements";
+import { IHTMLASTRoot, parseHTML } from './compiler/parser/template';
 
 export { BINDING_TOKENS } from './factory/injector';
 export { Element, Property, Binding, Inject, Emitter, Style } from './factory/decorator';
 
+export function parseTemplate(template: string): IHTMLASTRoot {
+    return parseHTML(template);
+}
 
 export function bind<T extends IUIState>(
     source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>,

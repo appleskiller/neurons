@@ -139,12 +139,12 @@ export function parseHTML(content: string): IHTMLASTRoot {
             throw error;
         },
     }, {
-            decodeEntities: true,
-            recognizeCDATA: true,
-            recognizeSelfClosing: true,
-            lowerCaseTags: false,
-            lowerCaseAttributeNames: false,
-        });
+        decodeEntities: true,
+        recognizeCDATA: true,
+        recognizeSelfClosing: true,
+        lowerCaseTags: false,
+        lowerCaseAttributeNames: false,
+    });
     parser.write(content);
     parser.end();
     return result;

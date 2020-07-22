@@ -24,6 +24,7 @@ export { FileUploader } from './uploader/file';
 export { ImageUploader } from './uploader/image';
 export { FileUploadTrigger } from './uploader/trigger';
 export { SvgImage } from './image/svgimage';
+export { Hint } from './hint/hint';
 
 export { alert, modal, sidePanel, tooltip } from './dialog';
 export { stepperModal } from './stepper/stepper';
