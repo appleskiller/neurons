@@ -20,11 +20,11 @@ export const compilerUtil = {
     parseStatement: function (statement: string): IStatementInfo {
         return parseStatement(statement);
     },
-    composeGetter: function (key: string, info: IStatementInfo, skipError?: boolean): INeBindingFunction {
-        return composeGetter(key, info, skipError);
+    composeGetter: function (info: IStatementInfo, key?: string, skipError?: boolean): INeBindingFunction {
+        return composeGetter(key || '', info, skipError);
     },
-    composeCallback: function(key: string, info: IStatementInfo, skipError?: boolean): INeBindingFunction {
-        return composeCallback(key, info, skipError);
+    composeCallback: function(info: IStatementInfo, key?: string, skipError?: boolean): INeBindingFunction {
+        return composeCallback(key || '', info, skipError);
     }
 }
 // -------------------------------------------------------------------
