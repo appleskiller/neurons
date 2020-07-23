@@ -8,7 +8,25 @@ export { parseXML, XMLASTNodeType } from './helper/xml';
 // datatype
 // ===================================================================
 import * as datatypeExports from './datatype';
+import { IStatementInfo, parseStatement } from './binding/compiler/parser/statement';
+import { composeVaribles, composeGetter, composeCallback } from './binding/common/util';
+import { INeBindingFunction } from './binding/common/interfaces';
 export const datatype = datatypeExports;
+
+// -------------------------------------------------------------------
+// compiler
+// ===================================================================
+export const compilerUtil = {
+    parseStatement: function (statement: string): IStatementInfo {
+        return parseStatement(statement);
+    },
+    composeGetter: function (key: string, info: IStatementInfo, skipError?: boolean): INeBindingFunction {
+        return composeGetter(key, info, skipError);
+    },
+    composeCallback: function(key: string, info: IStatementInfo, skipError?: boolean): INeBindingFunction {
+        return composeCallback(key, info, skipError);
+    }
+}
 // -------------------------------------------------------------------
 // binding
 // ===================================================================
@@ -24,8 +42,9 @@ export {
 
     bind,
     bootstrap,
-    parseTemplate
+    parseTemplate,
 } from './binding';
+export { HTMLASTNodeType } from './binding/compiler/parser/template';
 // -------------------------------------------------------------------
 // cdk
 // ===================================================================
