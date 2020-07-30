@@ -180,6 +180,7 @@ function pickCSSBlocks(css: string, prefix: string = '') {
 
 export interface IThemeBinding {
     setState(state: any): void;
+    detectChanges(): void;
     destroy(): void;
 }
 
@@ -219,6 +220,10 @@ export function bindTheme(css: string, theme: any, prefix: string = ''): IThemeB
         setState: (state) => {
             if (_destroyed || !state) return;
             Object.assign(internalTheme, state);
+            refs.forEach(ref => ref.detectChanges());
+        },
+        detectChanges: () => {
+            if (_destroyed) return;
             refs.forEach(ref => ref.detectChanges());
         },
         destroy: () => {
