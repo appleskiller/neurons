@@ -118,14 +118,14 @@ function pickCSSBody(css: string, selector: string = '') {
         let openIndex = rest.search(openRegExp);
         if (openIndex === -1 || openIndex > closeIndex) {
             // 直接结束
-            body = rest.substr(0, closeIndex).trimRight();
+            body = rest.substr(0, closeIndex);
             body && blocks.push(`${selector} {${body}\n}\n`);
             rest = rest.substr(closeIndex + 2);
             return {rest: rest, blocks: blocks};
         } else {
             let index = (rest.substr(0, openIndex)).lastIndexOf(';');
             if (index !== -1) {
-                body = rest.substr(0, index + 1).trimRight();
+                body = rest.substr(0, index + 1);
                 body && blocks.push(`${selector} {${body}\n}\n`);
                 rest = rest.substr(index + 1);
             }
