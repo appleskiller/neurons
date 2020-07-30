@@ -1,6 +1,6 @@
 {
   "name": "neurons",
-  "version": "1.0.35",
+  "version": "1.0.36",
   "description": "Neurons UI",
   "author": "appleskiller@163.com",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "neurons-dom": "1.0.11",
     "neurons-emitter": "1.0.5",
     "neurons-injector": "1.0.5",
-    "neurons-utils": "^1.0.18"
+    "neurons-utils": "1.0.18"
   },
   "devDependencies": {
     "@types/jasmine": "^3.3.16",

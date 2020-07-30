@@ -14,6 +14,7 @@ import './demos/ui-list';
 import './demos/ui-popup';
 import './demos/ui-stepper';
 import './demos/ui-svg';
+import './demos/ui-theme';
 import './demos/ui-tooltip';
 import './demos/ui-uploader';
 import './app';

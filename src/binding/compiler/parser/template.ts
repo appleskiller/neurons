@@ -489,8 +489,12 @@ function parseStyleInput(key, value, inputs, styles, styleInputs) {
         }
     });
 }
+function getPlainValue(statement) {
+    const getter = new Function('', `return (${statement || ''})`);
+    return getter()
+}
 // content
-function parseContent(content: string) {
+export function parseContent(content: string) {
     content = content || '';
     const contents = [];
     while (content) {
@@ -501,7 +505,7 @@ function parseContent(content: string) {
             content = content.substr(index + match[0].length);
             const info = parseStatement(match[1] || '');
             if (info.isPlainValue) {
-                preText += match[1] || '';
+                preText += getPlainValue(info.statement);;
                 preText && contents.push(preText);
             } else {
                 preText && contents.push(preText);

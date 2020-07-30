@@ -54,7 +54,8 @@ export { Animation,
     scrollManager,
 
     POPUP_TOKENS,
-    DropPosition
+    DropPosition,
+    bindTheme
 } from './cdk';
 // -------------------------------------------------------------------
 // components
