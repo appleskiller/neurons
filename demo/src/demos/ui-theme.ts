@@ -15,23 +15,23 @@ register({
             title: '样式绑定',
             bootstrap: container => {
                 const theme = {
-                    padding: 12,
-                    borderWidth: 1,
+                    padding: '12px',
+                    borderWidth: '1px',
                     borderColor: 'rgba(0, 125, 125, 0.24)',
-                    borderRadius: 3,
-                    paddingLeft: 24,
+                    borderRadius: '3px',
+                    paddingLeft: '24px',
                     color: 'red',
                     backgroundColor: 'rgba(125, 125, 125, 0.24)'
                 };
                 const ref = bindTheme(`
                     .ui-theme-binding {
-                        color: {{color}};
+                        color: $color;
                         background-color: rgba(125, 125, 125, 0.24);
-                        padding: {{padding}}px;
+                        padding: $padding;
                         .ui-theme-binding-content {
-                            background-color: {{backgroundColor}};
+                            background-color: $backgroundColor;
                         }
-                        border: solid {{borderWidth}}px {{borderColor}};
+                        border: solid $borderWidth $borderColor;
                         .ui-theme-binding-content {
                             .ui-theme-binding-content-inside {
                                 line-height: 46px;
@@ -51,10 +51,10 @@ register({
                     .ui-theme-binding {
                         .ui-theme-binding-content {
                             .ui-theme-binding-content-inside {
-                                padding-left: {{paddingLeft}}px;
+                                padding-left: $paddingLeft;
                             }
                         }
-                        border-radius: {{borderRadius}}px;
+                        border-radius: $borderRadius;
                     }
                 `, theme);
                 bind(`

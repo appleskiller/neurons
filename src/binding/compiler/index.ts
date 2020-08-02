@@ -571,6 +571,7 @@ function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateComp
         let arr = statement.split(' in ');
         statement = arr[1].trim();
     }
+    node = {...node};
     delete node.logics;
     constructorStack.push(function (context: INeTemplateContext) {
         const skipError = context.skipError;
@@ -654,6 +655,7 @@ function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateComp
 function processIfNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     const targetKey = '*if';
     const logicInfo = node.logics[targetKey];
+    node = {...node};
     delete node.logics;
     constructorStack.push(function (context: INeTemplateContext) {
         const skipError = context.skipError;

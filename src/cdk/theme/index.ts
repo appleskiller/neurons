@@ -59,7 +59,7 @@ function compileCSS(css: string): (string | ((theme) => string))[] {
     css = css || '';
     css = css.trim();
     if (!css) return [];
-    const parsed = parseContent(css);
+    const parsed = parseContent(css, '$');
     if (typeof parsed === 'string') {
         return [parsed];
     } else {

@@ -154,7 +154,25 @@ export function parseHTML(content: string): IHTMLASTRoot {
 // =======================================================
 const inputRegExp = /^\[(.+?)\]$/;
 const outputRegExp = /^\((.+?)\)$/;
-const contentExpresionRegexp = /\{\{(.+?)\}\}/;
+const contentBracketsRegexp = /\{\{(.+?)\}\}/;
+const content$ModeRegexp = /\$[a-zA-Z0-9\-\_\.]{0,}/;
+const contentExpMatcher = {
+    '{{}}': (content) => {
+        return content.match(contentBracketsRegexp)
+    },
+    '$': (content) => {
+        const match = content.match(content$ModeRegexp);
+        if (!match) return;
+        const result: any = [];
+        result.index = match.index;
+        result.input = match.input;
+        result.groups = match.groups;
+        result.length = 2;
+        result[0] = match[0];
+        result[1] = match[0].substr(1);
+        return result;
+    },
+}
 // -------------------------------------------------------
 // parser functions
 // =======================================================
@@ -494,11 +512,12 @@ function getPlainValue(statement) {
     return getter()
 }
 // content
-export function parseContent(content: string) {
+export function parseContent(content: string, mode: '{{}}' | '$' = '{{}}') {
     content = content || '';
     const contents = [];
     while (content) {
-        const match = content.match(contentExpresionRegexp);
+        if (!contentExpMatcher[mode]) break;
+        const match = contentExpMatcher[mode](content);
         if (match) {
             const index = match.index;
             let preText = content.substring(0, index);

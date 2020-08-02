@@ -9,6 +9,7 @@ export function processOutputs(node: IHTMLASTNode, constructorStack: INeTemplate
     const outputs = node.outputs || {};
     if (isEmpty(outputs)) return;
     constructorStack.push(function (context: INeTemplateContext) {
+        const skipError = context.skipError;
         const elementBinding = context.current;
         const initializeStack = context.initializeStack;
         const element = elementBinding.element;
@@ -18,7 +19,7 @@ export function processOutputs(node: IHTMLASTNode, constructorStack: INeTemplate
         Object.keys(outputs).forEach(targetKey => {
             const info = outputs[targetKey];
             const statement = info.statement;
-            const callback = composeCallback(targetKey, info);
+            const callback = composeCallback(targetKey, info, skipError);
             let listener;
             const bindingCallback = function (scope: INeBindingScope) {
                 // 绑定监听

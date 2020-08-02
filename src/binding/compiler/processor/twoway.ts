@@ -20,7 +20,7 @@ export function processTwoWays(node: IHTMLASTNode, constructorStack: INeTemplate
             const info = twoWays[targetKey];
             const statement = info.statement;
             const getter = composeGetter(targetKey, info, skipError);
-            const callback = composeCallback(targetKey, info);
+            const callback = composeCallback(targetKey, info, skipError);
             let listener, previousValue;
             const setter = function (scope: INeBindingScope) {
                 const value = getter(scope);
