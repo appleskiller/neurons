@@ -93,8 +93,8 @@ function compileCSS(css: string): (string | ((theme) => string))[] {
     }
 }
 
-const openRegExp = /[^{]\{[^{]/;
-const closeRegExp = /[^}]\}[^}]/;
+const openRegExp = /\{/;
+const closeRegExp = /\}/;
 
 function firstChar(str: string): string {
     const openIndex = str.search(openRegExp);
@@ -119,14 +119,14 @@ function pickCSSBody(css: string, selector: string = '') {
         if (openIndex === -1 || openIndex > closeIndex) {
             // 直接结束
             body = rest.substr(0, closeIndex);
-            body && blocks.push(`${selector} {${body}\n}\n`);
-            rest = rest.substr(closeIndex + 2);
+            !!body.trim() && blocks.push(`${selector} {${body}\n}`);
+            rest = rest.substr(closeIndex + 1);
             return {rest: rest, blocks: blocks};
         } else {
             let index = (rest.substr(0, openIndex)).lastIndexOf(';');
             if (index !== -1) {
                 body = rest.substr(0, index + 1);
-                body && blocks.push(`${selector} {${body}\n}\n`);
+                !!body.trim() && blocks.push(`${selector} {${body}\n}`);
                 rest = rest.substr(index + 1);
             }
             // 子节点
@@ -140,7 +140,7 @@ function pickCSSBody(css: string, selector: string = '') {
     }
     rest = rest.trim();
     if (rest) {
-        blocks.push(`${selector} {${rest}\n}\n`);
+        blocks.push(`${selector} {${rest}\n}`);
     }
     return {rest: rest, blocks: blocks};
 }
@@ -152,7 +152,7 @@ function pickCSSBlocks(css: string, prefix: string = '') {
     while (rest) {
         openIndex = rest.search(openRegExp);
         if (openIndex >= 0) {
-            let selector = rest.substring(0, openIndex + 1).trim();
+            let selector = rest.substring(0, openIndex).trim();
             if (selector) {
                 // &作为连接符
                 if (selector.charAt(0) === '&') {
@@ -160,7 +160,7 @@ function pickCSSBlocks(css: string, prefix: string = '') {
                 } else {
                     selector = prefix ? prefix + ' ' + selector : selector;
                 }
-                const ret = pickCSSBody(rest.substr(openIndex + 2), selector);
+                const ret = pickCSSBody(rest.substr(openIndex + 1), selector);
                 rest = ret.rest;
                 blocks = blocks.concat(ret.blocks);
                 // 检查平级节点
@@ -193,19 +193,39 @@ export function bindTheme(css: string, theme: any, prefix: string = ''): IThemeB
             const compiled = compileCSS(current);
             if (compiled.length) {
                 const isPlain = compiled.every(item => typeof item === 'string');
-                if (!ret.length) {
-                    isPlain ? ret.push(compiled.join('')) : ret.push(compiled);
+                if (isPlain) {
+                    ret.push(compiled.join(''));
                 } else {
-                    if (isPlain && typeof ret[ret.length - 1] === 'string') {
-                        ret[ret.length - 1] = ret[ret.length - 1] + '\n' + compiled.join('');
-                    } else {
-                        ret.push(compiled);
-                    }
+                    ret.push(compiled);
                 }
             }
             return ret;
         }, []);
         compiledCSSCache.set(css, compiledCSS);
+    }
+    // 添加prefix
+    prefix = (prefix || '').trim();
+    if (prefix && compiledCSS.length) {
+        compiledCSS = compiledCSS.reduce((ret, compiled) => {
+            const isPlain = typeof compiled === 'string';
+            if (typeof compiled === 'string') {
+                compiled = `${prefix} ${compiled}`;
+            } else {
+                compiled.unshift(`${prefix} `);
+            }
+            if (!ret.length) {
+                ret.push(compiled);
+            } else {
+                if (isPlain && typeof ret[ret.length - 1] === 'string') {
+                    ret[ret.length - 1] = ret[ret.length - 1] + '\n' + compiled;
+                } else if (!isPlain && typeof ret[ret.length - 1] !== 'string'){
+                    ret[ret.length - 1] = (ret[ret.length - 1] as any[]).concat(['\n']).concat(compiled);
+                } else {
+                    ret.push(compiled);
+                }
+            }
+            return ret;
+        }, ([] as CompiledCSSBlock[]));
     }
     let internalTheme = {...(theme || {})};
     const refs = compiledCSS.map(compiled => {

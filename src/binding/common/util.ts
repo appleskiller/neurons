@@ -3,6 +3,9 @@ import { IStatementInfo } from '../compiler/parser/statement';
 import { INeBindingScope, INeBindingFunction } from './interfaces';
 import { createElement, addEventListener } from 'neurons-dom';
 import { domapi } from './domapi';
+import { LoggerFactory } from '../../logger';
+
+const logger = LoggerFactory.getLogger('neurons.binding');
 
 export function invokeBindingFunction(func, context, implicits, targetKey: string, statement: string, skipError?: boolean) {
     let v;
@@ -10,6 +13,7 @@ export function invokeBindingFunction(func, context, implicits, targetKey: strin
         v = implicits ? func.call(context, implicits) : func.call(context);
     } catch (error) {
         if (skipError) {
+            logger.error(error);
             return statement;
         } else {
             throw wrapBindingErrorMessage(error, targetKey || '', statement);

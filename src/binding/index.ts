@@ -18,7 +18,7 @@ export function bind<T extends IUIState>(
     option?: IElementOptions<T>
 ): IBindingRef<T> {
     option = option || {};
-    const elementRef = bindingFactory.create<T>(source, option.state, option.hostBinding, option.providers, null, option.parentInjector);
+    const elementRef = bindingFactory.create<T>(source, option.state, option.hostBinding, option.providers, null, option.parentInjector, option.skipError);
     if (option.placeholder) {
         elementRef.attachTo(option.placeholder);
     } else {

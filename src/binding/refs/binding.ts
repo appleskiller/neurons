@@ -578,9 +578,10 @@ export class NeAttributeBindingRef extends NeBindingRef {
         hostElement: HTMLElement,
         parent?: INeBindingRef,
         parentInjector?: IInjector,
-        hooks?: INeTemplateBindingHook
+        hooks?: INeTemplateBindingHook,
+        skipError?: boolean,
     ) {
-        super(constructorStack, parent, parentInjector, hooks);
+        super(constructorStack, parent, parentInjector, hooks, skipError);
         this.attached = true;
         this._parentNode = hostElement;
     }

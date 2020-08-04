@@ -287,10 +287,11 @@ export function processAttrNodes(nodes: IHTMLASTNode[], constructorStack: INeTem
 
 export function processAttrNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileFunction[]) {
     constructorStack.push(function (context: INeTemplateContext) {
+        const skipError = context.skipError;
         const host = context.host;
         // TODO 尚未支持自定义元素
         // const factory = createAttributEBindingRefFactory(node.name, host.element, context.bindingRef, context.parentInjector);
-        const factory = createAttributEBindingRefFactory(node.name, host.element as HTMLElement, context.bindingRef, context.parentInjector);
+        const factory = createAttributEBindingRefFactory(node.name, host.element as HTMLElement, context.bindingRef, context.parentInjector, skipError);
         const clazz = getBindingElementClass(BindingElementTypes.ATTRIBUTE);
         const element = new clazz(node.name, factory);
         context.current = {
@@ -342,6 +343,7 @@ function createAttributEBindingRefFactory(
     hostElement: HTMLElement | INeElement,
     hostBindingRef: INeBindingRef,
     parentInjector: IInjector,
+    skipError?: boolean,
 ): IBindingRefFactory {
     const metadata = getAttributeBindingMetadata(selector);
     const hostBinding = metadata.hostBinding;
@@ -352,7 +354,7 @@ function createAttributEBindingRefFactory(
             let injector = parentInjector || bindingInjector;
             providers && (injector = injector.create(providers));
             const ref = hostElement instanceof Node
-                ? new NeAttributeBindingRef(constructorStack, hostElement, hostBindingRef, injector)
+                ? new NeAttributeBindingRef(constructorStack, hostElement, hostBindingRef, injector, null, skipError)
                 : null; // TODO
             const buildInProviders = buildinBindingProviders(ref);
             const instance = createAttributeBindingInstance(selector, buildInProviders, injector);
@@ -456,6 +458,7 @@ function processUIBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateC
     const templateId = node.id;
     // TODO tag[attr] & [attr]
     constructorStack.push(function (context: INeTemplateContext) {
+        const skipError = context.skipError;
         const selector = match.selector;
         // metadata
         const metadata = getUIBindingMetadata(selector);
@@ -467,7 +470,7 @@ function processUIBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateC
                 providers && (injector = injector.create(providers));
                 // binding
                 const tpl = compile(metadata.template);
-                const bindingRef = new NeBindingRef(tpl.constructorStack, parentBindingRef, injector);
+                const bindingRef = new NeBindingRef(tpl.constructorStack, parentBindingRef, injector, null, skipError);
                 // injector
                 const buildInProviders = buildinBindingProviders(bindingRef);
                 const instance = createUIBindingInstance(selector, buildInProviders, injector);
@@ -596,7 +599,7 @@ function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateComp
             newInstance: (providers?: Provider[]) => {
                 let injector = parentInjector || bindingInjector;
                 providers && (injector = injector.create(providers));
-                return new NeImplicitsBindingRef(stack, bindingRef, injector, hooks);
+                return new NeImplicitsBindingRef(stack, bindingRef, injector, hooks, skipError);
             }
         };
         const clazz = getBindingElementClass(BindingElementTypes.FOR);
@@ -675,7 +678,7 @@ function processIfNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileF
             newInstance: (providers?: Provider[]) => {
                 let injector = parentInjector || bindingInjector;
                 providers && (injector = injector.create(providers));
-                return new NeImplicitsBindingRef(stack, bindingRef, injector, hooks);
+                return new NeImplicitsBindingRef(stack, bindingRef, injector, hooks, skipError);
             }
         };
         const clazz = getBindingElementClass(BindingElementTypes.IF);
