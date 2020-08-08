@@ -1,4 +1,5 @@
 import { ISVGIcon } from 'neurons-dom/dom/element';
+import { checkbox_uncheck, checkbox_check, radio_uncheck, radio_check, caret_down, search, times, check, empty_icon, toggle_on, toggle_off, ellipsis_h, arrow_up, arrow_down, arrow_left, arrow_right, image, file, download_file, import_icon, hint_icon, page_first, page_last, page_previous, page_next } from './icon/icons';
 
 export { Button } from "./button/button";
 export { CheckItem } from './check/check';
@@ -29,8 +30,33 @@ export { Hint } from './hint/hint';
 export { alert, modal, sidePanel, tooltip } from './dialog';
 export { stepperModal } from './stepper/stepper';
 
-import * as iconBase from './icon/icons';
-export const icons: { [name: string]: ISVGIcon} = { ...iconBase }
+export const icons = {
+    checkbox_uncheck: checkbox_uncheck,
+    checkbox_check: checkbox_check,
+    radio_uncheck: radio_uncheck,
+    radio_check: radio_check,
+    caret_down: caret_down,
+    search: search,
+    times: times,
+    check: check,
+    empty_icon: empty_icon,
+    toggle_on: toggle_on,
+    toggle_off: toggle_off,
+    ellipsis_h: ellipsis_h,
+    arrow_up: arrow_up,
+    arrow_down: arrow_down,
+    arrow_left: arrow_left,
+    arrow_right: arrow_right,
+    image: image,
+    file: file,
+    download_file: download_file,
+    import_icon: import_icon,
+    hint_icon: hint_icon,
+    page_first: page_first,
+    page_last: page_last,
+    page_previous: page_previous,
+    page_next: page_next,
+};
 export { theme } from './style/theme';
 
 export { SvgShape, SVGPathShape, SVGDataURIShape } from './shape';
