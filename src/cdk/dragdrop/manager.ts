@@ -130,6 +130,8 @@ export class DragManager extends EventEmitter implements IDragManager {
     private _onDrop() {
         // drop revert or accept
         const dragSource = this.dragSource;
+        // 检查是否产生过位移，如果没有则不回调
+        const mouseMoved = canDrag(this.dragSource.startEvent, this.dragSource.moveEvent);
         removeClass(dragSource.element, 'ne-dragging');
         const touching = dragSource.touching;
         if (!touching) {
@@ -141,7 +143,7 @@ export class DragManager extends EventEmitter implements IDragManager {
             whatever.forEach(element => {
                 if (element && element['_dropOptions']) {
                     option = element['_dropOptions'];
-                    option.onDrop && option.onDrop(DropPosition.whatever, dragSource, this);
+                    mouseMoved && option.onDrop && option.onDrop(DropPosition.whatever, dragSource, this);
                 }
             });
             const element = touching.element;
@@ -152,13 +154,13 @@ export class DragManager extends EventEmitter implements IDragManager {
                 element.removeAttribute('drop-touching-scope');
                 element.removeAttribute('drop-touching-position');
                 dragSource.dropMode = option.dropMode || 'drop';
-                option.onDrop && option.onDrop(touching.position, dragSource, this);
+                mouseMoved && option.onDrop && option.onDrop(touching.position, dragSource, this);
             } else {
                 dragSource.dropMode = 'revert';
                 dragSource.feedback.revert(null);
             }
         }
-        dragSource.onDragStop && dragSource.onDragStop(dragSource, this);
+        mouseMoved && dragSource.onDragStop && dragSource.onDragStop(dragSource, this);
     }
     private _onTouching() {
         // 更新touch

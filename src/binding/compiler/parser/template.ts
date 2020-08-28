@@ -152,6 +152,29 @@ export function parseHTML(content: string): IHTMLASTRoot {
 // -------------------------------------------------------
 // regexps
 // =======================================================
+const pairRegExp = /[\(\)]/;
+function subStringByPaired(str: string) {
+    let match = str.match(pairRegExp);
+    if (!match || match[0] !== '(') return '';
+    let level = 1;
+    let index = match.index;
+    let rest = str.substr(match.index + 1);
+    while(level && rest) {
+        match = rest.match(pairRegExp);
+        if (!match) break;
+        index = index + match.index + 1;
+        rest = rest.substr(match.index + 1);
+        if (match[0] === ')') {
+            level -= 1;
+        } else {
+            level += 1;
+        }
+    }
+    // 不是完整闭合的结构
+    if (level) return '';
+    return str.substr(0, index + 1);
+}
+
 const inputRegExp = /^\[(.+?)\]$/;
 const outputRegExp = /^\((.+?)\)$/;
 const contentBracketsRegexp = /\{\{(.+?)\}\}/;
@@ -170,6 +193,12 @@ const contentExpMatcher = {
         result.length = 2;
         result[0] = match[0];
         result[1] = match[0].substr(1);
+        // 处理函数
+        if (result[1].trim().indexOf('(') === 0) {
+            const str = subStringByPaired(result[1]);
+            result[0] = result[0] + str;
+            result[1] = result[1] + str;
+        }
         return result;
     },
 }

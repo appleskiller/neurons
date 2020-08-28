@@ -1,3 +1,4 @@
+import { internalThemeManager } from '../../cdk/theme/manager';
 
 export const theme = {
     transition: {
@@ -45,3 +46,5 @@ export const theme = {
         pure: 'rgba(255, 255, 255, 1)',
     },
 }
+
+internalThemeManager.init(theme);

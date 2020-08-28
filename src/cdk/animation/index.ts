@@ -108,6 +108,66 @@ export type CancelAnimationFunction = () => void;
         -ms-transform: scaleY(0.8);
         transform: scaleY(0.8);
     }
+    @-webkit-keyframes ne-animation-wave-stretch-delay {
+        0%, 40%, 100% {
+            -webkit-transform: scaleY(0.4);
+                    transform: scaleY(0.4);
+        }
+        20% {
+            -webkit-transform: scaleY(1);
+                    transform: scaleY(1);
+        }
+    }
+
+    @keyframes ne-animation-wave-stretch-delay {
+        0%, 40%, 100% {
+            -webkit-transform: scaleY(0.4);
+                    transform: scaleY(0.4);
+        }
+        20% {
+            -webkit-transform: scaleY(1);
+                    transform: scaleY(1);
+        }
+    }
+    .ne-animation-wave {
+        width: 32px;
+        height: 32px;
+        margin: auto;
+        text-align: center;
+        font-size: 0;
+    }
+    .ne-animation-wave .ne-animation-rect {
+        background-color: rgb(48, 125, 218);
+        height: 100%;
+        width: 12%;
+        margin: 0 1px;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 12px;
+        display: inline-block;
+        -webkit-animation: ne-animation-wave-stretch-delay 1.2s infinite ease-in-out;
+                animation: ne-animation-wave-stretch-delay 1.2s infinite ease-in-out;
+    }
+    .ne-animation-wave .ne-animation-rect-1 {
+        -webkit-animation-delay: -1.2s;
+                animation-delay: -1.2s;
+    }
+    .ne-animation-wave .ne-animation-rect-2 {
+        -webkit-animation-delay: -1.1s;
+                animation-delay: -1.1s;
+    }
+    .ne-animation-wave .ne-animation-rect-3 {
+        -webkit-animation-delay: -1s;
+                animation-delay: -1s;
+    }
+    .ne-animation-wave .ne-animation-rect-4 {
+        -webkit-animation-delay: -0.9s;
+                animation-delay: -0.9s;
+    }
+    .ne-animation-wave .ne-animation-rect-5 {
+        -webkit-animation-delay: -0.8s;
+                animation-delay: -0.8s;
+    }
 `)
 export class Animation {
     static start(config: IAnimationConfig): CancelAnimationFunction {

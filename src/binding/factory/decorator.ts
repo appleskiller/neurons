@@ -2,6 +2,7 @@ import { decorator, decoratorType, uniqueId } from 'neurons-utils';
 import { bindingFactory, logicBindingFactory, attributeBindingFactory } from './factory';
 import { IUIBindingDefinition, ILogicBindingDefinition, IAttributeBindingDefinition } from '../common/interfaces';
 import { appendCSSTagOnce } from 'neurons-dom';
+import { internalThemeManager } from '../../cdk/theme/manager';
 
 export function Inject(token: any) {
     if (!token) throw new Error(`Invalid parameter for decorator`);
@@ -37,7 +38,7 @@ export function Binding(definition: IUIBindingDefinition) {
             // 插入组件样式
             if (definition && definition.style) {
                 const id = uniqueId('ne_ui_style');
-                appendCSSTagOnce(id, definition.style);
+                internalThemeManager.addStyles(id, definition.style);
             }
         } else {
             throw new TypeError(`Decorator "Binding" must be only acted upon Class`);
@@ -92,7 +93,7 @@ export function Style(css: string) {
         if (type === decoratorType.CLASS) {
             if (css) {
                 const id = uniqueId('ne_style');
-                appendCSSTagOnce(id, css);
+                internalThemeManager.addStyles(id, css);
             }
         } else {
             throw new TypeError(`Decorator "Style" must be only acted upon Class`);

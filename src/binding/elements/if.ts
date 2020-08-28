@@ -190,7 +190,7 @@ export class NeIfElement implements INeLogicElement {
                 this.onDetach();
             }
         }
-        recursive && this._actived && this._bindingRef.detectChanges(recursive);
+        this._actived && this._bindingRef.detectChanges(recursive);
     }
 }
 

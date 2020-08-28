@@ -11,6 +11,7 @@ import * as datatypeExports from './datatype';
 import { IStatementInfo, parseStatement } from './binding/compiler/parser/statement';
 import { composeVaribles, composeGetter, composeCallback } from './binding/common/util';
 import { INeBindingFunction } from './binding/common/interfaces';
+import { ILoadingService } from './cdk/loading/loading';
 export const datatype = datatypeExports;
 
 // -------------------------------------------------------------------
@@ -48,14 +49,26 @@ export { HTMLASTNodeType } from './binding/compiler/parser/template';
 // -------------------------------------------------------------------
 // cdk
 // ===================================================================
-export { Animation,
+export {
+    Animation,
+    ThemeManager,
+    LoadingService,
+    LoadingMask,
+
     dragManager,
     popupManager,
     scrollManager,
+    themeManager,
+    loading,
 
     POPUP_TOKENS,
     DropPosition,
-    bindTheme
+    bindTheme,
+
+    StringBindingRef,
+    compileStringTemplate,
+    renderStringTemplate,
+    bindStringTemplate,
 } from './cdk';
 // -------------------------------------------------------------------
 // components
@@ -78,6 +91,8 @@ export {
     List,
     SearchableList,
     SortableList,
+    Tree,
+    SearchableTree,
     RadioButton,
     RadioGroup,
     ToolTip,
@@ -95,6 +110,8 @@ export {
     sidePanel,
     tooltip,
     stepperModal,
+    stepperAccordion,
+    STEPPER_TOKENS,
 
     icons,
     shapes,

@@ -145,6 +145,55 @@ function pickCSSBody(css: string, selector: string = '') {
     return {rest: rest, blocks: blocks};
 }
 
+const pairRegExp = /[\{\}]/;
+function subStringByPaired(str: string) {
+    let match = str.match(pairRegExp);
+    if (!match || match[0] !== '{') return '';
+    let level = 1;
+    let index = match.index;
+    let rest = str.substr(match.index + 1);
+    while(level && rest) {
+        match = rest.match(pairRegExp);
+        if (!match) break;
+        index = index + match.index + 1;
+        rest = rest.substr(match.index + 1);
+        if (match[0] === '}') {
+            level -= 1;
+        } else {
+            level += 1;
+        }
+    }
+    // 不是完整闭合的结构
+    if (level) return '';
+    return str.substr(0, index + 1);
+}
+const keyframesRegExp = /\@[a-zA-Z\-]{0,}keyframes/;
+function pickAtCSSBlocks(css: string, selector = '', prefix: string = '') {
+    let ret, rest;
+    if (selector.search(keyframesRegExp) === 0) {
+        const tmp = `${selector} { ${css}`;
+        const str = subStringByPaired(tmp);
+        if (str) {
+            // 直接返回
+            return {
+                rest: tmp.substr(str.length),
+                blocks: [str]
+            }
+        }
+    }
+    ret = pickCSSBlocks(css, prefix);
+    rest = ret.rest.trim();
+    if (rest.indexOf('}') === 0) {
+        rest = rest.substr(1);
+    }
+    return {
+        rest: rest,
+        blocks: (ret.blocks || []).map(block => {
+            return `${selector} {\n${block}\n}`;
+        })
+    }
+}
+
 function pickCSSBlocks(css: string, prefix: string = '') {
     css = css || '';
     if (!css) return {rest: '', blocks: []};
@@ -154,13 +203,18 @@ function pickCSSBlocks(css: string, prefix: string = '') {
         if (openIndex >= 0) {
             let selector = rest.substring(0, openIndex).trim();
             if (selector) {
-                // &作为连接符
-                if (selector.charAt(0) === '&') {
-                    selector = prefix + selector.substr(1);
+                let ret;
+                if (selector.charAt(0) === '@') {
+                    ret = pickAtCSSBlocks(rest.substr(openIndex + 1), selector, prefix);
                 } else {
-                    selector = prefix ? prefix + ' ' + selector : selector;
+                    // &作为连接符
+                    if (selector.charAt(0) === '&') {
+                        selector = prefix + selector.substr(1);
+                    } else {
+                        selector = prefix ? prefix + ' ' + selector : selector;
+                    }
+                    ret = pickCSSBody(rest.substr(openIndex + 1), selector);
                 }
-                const ret = pickCSSBody(rest.substr(openIndex + 1), selector);
                 rest = ret.rest;
                 blocks = blocks.concat(ret.blocks);
                 // 检查平级节点
@@ -205,13 +259,15 @@ export function bindTheme(css: string, theme: any, prefix: string = ''): IThemeB
     }
     // 添加prefix
     prefix = (prefix || '').trim();
-    if (prefix && compiledCSS.length) {
+    if (compiledCSS.length) {
         compiledCSS = compiledCSS.reduce((ret, compiled) => {
             const isPlain = typeof compiled === 'string';
-            if (typeof compiled === 'string') {
-                compiled = `${prefix} ${compiled}`;
-            } else {
-                compiled.unshift(`${prefix} `);
+            if (prefix) {
+                if (typeof compiled === 'string') {
+                    compiled = `${prefix} ${compiled}`;
+                } else {
+                    compiled.unshift(`${prefix} `);
+                }
             }
             if (!ret.length) {
                 ret.push(compiled);

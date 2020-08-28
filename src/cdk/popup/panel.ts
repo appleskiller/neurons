@@ -36,7 +36,12 @@ const defaultPopupPosition = {
     selector: 'ne-popup-panel',
     template: `<div
             #panel
-            [class]="{[panelClass]: true, 'ne-popup-panel': true, 'ne-click-shake-up': shakeup}" 
+            [class]="{
+                [panelClass]: true,
+                'ne-popup-panel': true,
+                'ne-internal-panel': isInternalPopup,
+                'ne-click-shake-up': shakeup
+            }" 
             [style]="getContainerStyles()"
             [popup-mode]="popupMode || ''"
         >
@@ -58,6 +63,9 @@ const defaultPopupPosition = {
         position: fixed;
         max-width: 100%;
         max-height: 100%;
+    }
+    .ne-popup-panel.ne-internal-panel {
+        position: absolute;
     }
     .ne-popup-panel .ne-popup-panel-content {
         overflow: hidden;
@@ -85,7 +93,9 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
     @Property() popupContainer: HTMLElement;
     @Property() panelClass = '';
     @Property() autoClose = true;
+    @Property() disableAnimation = false;
     @Property() shakeup = false;
+    @Property() isInternalPopup = false;
     @Property() source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T> = null;
     @Property() binding: IBindingDefinition = null;
     @Property() state: T = null;
@@ -177,6 +187,9 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             }
         } else {
             this.animationType = popupPosition2AnimationType[position] || PopupAnimation.scaleUp;
+        }
+        if (this.disableAnimation) {
+            this.animationType = '';
         }
     }
     getContainerStyles() {
@@ -431,6 +444,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         } else if (position === 'leftTop') {
             connectPosition = (box.left - panelWidth - offset) ? 'right' : 'left';
             relativeLeft = this._fixPositionFromStart(box.left, box.width, panelWidth, width, offset);
+            // TODO 此处有bug，当panelHeight > height的时候会产生问题
             relativeTop = Math.max(0, Math.min(box.top, height - panelHeight));
         } else if (position === 'topRight') {
             connectPosition = (box.top - panelBox.height - offset < 0) ? 'bottom' : 'top';
@@ -677,13 +691,15 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
         private _popupRef: IPopupRef<T>,
         private _container: HTMLElement,
         source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>,
-        option?: IPopupOption<T>
+        option?: IPopupOption<T>,
+        isInternalPopup = false
     ) {
         this._placeholder = nativeApi.createComment();
         nativeApi.appendChild(this._container, this._placeholder);
         const state = (option || {}) as PopupPanelState<T>;
         state.source = source;
         state.popupContainer = this._container;
+        state.isInternalPopup = isInternalPopup;
         this._oriState = {
             popupContainer: this._container,
             panelClass: state.panelClass,
@@ -691,11 +707,14 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
             position: state.position,
             width: state.width,
             height: state.height,
+            isInternalPopup: isInternalPopup,
         }
         this._ref = bindingFactory.create(PopupPanelState, state, {
             '[popupContainer]': 'popupContainer',
             '[panelClass]': 'panelClass',
             '[autoClose]': 'autoClose',
+            '[isInternalPopup]': 'isInternalPopup',
+            '[disableAnimation]': 'disableAnimation',
             '[binding]': 'binding',
             '[state]': 'state',
             '[source]': 'source',

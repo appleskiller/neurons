@@ -35,7 +35,8 @@ export class PopupManager implements IPopupManager {
     }
     open<T extends StateObject>(component: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>, option?: IPopupOption<T>): IPopupRef<T> {
         this._validateInitialize();
-        const popup = new PopupRef<T>(this, this._container);
+        const container = option && option.popupContainer ? option.popupContainer : this._container;
+        const popup = new PopupRef<T>(this, container, this._container !== container);
         this._addPopup(popup);
         popup.open(component, option);
         return popup;
@@ -57,10 +58,10 @@ export class PopupManager implements IPopupManager {
     private _addPopup(popup: IPopupRef<any>) {
         if (this._popups.indexOf(popup) === -1) {
             this._popups.push(popup);
-            nativeApi.removeClass(this._container, 'empty');
+            !popup.isInternalPopup && nativeApi.removeClass(this._container, 'empty');
             popup.onClosed.listen(() => {
                 this._removePopup(popup);
-                if (isEmpty(this._popups)) {
+                if (isEmpty(this._popups.filter(popup => !popup.isInternalPopup))) {
                     nativeApi.addClass(this._container, 'empty');
                 }
             })
@@ -77,7 +78,8 @@ export class PopupManager implements IPopupManager {
             this._inited = true;
             if (isBrowser) {
                 const container = this._config.container || window.document.body;
-                this._container = nativeApi.createElement('div', 'ne-popup-host');
+                const hostClass = this._config.hostClass ? `ne-popup-host ${this._config.hostClass}` : 'ne-popup-host';
+                this._container = nativeApi.createElement('div', hostClass);
                 container.appendChild(this._container);
                 this._listeners.push(nativeApi.addEventListener(window, 'hashchange', () => {
                     Object.values(this._popups).forEach(popup => {

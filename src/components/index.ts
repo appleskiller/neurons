@@ -16,6 +16,8 @@ export { SearchInput } from './input/search';
 export { TextArea } from './input/textarea';
 export { CollapsibleList } from './list/collapsiblelist';
 export { List } from './list/list';
+export { Tree } from './tree/tree';
+export { SearchableTree } from './tree/searchabletree';
 export { SearchableList } from './list/seachablelist';
 export { SortableList } from './list/sortablelist';
 export { RadioButton } from './radio/radiobutton';
@@ -29,6 +31,7 @@ export { Hint } from './hint/hint';
 
 export { alert, modal, sidePanel, tooltip } from './dialog';
 export { stepperModal } from './stepper/stepper';
+export { stepperAccordion, STEPPER_TOKENS } from './stepper/accordionstepper';
 
 export const icons = {
     checkbox_uncheck: checkbox_uncheck,

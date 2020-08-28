@@ -8,7 +8,7 @@ import { isDefined, isEmpty } from 'neurons-utils';
 import { addEventListener } from 'neurons-dom';
 
 export class PopupRef<T extends StateObject> implements IPopupRef<T> {
-    constructor(private _manager: IPopupManager, private _container: HTMLElement) {
+    constructor(private _manager: IPopupManager, private _container: HTMLElement, public isInternalPopup = false) {
     }
     private _nativeEmitter = new EventEmitter();
 
@@ -22,8 +22,8 @@ export class PopupRef<T extends StateObject> implements IPopupRef<T> {
 
     open(source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>, option?: IPopupOption<T>): void {
         this.option = option || {} as IPopupOption<T>;
-        this.overlay = this._attachOverlay(this._container, this.option);
-        this.panel = this._attachPanel(this._container, source, this.option);
+        this.overlay = this._attachOverlay(this._container, this.option, this.isInternalPopup);
+        this.panel = this._attachPanel(this._container, source, this.option, this.isInternalPopup);
         this.overlay.appear();
         this.panel.appear();
         this.overlay.onClick.listen(() => {
@@ -51,12 +51,12 @@ export class PopupRef<T extends StateObject> implements IPopupRef<T> {
         this.overlay.disappear();
         this.panel.disappear();
     }
-    protected _attachOverlay(container: HTMLElement, option?: IPopupOption<T>): IPopupOverlayRef<T> {
-        const overlay = new PopupOverlayRef(container, option);
+    protected _attachOverlay(container: HTMLElement, option?: IPopupOption<T>, isInternalPopup = false): IPopupOverlayRef<T> {
+        const overlay = new PopupOverlayRef(container, option, isInternalPopup);
         return overlay;
     }
-    protected _attachPanel(container: HTMLElement, source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>, option?: IPopupOption<T>): IPopupPanelRef<T> {
-        const panel = new PopupPanelRef(this, container, source, option);
+    protected _attachPanel(container: HTMLElement, source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>, option?: IPopupOption<T>, isInternalPopup = false): IPopupPanelRef<T> {
+        const panel = new PopupPanelRef(this, container, source, option, isInternalPopup);
         return panel;
     }
 }

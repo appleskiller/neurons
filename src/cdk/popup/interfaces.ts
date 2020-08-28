@@ -49,6 +49,7 @@ export enum PopupMode {
 
 export interface IPopupManagerConfig {
     container?: HTMLElement;
+    hostClass?: string;
 }
 
 export interface IPopupOptionBase {
@@ -56,6 +57,7 @@ export interface IPopupOptionBase {
     position?: 'center' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom' | string;
     width?: number | string;
     height?: number | string;
+    popupContainer?: HTMLElement;
     connectElement?: HTMLElement | MouseEvent;
     binding?: IBindingDefinition;
     state?: StateObject;
@@ -69,12 +71,14 @@ export interface IPopupOption<T extends StateObject> extends IPopupOptionBase {
     overlayBackgroundColor?: string;
     autoClose?: boolean;
     disableClose?: boolean;
+    disableAnimation?: boolean;
     popupMode?: 'modal' | 'dropdown' | 'tooltip' | string;
 }
 
 export interface IPopupPanelState {
     popupContainer?: HTMLElement;
     panelClass?: string;
+    isInternalPopup?: boolean;
     popupMode?: 'modal' | 'dropdown' | 'tooltip' | string;
     position?: 'center' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom' | string;
     width?: number | string;
@@ -115,6 +119,7 @@ export interface IPopupManager {
 }
 
 export interface IPopupRef<T extends StateObject> {
+    isInternalPopup: boolean;
     option: IPopupOption<T>;
     overlay: IPopupOverlayRef<T>;
     panel: IPopupPanelRef<T>;

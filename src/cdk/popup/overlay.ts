@@ -24,12 +24,13 @@ export interface IPopupOverlayOption<T> extends IPopupOption<T> {
     }
 `)
 export class PopupOverlayRef<T extends StateObject> implements IPopupOverlayRef<T> {
-    constructor(private _container: HTMLElement, option?: IPopupOption<T>) {
+    constructor(private _container: HTMLElement, option?: IPopupOption<T>, isInternalPopup = false) {
         if (option.hasOverlay !== false) {
             this._placeholder = nativeApi.createComment();
             nativeApi.appendChild(this._container, this._placeholder);
             const state: IPopupOverlayOption<T> = {
                 popupMode: PopupMode.modal,
+                isInternal: isInternalPopup,
                 overlayClass: '',
                 overlayBackgroundColor: '',
                 animationEnter: false,
@@ -44,6 +45,7 @@ export class PopupOverlayRef<T extends StateObject> implements IPopupOverlayRef<
                     [class]="{
                         [overlayClass]: true,
                         'ne-popup-overlay': true,
+                        'ne-internal-overlay': isInternal,
                         'ne-animation': true,
                         'ne-animation-fade': true,
                         'ne-animation-enter': animationEnter,
