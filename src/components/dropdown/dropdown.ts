@@ -181,6 +181,7 @@ export class DropDownButton<T> {
 export class DropDownList<T> {
     @Property() caretIcon = caret_down;
     
+    @Property() disabled: boolean = false;
     @Property() required = false;
     @Property() active = true;
     @Property() searchableThreshold = 20;
@@ -215,6 +216,7 @@ export class DropDownList<T> {
         this.invalid = this._isInvalid();
     }
     onClick(e) {
+        if (this.disabled) return;
         if (this.enableMultiSelection) {
             this.openMultiSelectionList();
         } else {

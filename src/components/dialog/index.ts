@@ -22,6 +22,10 @@ export interface IAlertOption {
     hideOkButton?: boolean;
     hideCancelButton?: boolean;
 
+    middleLabel?: string;
+    onMiddle?: () => void;
+    hideMiddleButton?: boolean;
+
     panelClass?: string;
     width?: number | string;
     hasOverlay?: boolean;
@@ -89,8 +93,25 @@ export interface ISidePanelOption {
 }
 
 export function alert(option: IAlertOption): IPopupRef<any> {
-    // const bindingStr = `<ne-binding [source]="innerTemplate" [state]="innerState"/>`;
-    const ref = popupManager.open(`<div [class]="{'ne-dialog': true, 'ne-alert': true, 'hide-title': !title, 'hide-message': ${!option.html && !option.message ? 'true' : 'false'}, 'hide-ok': hideOkButton, 'hide-cancel': hideCancelButton}">
+    const hideOkButton = 'hideOkButton' in option ? option.hideOkButton : false;
+    const hideCancelButton = 'hideCancelButton' in option ? option.hideCancelButton : false;
+    const hideMiddleButton = 'hideMiddleButton' in option ? option.hideMiddleButton : true;
+    let btnCount = 0;
+    !hideOkButton && (btnCount += 1);
+    !hideCancelButton && (btnCount += 1);
+    !hideMiddleButton && (btnCount += 1);
+
+    const ref = popupManager.open(`
+    <div class="ne-dialog ne-alert"
+        [class.hide-title]="!title"
+        [class.hide-message]="${!option.html && !option.message ? 'true' : 'false'}"
+        [class.hide-ok]="hideOkButton"
+        [class.hide-cancel]="hideCancelButton"
+        [class.hide-middle]="hideMiddleButton"
+        [class.button-count-3]="btnCount === 3"
+        [class.button-count-2]="btnCount === 2"
+        [class.button-count-1]="btnCount === 1"
+    >
         <div class="ne-dialog-title">
             <div>{{title}}</div>
         </div>
@@ -101,6 +122,7 @@ export function alert(option: IAlertOption): IPopupRef<any> {
         </div>
         <div class="ne-dialog-footer">
             <ne-button class="ne-dialog-cancel-btn" (click)="onCancel()">{{cancelLabel}}</ne-button>
+            <ne-button class="ne-dialog-middle-btn" (click)="onMiddle()">{{middleLabel}}</ne-button>
             <ne-button class="ne-dialog-ok-btn" [mode]="'flat'" [color]="okColor" (click)="onOk()">{{okLabel}}</ne-button>
         </div>
     </div>`, {
@@ -115,11 +137,14 @@ export function alert(option: IAlertOption): IPopupRef<any> {
                 title: option.title || '',
                 message: option.message || '',
                 html: option.html || '',
-                okLabel: 'okLabel' in option ? option.okLabel : '确定',
                 okColor: 'okColor' in option ? option.okColor : 'primary',
+                okLabel: 'okLabel' in option ? option.okLabel : '确定',
                 cancelLabel: 'cancelLabel' in option ? option.cancelLabel : '取消',
-                hideOkButton: 'hideOkButton' in option ? option.hideOkButton : false,
-                hideCancelButton: 'hideCancelButton' in option ? option.hideCancelButton : false,
+                middleLabel: 'middleLabel' in option ? option.middleLabel : '关闭',
+                hideOkButton: hideOkButton,
+                hideCancelButton: hideCancelButton,
+                hideMiddleButton: hideMiddleButton,
+                btnCount: btnCount,
                 onOk: () => {
                     if (option.onOk) {
                         const result = option.onOk();
@@ -136,6 +161,10 @@ export function alert(option: IAlertOption): IPopupRef<any> {
                 },
                 onCancel: () => {
                     option.onCancel && option.onCancel();
+                    ref.close();
+                },
+                onMiddle: () => {
+                    option.onMiddle && option.onMiddle();
                     ref.close();
                 },
                 innerTemplate: option.body ? option.body.template : '',
@@ -286,6 +315,10 @@ appendCSSTagOnce('ne-ui-dialog', `
     padding: 6px 24px;
     min-width: 94px;
 }
+.ne-dialog .ne-dialog-middle-btn {
+    border-left: solid 1px ${theme.gray.normal};
+    border-right: solid 1px ${theme.gray.normal};
+}
 .ne-dialog .ne-dialog-close {
     position: absolute;
     top: 0;
@@ -304,6 +337,9 @@ appendCSSTagOnce('ne-ui-dialog', `
     display: none;
 }
 .ne-dialog.hide-cancel .ne-dialog-cancel-btn {
+    display: none;
+}
+.ne-dialog.hide-middle .ne-dialog-middle-btn {
     display: none;
 }
 .ne-dialog.ne-modal .ne-dialog-footer .ne-button {
@@ -362,8 +398,16 @@ appendCSSTagOnce('ne-ui-dialog', `
 .ne-dialog.ne-side-panel .ne-dialog-close {
     border-radius: 0;
 }
-.ne-dialog.ne-alert.hide-ok .ne-dialog-footer .ne-button,
-.ne-dialog.ne-alert.hide-cancel .ne-dialog-footer .ne-button {
+.ne-dialog.ne-alert .ne-dialog-footer .ne-button {
+    width: 50%;
+}
+.ne-dialog.ne-alert.button-count-1 .ne-dialog-footer .ne-button {
     width: 100%;
+}
+.ne-dialog.ne-alert.button-count-2 .ne-dialog-footer .ne-button {
+    width: 50%;
+}
+.ne-dialog.ne-alert.button-count-3 .ne-dialog-footer .ne-button {
+    width: 33.33%;
 }
 `);

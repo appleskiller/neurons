@@ -4,6 +4,7 @@ import { IPopupRef } from '../../cdk/popup/interfaces';
 import { createElement, appendCSSTagOnce } from 'neurons-dom';
 import { IEmitter, EventEmitter, emitter } from 'neurons-emitter';
 import { ISVGIcon } from 'neurons-dom/dom/element';
+import { removeMe } from 'neurons-dom';
 import { bind } from '../../binding';
 import { theme } from '../style/theme';
 import { arrow_right } from '../icon/icons';
@@ -36,6 +37,8 @@ export interface IAccordionStep {
     stepDescription?: string;
     template: string;
     state: any;
+
+    autoHeight?: boolean;
 
     // [key: string]: any;
 }
@@ -99,6 +102,7 @@ function bindContentRef(step: IAccordionStep, index: number, container: HTMLElem
         index: index,
         touched: false,
         actived: false,
+        autoHeight: !!step.autoHeight,
         onChanges: (changes) => {
             if (!ref && state.touched && state.actived) {
                 ref = bind(step.template || '', {
@@ -133,11 +137,15 @@ function bindContentRef(step: IAccordionStep, index: number, container: HTMLElem
                     const content = wrapperRef.element('content') as HTMLElement;
                     content.style.height = state.maxHeight + 'px';
                     ref.resize();
-                    const box = ref.getBoundingClientRect();
-                    const height = Math.min(box.height, state.maxHeight);
-                    wrapperRef.setState({height: height});
-                    content.style.height = height + 'px';
-                    ref.resize();
+                    if (step.autoHeight) {
+                        const box = ref.getBoundingClientRect();
+                        const height = Math.min(box.height, state.maxHeight);
+                        wrapperRef.setState({height: height});
+                        content.style.height = height + 'px';
+                        ref.resize();
+                    } else {
+                        wrapperRef.setState({height: state.maxHeight});
+                    }
                 } else {
                     wrapperRef.setState({height: 0});
                 }
@@ -152,7 +160,7 @@ function bindContentRef(step: IAccordionStep, index: number, container: HTMLElem
             [style.height]="height"
             [style.max-height]="maxHeight"
         >
-            <div class="ne-accordion-stepper-content-layout" #content/>
+            <div class="ne-accordion-stepper-content-layout" [style.overflow]="autoHeight ? 'none' : 'auto'" #content/>
         </div>
     `, {
         container: container,
@@ -168,6 +176,7 @@ export function stepperAccordion(option: IStepperAccordionOption, steps: IAccord
     const complete = () => {
         isCompleted = true;
     }
+    const container = createElement('div', 'ne-accordion-stepper');
     const controller: IAccordionStepperControl = {
         previousIndex: -1,
         stepIndex: -1,
@@ -294,10 +303,10 @@ export function stepperAccordion(option: IStepperAccordionOption, steps: IAccord
             _nativeEmitter.off();
             titleRefs.forEach(ref => ref.destroy());
             contentRefs.forEach(ref => ref.destroy());
+            removeMe(container);
         }
     }
     // 创建视图
-    const container = createElement('div', 'ne-accordion-stepper');
     option.container.appendChild(container);
     let maxHeight = 0;
     steps.forEach((step, index) => {

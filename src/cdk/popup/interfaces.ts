@@ -71,6 +71,7 @@ export interface IPopupOption<T extends StateObject> extends IPopupOptionBase {
     overlayBackgroundColor?: string;
     autoClose?: boolean;
     disableClose?: boolean;
+    canBeClosed?: () => boolean;
     disableAnimation?: boolean;
     popupMode?: 'modal' | 'dropdown' | 'tooltip' | string;
 }

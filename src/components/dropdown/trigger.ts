@@ -37,12 +37,18 @@ import { ClassLike } from 'neurons-injector';
             transition: ${theme.transition.normal('background-color', 'border-color')};
             box-sizing: border-box;
         }
+        .ne-dropdown-trigger[disabled] {
+            opacity: 0.3;
+        }
         .ne-dropdown-trigger:hover {
             background-color: rgba(125, 125, 125, 0.12);
         }
         .ne-dropdown-trigger.opened,
         .ne-dropdown-trigger:active {
             background-color: rgba(125, 125, 125, 0.24);
+        }
+        .ne-dropdown-trigger.invalid {
+            border-color: ${theme.color.error};
         }
         .ne-dropdown-trigger .ne-dropdown-trigger-icon {
             position: absolute;
@@ -68,6 +74,7 @@ import { ClassLike } from 'neurons-injector';
 })
 export class DropDownTrigger<T> {
     @Property() caretIcon = caret_down;
+    @Property() disabled: boolean = false;
     @Property() label = '';
     @Property() placeholder: string = '请选择...';
     @Property() openFunction: (container: HTMLElement, popupRef: IPopupRef<any>) => IBindingRef<any>;
@@ -99,6 +106,7 @@ export class DropDownTrigger<T> {
         this._popupRef && this._popupRef.close();
     }
     onClick(e) {
+        if (this.disabled) return;
         this._popupRef && this._popupRef.close();
         const container = createElement('div', 'ne-dropdown-trigger-panel');
         const ref = popupManager.open(container, {

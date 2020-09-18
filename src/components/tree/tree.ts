@@ -168,7 +168,7 @@ class TreeDataProvider {
         const stack = dataStack[0];
         if (!stack || !stack.length) return;
         
-        const _recurseItemChildren = function (item) {
+        const _recurseItemChildren = (item) => {
             if (item && !item.isLeaf && item.expanded) {
                 this._recurseSource(this._childrenMap.get(item), childItem => {
                     childItem.index = this.flatCollection.length;

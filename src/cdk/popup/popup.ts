@@ -28,7 +28,16 @@ export class PopupRef<T extends StateObject> implements IPopupRef<T> {
         this.panel.appear();
         this.overlay.onClick.listen(() => {
             if (!this.option.disableClose) {
-                this.close();
+                // 检查是否可关闭的函数
+                if (!this.option.canBeClosed || typeof this.option.canBeClosed !== 'function') {
+                    this.close();
+                } else {
+                    if (!!this.option.canBeClosed()) {
+                        this.close();
+                    } else {
+                        this.panel.shakeup();
+                    }
+                }
             } else {
                 this.panel.shakeup();
             }
