@@ -123,7 +123,7 @@ class TreeDataProvider {
             if (items.length) {
                 const params = [item.index + 1, 0].concat(items);
                 this.flatCollection.splice.apply(this.flatCollection, params);
-                for (let i = item.index + items.length + 1; i < this.flatCollection.length; i++) {
+                for (let i = item.index + 1; i < this.flatCollection.length; i++) {
                     this.flatCollection[i].index = i;
                 }
             }
@@ -142,9 +142,9 @@ class TreeDataProvider {
     collapse(data) {
         const item = this._itemMap.get(data);
         if (item && !item.isLeaf && item.expanded) {
-            const len = this._collapseItem(item);
+            const items = this._collapseItem(item);
             item.expanded = false;
-            if (len) {
+            if (items && items.length) {
                 for (let i = item.index + 1; i < this.flatCollection.length; i++) {
                     this.flatCollection[i].index = i;
                 }
