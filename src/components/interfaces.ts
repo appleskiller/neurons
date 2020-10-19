@@ -45,7 +45,7 @@ export interface ISVGShape {
     stroke?: string;
     strokeWidth?: number;
     strokeLinecap?: 'butt' | 'round' | 'square';
-    strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'miter-clip' | 'arcs';
+    strokeLinejoin?: 'miter' | 'round' | 'bevel';
     strokeDasharray?: string;
     strokeDashoffset?: number;
 
