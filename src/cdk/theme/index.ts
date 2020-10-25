@@ -266,6 +266,7 @@ export function bindTheme(css: string, theme: any, prefix: string = ''): IThemeB
                 if (typeof compiled === 'string') {
                     compiled = `${prefix} ${compiled}`;
                 } else {
+                    compiled = compiled.concat();
                     compiled.unshift(`${prefix} `);
                 }
             }
