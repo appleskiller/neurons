@@ -75,7 +75,7 @@ export class PopupRef<T extends StateObject> implements IPopupRef<T> {
         background-color: rgba(0, 0, 0, 0.7);
         color: rgba(255, 255, 255, 1);
         padding: 8px;
-        margin: 8px;
+        margin: 16px;
         max-width: 300px;
         font-size: 12px;
     }
@@ -121,6 +121,7 @@ export class ToolTipRef implements IToolTipRef {
             }
         } else {
             this._ref.updatePosition(connectElement);
+            this._ref.panel.detectChanges();
         }
     }
     updateOption(option?: IToolTipOption): void {
@@ -144,6 +145,7 @@ export class ToolTipRef implements IToolTipRef {
     updatePosition(connectElement?: HTMLElement | MouseEvent): void {
         connectElement && (this._option.connectElement = connectElement);
         this._ref && this._ref.updatePosition(connectElement);
+        this._ref && this._ref.panel.detectChanges();
     }
     close(): void {
         clearTimeout(this._delayTimeId);
