@@ -1,5 +1,5 @@
 import { Style } from '../../binding/factory/decorator';
-import { requestFrame } from 'neurons-utils';
+import { isEmpty, requestFrame } from 'neurons-utils';
 
 export interface IAnimationConfig {
     duration?: number;
@@ -198,7 +198,4 @@ export class Animation {
         clearTimeout(this._doneTimeID);
     }
 }
-
-
-
 
