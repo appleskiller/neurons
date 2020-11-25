@@ -7,6 +7,10 @@ import { createElement } from 'neurons-dom';
 import { LoadingMask } from './loadingmask';
 import { errorToMessage } from '../../binding/common/exception';
 
+export interface ILoadingOption {
+    backgroundColor?: string;
+}
+
 export interface ILoadingService {
     load<T>(promiseOrObservable: Promise<T> | ObservableLike<T>, container?: HTMLElement): Promise<T>;
     retryable<T>(retryFunc: IRetryFunction<T>, container?: HTMLElement): Promise<T>;
@@ -30,7 +34,7 @@ export class LoadingService implements ILoadingService {
         });
     }
     private _popupManager: IPopupManager;
-    load<T>(promiseOrObservable: Promise<T> | ObservableLike<T>, container?: HTMLElement): Promise<T> {
+    load<T>(promiseOrObservable: Promise<T> | ObservableLike<T>, container?: HTMLElement, option?: ILoadingOption): Promise<T> {
         return new Promise((resolve, reject) => {
             let popupRef: IPopupRef<any>;
             popupRef = this._popupManager.open(`
@@ -59,7 +63,7 @@ export class LoadingService implements ILoadingService {
             });
         });
     }
-    retryable<T>(retryFunc: IRetryFunction<T>, container?: HTMLElement): Promise<T> {
+    retryable<T>(retryFunc: IRetryFunction<T>, container?: HTMLElement, option?: ILoadingOption): Promise<T> {
         return new Promise((resolve, reject) => {
             let popupRef: IPopupRef<any>;
             let isCanceled = false;
@@ -87,12 +91,14 @@ export class LoadingService implements ILoadingService {
                     popupRef && popupRef.close();
                     reject(new Error('canceled!'));
                 },
+                backgroundColor: option && option.backgroundColor ? option.backgroundColor : '',
             }
             popupRef = this._popupManager.open(`
                 <ne-loading-mask
                     [retryMessage]="retryMessage"
                     [retryFunction]="retryFunction"
                     [cancelFunction]="cancelFunction"
+                    [style.background-color]="backgroundColor"
                 />
             `, {
                 popupMode: 'modal',

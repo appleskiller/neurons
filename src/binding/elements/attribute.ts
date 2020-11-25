@@ -271,8 +271,9 @@ export class NeAttributeElement implements INeAttributeElement {
             }
         });
         Object.keys(styles).forEach(styleName => {
-            styleName = cssProp2Prop(styleName);
-            const value = value2CssValue(styleName, styles[styleName]);
+            // cssName = cssProp2Prop(styleName);
+            // const value = value2CssValue(styleName, styles[styleName]);
+            const value = styles[styleName];
             if (this._hostStyles[styleName] !== value) {
                 this._hostStyles[styleName] = value;
                 this._setStyle(styleName, value);

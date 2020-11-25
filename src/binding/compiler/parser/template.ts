@@ -193,9 +193,10 @@ const contentExpMatcher = {
         result.length = 2;
         result[0] = match[0];
         result[1] = match[0].substr(1);
+        const rest = content.substr(match.index + match[0].length);
         // 处理函数
-        if (result[1].trim().indexOf('(') === 0) {
-            const str = subStringByPaired(result[1]);
+        if (rest.trim().indexOf('(') === 0) {
+            const str = subStringByPaired(rest);
             result[0] = result[0] + str;
             result[1] = result[1] + str;
         }
