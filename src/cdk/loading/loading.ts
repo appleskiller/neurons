@@ -12,8 +12,8 @@ export interface ILoadingOption {
 }
 
 export interface ILoadingService {
-    load<T>(promiseOrObservable: Promise<T> | ObservableLike<T>, container?: HTMLElement): Promise<T>;
-    retryable<T>(retryFunc: IRetryFunction<T>, container?: HTMLElement): Promise<T>;
+    load<T>(promiseOrObservable: Promise<T> | ObservableLike<T>, container?: HTMLElement, option?: ILoadingOption): Promise<T>;
+    retryable<T>(retryFunc: IRetryFunction<T>, container?: HTMLElement, option?: ILoadingOption): Promise<T>;
 }
 export type IRetryFunction<T> = () => Promise<T> | ObservableLike<T>;
 
