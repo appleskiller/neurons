@@ -152,7 +152,8 @@ if (browserGhostEnabled) {
         unRegisterLisener = () => {
             lisener();
             hideLogs()
-        }
+        };
+        return '使用 ctrl + shift + l 组合键查看日志';
     });
     !globalContext.deactiveLogDisplay && (globalContext.deactiveLogDisplay = () => {
         globalContext.logDisplayActived = false;

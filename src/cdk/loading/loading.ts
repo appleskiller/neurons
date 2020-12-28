@@ -70,8 +70,11 @@ export class LoadingService implements ILoadingService {
             const state = {
                 retryMessage: '',
                 retryFunction: () => {
-                    state.retryMessage = '';
-                    popupRef && popupRef.panel.detectChanges();
+                    popupRef && popupRef.panel.changeState({
+                        state: {
+                            retryMessage: '',
+                        }
+                    })
                     asPromise(retryFunc())
                     .then(result => {
                         if (isCanceled) return;
@@ -81,8 +84,11 @@ export class LoadingService implements ILoadingService {
                         if (error && 'status' in error && error.status == 401) {
                             popupRef && popupRef.close();
                         } else {
-                            state.retryMessage = errorToMessage(error);
-                            popupRef && popupRef.panel.detectChanges();
+                            popupRef && popupRef.panel.changeState({
+                                state: {
+                                    retryMessage: errorToMessage(error),
+                                }
+                            })
                         }
                     });
                 },
