@@ -16,6 +16,7 @@ export { SearchInput } from './input/search';
 export { TextArea } from './input/textarea';
 export { CollapsibleList } from './list/collapsiblelist';
 export { List } from './list/list';
+export { TileList } from './list/tilelist';
 export { Tree } from './tree/tree';
 export { SearchableTree } from './tree/searchabletree';
 export { SearchableList } from './list/seachablelist';

@@ -9,7 +9,7 @@ import { theme } from '../style/theme';
 @Binding({
     selector: 'ne-search-input',
     template: `
-        <div [class]="{'ne-search-input': true, 'focused': focus, 'collapsible': collapsible, 'expanded': expanded, 'readonly': readonly, 'disabled': disabled}" (click)="onHostClick($event)">
+        <div [class]="{'ne-search-input': true, 'focused': focus, 'collapsible': collapsible, 'expanded': expanded, 'readonly': readonly, 'disabled': disabled, 'show-clear': showClear}" (click)="onHostClick($event)">
             <ne-icon
                 class="ne-search-input-prefix ne-search-icon"
                 [icon]="searchIcon"

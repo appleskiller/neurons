@@ -89,6 +89,7 @@ export {
     TextArea,
     CollapsibleList,
     List,
+    TileList,
     SearchableList,
     SortableList,
     Tree,

@@ -149,9 +149,9 @@ export class List<T> {
     startIndex: number = 0;
     endIndex: number = 0;
     offset: number = 0;
-    contentHeight: number = 0;
+    contentHeight: number | string = 0;
 
-    private _typicalHeight = undefined;
+    protected _typicalHeight = undefined;
 
     onInit() {
         this.dataProvider = this.dataProvider || [];
@@ -165,7 +165,7 @@ export class List<T> {
             // 重新测量
             this._typicalHeight = undefined;
         }
-        if (changes && ('dataProvider' in changes || 'filterFunction' in changes || 'active' in changes || this._isInvalidTypicalHeight())) {
+        if (changes && ('dataProvider' in changes || 'filterFunction' in changes || 'active' in changes || this._isInvalidTypicalSize())) {
             this._resetDataProvider();
         }
     }
@@ -253,7 +253,7 @@ export class List<T> {
     protected _resetDataProvider() {
         if (!this.active) return;
         if (this.dataProvider.length){
-            if (this._isInvalidTypicalHeight()) {
+            if (this._isInvalidTypicalSize()) {
                 this._measureSize();
             }
             // 过滤
@@ -270,7 +270,7 @@ export class List<T> {
             this.contentHeight = 0;
         }
     }
-    private _resetNativeDataProvider() {
+    protected _resetNativeDataProvider() {
         if (!this.active) return;
         // const scrollBarSize = utils.dom.getScrollbarWidth();
         const containerSize = getMaxHeight(this.container);
@@ -293,7 +293,7 @@ export class List<T> {
         }
         this.sliceDataProvider(this.filteredDataProvider, this.startIndex, this.endIndex);
     }
-    private _measureSize() {
+    protected _measureSize() {
         if (this.content.children.length > 1) {
             const child = this.content.children.item(0);
             const size = child.getBoundingClientRect();
@@ -322,7 +322,7 @@ export class List<T> {
             removeMe(container);
         }
     }
-    private _isInvalidTypicalHeight() {
+    protected _isInvalidTypicalSize() {
         if (this._typicalHeight === 0 || !isDefined(this._typicalHeight) || isNaN(this._typicalHeight)) {
             return true;
         } else {
