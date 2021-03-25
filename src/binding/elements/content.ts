@@ -10,6 +10,9 @@ export class NeContentElement implements INeElement {
     private _fragment = nativeApi.createDocumentFragment();
     private _children = [];
 
+    getTemplateVarible(id: string): HTMLElement | Node | INeElement {
+        return null;
+    }
     attach(): void {
         if (this.destroyed) return;
         if (!this.inited) {

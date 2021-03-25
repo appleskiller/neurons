@@ -95,7 +95,7 @@ export interface ISidePanelOption {
 export function alert(option: IAlertOption): IPopupRef<any> {
     const hideOkButton = 'hideOkButton' in option ? option.hideOkButton : false;
     const hideCancelButton = 'hideCancelButton' in option ? option.hideCancelButton : false;
-    const hideMiddleButton = 'hideMiddleButton' in option ? option.hideMiddleButton : true;
+    const hideMiddleButton = 'hideMiddleButton' in option ? option.hideMiddleButton : !option.middleLabel;
     let btnCount = 0;
     !hideOkButton && (btnCount += 1);
     !hideCancelButton && (btnCount += 1);

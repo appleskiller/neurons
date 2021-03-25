@@ -14,8 +14,7 @@ export function isUISelector(selector: any): boolean {
 
 export function createUIBindingInstance(
     selector: string,
-    providers?: Provider[],
-    parentInjector?: IInjector
+    injector?: IInjector
 ): any {
     const metadata: IBindingMetadata = getUIBindingMetadata(selector);
     let instance;
@@ -24,14 +23,13 @@ export function createUIBindingInstance(
     } else {
         instance = {};
     }
-    injectInstance(instance, metadata, providers, parentInjector);
+    injectInstance(instance, metadata, injector);
     return instance;
 }
 
 export function createAttributeBindingInstance(
     selector: string,
-    providers?: Provider[],
-    parentInjector?: IInjector
+    injector: IInjector
 ): any {
     const metadata: IAttributeBindingMetadata = getAttributeBindingMetadata(selector);
     let instance;
@@ -52,15 +50,14 @@ export function createAttributeBindingInstance(
     } else {
         instance = {};
     }
-    injectInstance(instance, metadata, providers, parentInjector);
+    injectInstance(instance, metadata, injector);
     return instance;
 }
 
 function injectInstance(
     instance: any,
     metadata: IBindingMetadata | IAttributeBindingMetadata,
-    providers?: Provider[],
-    parentInjector?: IInjector
+    injector: IInjector
 ) {
     const emitterRequired = metadata.emitters = metadata.emitters || {};
     const injectRequired = metadata.injects = metadata.injects || {};
@@ -85,8 +82,6 @@ function injectInstance(
         }
     }
     // 填充注入器
-    parentInjector = parentInjector || bindingInjector;
-    const injector = parentInjector.create(providers || []);
     instance.injector = injector;
     // 处理属性注入需求
     if (injectRequired) {

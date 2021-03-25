@@ -69,12 +69,14 @@ export {
     compileStringTemplate,
     renderStringTemplate,
     bindStringTemplate,
+    renderTemplate,
 } from './cdk';
 // -------------------------------------------------------------------
 // components
 // ===================================================================
 export {
     Button,
+    SwitchButton,
     CheckItem,
     HorizontalCheckGroup,
     CheckBox,
@@ -85,11 +87,14 @@ export {
     SvgIcon,
     Input,
     NumberInput,
+    DigitNumberInput,
     SearchInput,
+    RenameInput,
     TextArea,
     CollapsibleList,
     List,
     TileList,
+    InfiniteTileList,
     SearchableList,
     SortableList,
     Tree,

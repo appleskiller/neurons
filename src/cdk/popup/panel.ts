@@ -5,7 +5,7 @@ import { Binding, Property, Element, Emitter, Inject } from '../../binding/facto
 import { bindingFactory } from '../../binding/factory/factory';
 import { Animation } from '../animation';
 import { BINDING_TOKENS } from '../../binding/factory/injector';
-import { IEmitter } from 'neurons-emitter';
+import { emitter, EventEmitter, IEmitter } from 'neurons-emitter';
 import { isBrowser, isDefined, geometry } from 'neurons-utils';
 import { getPixel, value2CssValue } from 'neurons-dom';
 
@@ -48,7 +48,7 @@ const defaultPopupPosition = {
             <div #container [class]="{
                 'ne-popup-panel-content': true,
                 'ne-animation': animationEnter,
-                'ne-animation-fade': true,
+                'ne-animation-fade': !disableFadeInOut,
                 'ne-animation-enter': animationEnter,
                 'ne-animation-done': animationDone,
                 'ne-animation-fast': animationFast,
@@ -94,6 +94,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
     @Property() panelClass = '';
     @Property() autoClose = true;
     @Property() disableAnimation = false;
+    @Property() disableFadeInOut = false;
     @Property() shakeup = false;
     @Property() isInternalPopup = false;
     @Property() source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T> = null;
@@ -101,10 +102,11 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
     @Property() state: T = null;
     @Property() width: number | string = undefined;
     @Property() height: number | string = undefined;
+    @Property() onBeforeOpen: (popupRef: IPopupRef<any>) => void;
     
     @Property() popupMode: PopupMode = null;
     @Property() position: PopupPosition = null;
-    @Property() connectElement?: HTMLElement | MouseEvent = null;
+    @Property() connectElement?: HTMLElement | MouseEvent | IElementRef = null;
     
     @Property() show?: boolean = false;
 
@@ -113,6 +115,10 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
     @Element('viewElement') viewElement;
 
     @Emitter() hidden: IEmitter<void>;
+
+    @Emitter() opened: IEmitter<void>;
+    @Emitter() beforeClose: IEmitter<void>;
+    @Emitter() closed: IEmitter<void>;
     
     animationEnter = false;
     animationDone = false;
@@ -132,9 +138,72 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
     private _destroyed;
     private _showen = false;
 
+    @Inject(TOKENS.POPUP_REF) popupRef: IPopupRef<any>;
     @Inject(BINDING_TOKENS.ELEMENT_REF) elementRef: IElementRef;
     @Inject(BINDING_TOKENS.CHANGE_DETECTOR) changeDetector: IChangeDetector;
 
+    onInit() {
+        this._scrollListen = nativeApi.onHTMLScroll(() => {
+            if (!this._showen) return;
+            this._updatePosition();
+            this.changeDetector.detectChanges();
+        });
+    }
+    onChanges(changes?: StateChanges) {
+        if (this.show) {
+            this._show();
+        } else {
+            this._hide();
+        }
+    }
+    onResize() {
+        if (!this.animationDone) {
+            this._updateAnimationType();
+        }
+        this._updatePosition();
+    }
+    onDestroy() {
+        this._destroyed = true;
+        this._scrollListen && this._scrollListen();
+    }
+    getContainerStyles() {
+        if (!this._showen) return {};
+        const popupMode = this.popupMode || PopupMode.modal;
+        let position = this.position || defaultPopupPosition[popupMode] || PopupPosition.center;
+        if (popupMode === PopupMode.dropdown) {
+            return {
+                'top': this.relativeTop,
+                'left': this.relativeLeft,
+                'minWidth': this.relativeMinWidth,
+                'width': this.relativeWidth
+            };
+        } else if (popupMode === PopupMode.tooltip) {
+            return {
+                'top': this.relativeTop,
+                'left': this.relativeLeft,
+                'minWidth': this.relativeMinWidth,
+                'width': this.relativeWidth
+            };
+        } else if (popupMode === PopupMode.sidepanel) {
+            return {
+                'top': this.relativeTop,
+                'left': this.relativeLeft,
+                'minWidth': this.relativeMinWidth,
+                'width': this.relativeWidth,
+                'minHeight': this.relativeMinHeight,
+                'height': this.relativeHeight,
+            };
+        } else {
+            return {
+                'top': this.relativeTop,
+                'left': this.relativeLeft,
+                'minWidth': this.relativeMinWidth,
+                'width': this.relativeWidth,
+                'minHeight': this.relativeMinHeight,
+                'height': this.relativeHeight,
+            };
+        }
+    }
     private _updateAnimationType() {
         const popupMode = this.popupMode || PopupMode.modal;
         let position = this.position ||  defaultPopupPosition[popupMode] || PopupPosition.center;
@@ -192,82 +261,24 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             this.animationType = '';
         }
     }
-    getContainerStyles() {
-        if (!this._showen) return {};
-        const popupMode = this.popupMode || PopupMode.modal;
-        let position = this.position || defaultPopupPosition[popupMode] || PopupPosition.center;
-        if (popupMode === PopupMode.dropdown) {
-            return {
-                'top': this.relativeTop,
-                'left': this.relativeLeft,
-                'minWidth': this.relativeMinWidth,
-                'width': this.relativeWidth
-            };
-        } else if (popupMode === PopupMode.tooltip) {
-            return {
-                'top': this.relativeTop,
-                'left': this.relativeLeft,
-                'minWidth': this.relativeMinWidth,
-                'width': this.relativeWidth
-            };
-        } else if (popupMode === PopupMode.sidepanel) {
-            return {
-                'top': this.relativeTop,
-                'left': this.relativeLeft,
-                'minWidth': this.relativeMinWidth,
-                'width': this.relativeWidth,
-                'minHeight': this.relativeMinHeight,
-                'height': this.relativeHeight,
-            };
-        } else {
-            return {
-                'top': this.relativeTop,
-                'left': this.relativeLeft,
-                'minWidth': this.relativeMinWidth,
-                'width': this.relativeWidth,
-                'minHeight': this.relativeMinHeight,
-                'height': this.relativeHeight,
-            };
-        }
-    }
-    onInit() {
-        this._scrollListen = nativeApi.onHTMLScroll(() => {
-            if (!this._showen) return;
-            this._updatePosition();
-            this.changeDetector.detectChanges();
-        });
-    }
-    onChanges(changes?: StateChanges) {
-        if (this.show) {
-            this._show();
-        } else {
-            this._hide();
-        }
-    }
-    onResize() {
-        this._updatePosition();
-    }
-    onDestroy() {
-        this._destroyed = true;
-        this._scrollListen && this._scrollListen();
-    }
     private _show() {
         if (this._showen) return;
         this._showen = true;
         // 某些需要检测size的子视图会需要在套用animation type之前进行测量。
+        this.onBeforeOpen && this.onBeforeOpen(this.popupRef);
         this.changeDetector.detectChanges();
         this._updateAnimationType();
         this._updatePosition();
 
         this._cancelAnimation = Animation.start({
-            duration: 180,
+            duration: this.disableFadeInOut ? 0 : 180,
             onEnter: () => {
                 this.animationEnter = true;
                 this.animationDone = true;
+                this.opened.emit();
                 this.changeDetector.detectChanges();
             },
             onDone: () => {
-                
             },
         });
     }
@@ -275,14 +286,16 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         this._cancelAnimation && this._cancelAnimation();
         if (!this._showen) return;
         this._cancelAnimation = Animation.start({
-            duration: 120,
+            duration: this.disableFadeInOut ? 0 : 120,
             onEnter: () => {
                 this.animationDone = false;
                 this.animationFast = true;
+                this.beforeClose.emit();
                 this.changeDetector.detectChanges();
             },
             onDone: () => {
                 this._showen = false;
+                this.closed.emit();
                 this.hidden.emit();
             },
         });
@@ -397,7 +410,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             this.relativeWidth = '';
         }
     }
-    private _getConnectBoundingBox(connectElement: HTMLElement | MouseEvent) {
+    private _getConnectBoundingBox(connectElement: HTMLElement | MouseEvent | IElementRef) {
         if (!connectElement) {
             if (!this.popupContainer) {
                 return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
@@ -407,13 +420,15 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         }
         if ('nodeType' in connectElement) {
             return (this.connectElement as HTMLElement).getBoundingClientRect();
+        } else if ((this.connectElement as IElementRef).isElementRef) {
+            return (this.connectElement as IElementRef).getBoundingClientRect();
         } else {
             const e: MouseEvent = this.connectElement as MouseEvent;
             return { left: e.clientX - 12, top: e.clientY - 12, width: 24, height: 24 };
         }
     }
     // 计算相对connectElement的弹出位置，如果指定一侧空间不足则默认推向另外一侧
-    private _calcDropdownRelativePosition(position, connectElement: HTMLElement | MouseEvent, connectPosition) {
+    private _calcDropdownRelativePosition(position, connectElement: HTMLElement | MouseEvent | IElementRef, connectPosition) {
         const offset = 0;
         const box = this._getConnectBoundingBox(connectElement);
         const width = window.innerWidth;
@@ -489,7 +504,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             relativeWidth: relativeWidth,
         }
     }
-    private _calcTooltipRelativePosition(position, connectElement: HTMLElement | MouseEvent, connectPosition) {
+    private _calcTooltipRelativePosition(position, connectElement: HTMLElement | MouseEvent | IElementRef, connectPosition) {
         const offset = 0;
         const box = this._getConnectBoundingBox(connectElement);
         const width = window.innerWidth;
@@ -565,7 +580,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         }
     }
     // 计算侧面板的位置，如果不指定宽度或高度，则横向撑满或纵向撑满
-    private _calcSidepanelRelativePosition(position, connectElement: HTMLElement | MouseEvent, connectPosition) {
+    private _calcSidepanelRelativePosition(position, connectElement: HTMLElement | MouseEvent | IElementRef, connectPosition) {
         const offset = 0;
         const box = this._getConnectBoundingBox(connectElement);
         const isWidthDefined = isDefined(this.width);
@@ -624,7 +639,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             relativeHeight: relativeHeight,
         }
     }
-    private _calcModalRelativePosition(position, connectElement: HTMLElement | MouseEvent, connectPosition) {
+    private _calcModalRelativePosition(position, connectElement: HTMLElement | MouseEvent | IElementRef, connectPosition) {
         const offset = 0;
         const box = this._getConnectBoundingBox(connectElement);
         const isWidthDefined = isDefined(this.width);
@@ -694,9 +709,10 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
         option?: IPopupOption<T>,
         isInternalPopup = false
     ) {
+        option = option || {};
         this._placeholder = nativeApi.createComment();
         nativeApi.appendChild(this._container, this._placeholder);
-        const state = (option || {}) as PopupPanelState<T>;
+        const state = option as PopupPanelState<T>;
         state.source = source;
         state.popupContainer = this._container;
         state.isInternalPopup = isInternalPopup;
@@ -707,14 +723,16 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
             position: state.position,
             width: state.width,
             height: state.height,
+            onBeforeOpen: state.onBeforeOpen,
             isInternalPopup: isInternalPopup,
-        }
+        };
         this._ref = bindingFactory.create(PopupPanelState, state, {
             '[popupContainer]': 'popupContainer',
             '[panelClass]': 'panelClass',
             '[autoClose]': 'autoClose',
             '[isInternalPopup]': 'isInternalPopup',
             '[disableAnimation]': 'disableAnimation',
+            '[disableFadeInOut]': 'disableFadeInOut',
             '[binding]': 'binding',
             '[state]': 'state',
             '[source]': 'source',
@@ -725,23 +743,37 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
             '[connectElement]': 'connectElement',
             '[show]': 'show',
             '[shakeup]': 'shakeup',
-            '(hidden)': 'onHidden()'
-        }, [{
+            '[onBeforeOpen]': 'onBeforeOpen',
+            '(hidden)': 'onHidden()',
+            '(opened)': 'onOpened()',
+            '(beforeClose)': 'onBeforeClose()',
+            '(closed)': 'onClosed()',
+        }, (option.providers || []).concat([{
             token: TOKENS.POPUP_REF,
             use: this._popupRef
-        }]);
+        }]), null, option.parentInjector);
     }
     private _ref: IBindingRef<PopupPanelState<T>>;
     private _placeholder;
     private _destroyed = false;
     private _oriState: IPopupPanelState = {};
+
+    private _nativeEmitter: EventEmitter = new EventEmitter();
+    opened: IEmitter<void> = emitter('onOpened', this._nativeEmitter);
+    beforeClose: IEmitter<void> = emitter('onBeforeClose', this._nativeEmitter);
+    closed: IEmitter<void> = emitter('onClosed', this._nativeEmitter);
+
     appear() {
         if (this._destroyed) return;
         this._ref.setState({
             show: true,
             onHidden: () => {
                 this._ref.destroy();
-            }
+                this._nativeEmitter.off();
+            },
+            onOpened: () => { this.opened.emit(); },
+            onBeforeClose: () => { this.beforeClose.emit(); },
+            onClosed: () => { this.closed.emit(); },
         })
         this._ref.attachTo(this._placeholder);
     }

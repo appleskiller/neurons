@@ -264,6 +264,9 @@ export class List<T> {
             }
             this._resetNativeDataProvider();
         } else {
+            if (this.filteredDataProvider.length) {
+                this.filteredDataProvider = [];
+            }
             if (this.nativeDataProvider.length) {
                 this.nativeDataProvider = [];
             }

@@ -1,6 +1,6 @@
 import { IEmitter } from 'neurons-emitter';
-import { BindingSelector, BindingTemplate, IUIStateStatic, IBindingDefinition, StateObject } from '../../binding/common/interfaces';
-import { ClassLike } from 'neurons-injector';
+import { BindingSelector, BindingTemplate, IUIStateStatic, IBindingDefinition, StateObject, IElementRef } from '../../binding/common/interfaces';
+import { ClassLike, IInjector, Provider } from 'neurons-injector';
 
 export const TOKENS = {
     POPUP_REF: 'POPUP_REF'
@@ -58,9 +58,11 @@ export interface IPopupOptionBase {
     width?: number | string;
     height?: number | string;
     popupContainer?: HTMLElement;
-    connectElement?: HTMLElement | MouseEvent;
+    connectElement?: HTMLElement | MouseEvent | IElementRef;
     binding?: IBindingDefinition;
     state?: StateObject;
+    providers?: Provider[];
+    parentInjector?: IInjector;
 
     requirements?: ClassLike[];
 }
@@ -71,9 +73,11 @@ export interface IPopupOption<T extends StateObject> extends IPopupOptionBase {
     overlayBackgroundColor?: string;
     autoClose?: boolean;
     disableClose?: boolean;
-    canBeClosed?: () => boolean;
     disableAnimation?: boolean;
+    disableFadeInOut?: boolean;
     popupMode?: 'modal' | 'dropdown' | 'tooltip' | string;
+    canBeClosed?: () => boolean;
+    onBeforeOpen?: (popupRef: IPopupRef<any>) => void;
 }
 
 export interface IPopupPanelState {
@@ -86,6 +90,7 @@ export interface IPopupPanelState {
     height?: number | string;
     binding?: IBindingDefinition;
     state?: StateObject;
+    onBeforeOpen?: (popupRef: IPopupRef<any>) => void;
 }
 
 export interface IToolTipOption extends IPopupOptionBase {
@@ -104,6 +109,9 @@ export interface IPopupOverlayRef<T extends StateObject> {
 }
 
 export interface IPopupPanelRef<T extends StateObject> {
+    opened: IEmitter<void>;
+    beforeClose: IEmitter<void>;
+    closed: IEmitter<void>;
     shakeup();
     appear();
     disappear();

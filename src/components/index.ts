@@ -1,7 +1,8 @@
 import { ISVGIcon } from 'neurons-dom/dom/element';
-import { checkbox_uncheck, checkbox_check, radio_uncheck, radio_check, caret_down, search, times, check, empty_icon, toggle_on, toggle_off, ellipsis_h, arrow_up, arrow_down, arrow_left, arrow_right, image, file, download_file, import_icon, hint_icon, page_first, page_last, page_previous, page_next } from './icon/icons';
+import { setting, checkbox_uncheck, checkbox_check, radio_uncheck, radio_check, caret_down, search, edit, times, check, empty_icon, toggle_on, toggle_off, ellipsis_h, arrow_up, arrow_down, arrow_left, arrow_right, image, file, download_file, import_icon, hint_icon, page_first, page_last, page_previous, page_next, loop } from './icon/icons';
 
 export { Button } from "./button/button";
+export { SwitchButton } from "./button/switchbutton";
 export { CheckItem } from './check/check';
 export { HorizontalCheckGroup } from './check/checkhgroup';
 export { CheckBox } from './checkbox/checkbox';
@@ -12,11 +13,13 @@ export { DropDownTrigger } from './dropdown/trigger';
 export { SvgIcon } from './icon/svgicon';
 export { Input } from './input/input';
 export { NumberInput } from './input/number';
+export { DigitNumberInput } from './input/digitnumber';
 export { SearchInput } from './input/search';
+export { RenameInput } from './input/rename';
 export { TextArea } from './input/textarea';
 export { CollapsibleList } from './list/collapsiblelist';
 export { List } from './list/list';
-export { TileList } from './list/tilelist';
+export { TileList, InfiniteTileList } from './list/tilelist';
 export { Tree } from './tree/tree';
 export { SearchableTree } from './tree/searchabletree';
 export { SearchableList } from './list/seachablelist';
@@ -43,6 +46,7 @@ export const icons = {
     search: search,
     times: times,
     check: check,
+    edit: edit,
     empty_icon: empty_icon,
     toggle_on: toggle_on,
     toggle_off: toggle_off,
@@ -60,6 +64,8 @@ export const icons = {
     page_last: page_last,
     page_previous: page_previous,
     page_next: page_next,
+    setting: setting,
+    loop: loop,
 };
 export { theme } from './style/theme';
 

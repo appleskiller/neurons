@@ -43,7 +43,13 @@ export class NeDynamicElement implements INeElement {
     private _providers: Provider[];
 
     private _fragment = nativeApi.createDocumentFragment();
-    private _dirtyChanges = {}
+    private _dirtyChanges = {};
+    getTemplateVarible(id: string): HTMLElement | Node | INeElement {
+        if (this._bindingRef) {
+            return this._bindingRef.getTemplateVarible(id);
+        }
+        return null;
+    }
     detectChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         if (!this.inited) {

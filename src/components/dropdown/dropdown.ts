@@ -104,7 +104,12 @@ export class DropDownButton<T> {
 @Binding({
     selector: 'ne-dropdown-list',
     template: `
-        <div #trigger [class]="{'ne-dropdown-list-trigger': true, 'opened': opened, 'invalid': invalid}" [title]="label" (click)="onClick($event)">
+        <div #trigger [class]="{'ne-dropdown-list-trigger': true, 'opened': opened, 'invalid': invalid}"
+            [title]="label"
+            [class.disabled]="disabled"
+            [class.readonly]="readonly"
+            (click)="onClick($event)"
+        >
             <div class="ne-dropdown-list-trigger-inffix"><div>{{label}}</div></div>
             <ne-icon class="ne-dropdown-trigger-icon" [icon]="caretIcon"></ne-icon>
         </div>
@@ -120,15 +125,27 @@ export class DropDownButton<T> {
             border: solid 1px transparent;
             border-radius: 4px;
             background-color: rgba(125, 125, 125, 0.12);
-            transition: ${theme.transition.normal('background-color', 'border-color')};
+            transition: ${theme.transition.normal('background-color', 'border-color', 'opacity')};
             box-sizing: border-box;
         }
         .ne-dropdown-list-trigger:hover {
             background-color: rgba(125, 125, 125, 0.12);
         }
-        .ne-dropdown-list-trigger.opened,
+        .ne-dropdown-list-trigger.opened {
+            background-color: rgba(125, 125, 125, 0.24);
+        }
         .ne-dropdown-list-trigger:active {
             background-color: rgba(125, 125, 125, 0.24);
+        }
+        .ne-dropdown-list-trigger.disabled {
+            cursor: default;
+            opacity: 0.3;
+        }
+        .ne-dropdown-list-trigger.readonly {
+            cursor: default;
+        }
+        .ne-dropdown-list-trigger.readonly .ne-dropdown-trigger-icon {
+            display: none;
         }
         .ne-dropdown-list-trigger .ne-dropdown-trigger-icon {
             position: absolute;
@@ -182,6 +199,7 @@ export class DropDownList<T> {
     @Property() caretIcon = caret_down;
     
     @Property() disabled: boolean = false;
+    @Property() readonly: boolean = false;
     @Property() required = false;
     @Property() active = true;
     @Property() searchableThreshold = 20;
@@ -196,6 +214,7 @@ export class DropDownList<T> {
     @Property() itemRenderer: IItemStateStatic<T> = DefaultItemState;
     @Property() dropdownClass: string = '';
     @Property() dropdownOverlayClass: string = '';
+    @Property() dropdownPosition: string = 'bottomLeft';
     
     @Emitter() selectionChange: IEmitter<ISelectionChangeEvent<T>>;
     @Emitter() selectedItemChange: IEmitter<T>;
@@ -217,6 +236,7 @@ export class DropDownList<T> {
     }
     onClick(e) {
         if (this.disabled) return;
+        if (this.readonly) return;
         if (this.enableMultiSelection) {
             this.openMultiSelectionList();
         } else {
@@ -253,7 +273,7 @@ export class DropDownList<T> {
         const ref = popupManager.open(clazz, {
             connectElement: this.trigger,
             popupMode: 'dropdown',
-            position: 'bottomLeft',
+            position: this.dropdownPosition || 'bottomLeft',
             panelClass: `${this.dropdownClass} ne-dropdown-popup-list ${extraClass}`,
             overlayClass: this.dropdownOverlayClass,
             binding: {
@@ -313,7 +333,7 @@ export class DropDownList<T> {
         const ref = popupManager.open(clazz, {
             connectElement: this.trigger,
             popupMode: 'dropdown',
-            position: 'bottomLeft',
+            position: this.dropdownPosition || 'bottomLeft',
             panelClass: `${this.dropdownClass} ne-dropdown-popup-list ${extraClass}`,
             overlayClass: this.dropdownOverlayClass,
             binding: {

@@ -25,7 +25,6 @@ export class PopupRef<T extends StateObject> implements IPopupRef<T> {
         this.overlay = this._attachOverlay(this._container, this.option, this.isInternalPopup);
         this.panel = this._attachPanel(this._container, source, this.option, this.isInternalPopup);
         this.overlay.appear();
-        this.panel.appear();
         this.overlay.onClick.listen(() => {
             if (!this.option.disableClose) {
                 // 检查是否可关闭的函数
@@ -42,16 +41,27 @@ export class PopupRef<T extends StateObject> implements IPopupRef<T> {
                 this.panel.shakeup();
             }
         });
-        this.overlay.onAppeared.listen(() => {
+        this.panel.opened.listen(() => {
             this.onOpened.emit(this);
         });
-        this.overlay.onDispear.listen(() => {
+        this.panel.beforeClose.listen(() => {
             this.onClose.emit(this);
         });
-        this.overlay.onDispeared.listen(() => {
+        this.panel.closed.listen(() => {
             this.onClosed.emit(this);
             this._nativeEmitter.off();
         });
+        this.panel.appear();
+        // this.overlay.onAppeared.listen(() => {
+        //     this.onOpened.emit(this);
+        // });
+        // this.overlay.onDispear.listen(() => {
+        //     this.onClose.emit(this);
+        // });
+        // this.overlay.onDispeared.listen(() => {
+        //     this.onClosed.emit(this);
+        //     this._nativeEmitter.off();
+        // });
     }
     updatePosition(connectElement?: HTMLElement | MouseEvent): void {
         this.panel.updatePosition(connectElement);

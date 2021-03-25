@@ -108,6 +108,7 @@ export interface INeElement {
     readonly placeholder: Node;
     readonly attached: boolean;
 
+    getTemplateVarible(id: string): HTMLElement | Node | INeElement;
     find(fn: (element: Node) => boolean): Node;
     children(): HTMLElement[];
 
@@ -248,6 +249,8 @@ export interface IBindingRef<T> {
 }
 
 export interface IElementRef {
+    isElementRef: boolean;
+    element(id: string): Node | HTMLElement | IElementRef;
     hasAttached(): boolean;
     attach(): IElementRef;
     detach(): IElementRef;

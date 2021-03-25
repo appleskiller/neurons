@@ -1,4 +1,4 @@
-import { Injector, Provider } from 'neurons-injector';
+import { IInjector, Injector, Provider } from 'neurons-injector';
 import { IChangeDetector, INeElement, INeBindingRef } from '../common/interfaces';
 import { wrapElement2ElementRef, wrapBindingRef2ElementRef } from '../refs/element';
 import { isArray } from 'neurons-utils';
@@ -6,9 +6,10 @@ import { isArray } from 'neurons-utils';
 export const BINDING_TOKENS = {
     ELEMENT_REF: 'ELEMENT_REF',
     CHANGE_DETECTOR: 'CHANGE_DETECTOR',
+    INJECTOR: 'INJECTOR',
 }
 
-export function buildinBindingProviders(bindingRef: INeBindingRef): Provider[] {
+export function buildinBindingProviders(bindingRef: INeBindingRef, injector: IInjector): Provider[] {
     return [
     {
         token: BINDING_TOKENS.ELEMENT_REF,
@@ -18,6 +19,9 @@ export function buildinBindingProviders(bindingRef: INeBindingRef): Provider[] {
         use: <IChangeDetector>{
             detectChanges: (recursive: boolean = false) => bindingRef.detectChanges(recursive)
         }
+    }, {
+        token: BINDING_TOKENS.INJECTOR,
+        use: injector
     }];
 }
 

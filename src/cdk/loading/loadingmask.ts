@@ -2,7 +2,7 @@ import { Binding, Inject, BINDING_TOKENS, Element, Property } from '../../bindin
 import { IChangeDetector, IElementRef } from '../../binding/common/interfaces';
 import { errorToMessage } from '../../binding/common/exception';
 import { removeMe } from 'neurons-dom';
-import { Button } from '../../components';
+import { Button } from '../../components/button/button';
 
 @Binding({
     selector: 'ne-loading-mask',

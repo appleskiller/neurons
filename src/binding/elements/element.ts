@@ -62,6 +62,12 @@ export class NeElement implements INeElement {
 
     private _fragment = nativeApi.createDocumentFragment();
     private _dirtyChanges: INeElementChanges = { attributes: {}, events: {}, inputs: {}, outputs: {}, twoWays: {}, attrs: {}, classes: {}, styles: {}, listeners: {} };
+    getTemplateVarible(id: string): HTMLElement | Node | INeElement {
+        if (this._bindingRef) {
+            return this._bindingRef.getTemplateVarible(id);
+        }
+        return null;
+    }
     detectChanges(recursive: boolean = false) {
         if (this.destroyed) return;
         if (!this.inited) {

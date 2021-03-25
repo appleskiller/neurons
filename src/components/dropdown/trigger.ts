@@ -18,7 +18,11 @@ import { ClassLike } from 'neurons-injector';
 @Binding({
     selector: 'ne-dropdown-trigger',
     template: `
-        <div #trigger [class]="{'ne-dropdown-trigger': true, 'opened': _opened, 'invalid': invalid}" [title]="label || placeholder" (click)="onClick($event)">
+        <div #trigger [class]="{'ne-dropdown-trigger': true, 'opened': _opened, 'invalid': invalid}"
+            [title]="label || placeholder"
+            [class.disabled]="disabled"
+            (click)="onClick($event)"
+        >
             <div class="ne-dropdown-trigger-inffix"><div>{{label || placeholder}}</div></div>
             <ne-icon class="ne-dropdown-trigger-icon" [icon]="caretIcon"></ne-icon>
         </div>
@@ -34,10 +38,11 @@ import { ClassLike } from 'neurons-injector';
             border: solid 1px transparent;
             border-radius: 4px;
             background-color: rgba(125, 125, 125, 0.12);
-            transition: ${theme.transition.normal('background-color', 'border-color')};
+            transition: ${theme.transition.normal('background-color', 'border-color', 'opacity')};
             box-sizing: border-box;
         }
-        .ne-dropdown-trigger[disabled] {
+        .ne-dropdown-trigger.disabled {
+            cursor: default;
             opacity: 0.3;
         }
         .ne-dropdown-trigger:hover {
@@ -72,9 +77,10 @@ import { ClassLike } from 'neurons-injector';
         SvgIcon,
     ]
 })
-export class DropDownTrigger<T> {
+export class DropDownTrigger {
     @Property() caretIcon = caret_down;
     @Property() disabled: boolean = false;
+    @Property() invalid: boolean = false;
     @Property() label = '';
     @Property() placeholder: string = '请选择...';
     @Property() openFunction: (container: HTMLElement, popupRef: IPopupRef<any>) => IBindingRef<any>;
@@ -99,7 +105,7 @@ export class DropDownTrigger<T> {
 
     private _popupRef: IPopupRef<any>;
 
-    onChanges() {
+    onChanges(changes) {
         
     }
     onDestroy() {
@@ -109,6 +115,7 @@ export class DropDownTrigger<T> {
         if (this.disabled) return;
         this._popupRef && this._popupRef.close();
         const container = createElement('div', 'ne-dropdown-trigger-panel');
+        let innerPanel: IBindingRef<any>;
         const ref = popupManager.open(container, {
             connectElement: this.trigger,
             panelClass: `ne-dropdown-trigger-popup ${this.panelClass || ''}`,
@@ -121,11 +128,12 @@ export class DropDownTrigger<T> {
             disableClose: this.disableClose,
             width: this.width,
             height: this.height,
+            onBeforeOpen: (popupRef: IPopupRef<any>) => {
+                innerPanel = this.openFunction ? this.openFunction(container, popupRef) : null;
+            }
         });
-        let innerPanel: IBindingRef<any>;
         ref.onOpened.listen(() => {
             this._opened = true;
-            innerPanel = this.openFunction ? this.openFunction(container, ref) : null;
             this.opened.emit();
             ref.updatePosition();
             this.changeDetector.detectChanges();

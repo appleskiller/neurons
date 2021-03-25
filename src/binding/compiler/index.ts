@@ -57,7 +57,7 @@ export function bindTemplate(
 ): INeBindingRef {
     const tpl = compile(template);
     let injector = parentInjector || bindingInjector;
-    providers && (injector = injector.create(providers));
+    injector = injector.create(providers);
     const ref = new NeBindingRef(tpl.constructorStack, parent, injector, null, skipError);
     // 如果为简单模板则直接执行绑定
     ref.isPlainTemplate && ref.bind({});
@@ -74,7 +74,7 @@ export function bindSelector(
 ) {
     const tpl = compileSelector(selector, hostBinding);
     let injector = parentInjector || bindingInjector;
-    providers && (injector = injector.create(providers));
+    injector = injector.create(providers);
     const ref = new NeBindingRef(tpl.constructorStack, parent, injector, null, skipError);
     return ref;
 }
@@ -90,7 +90,7 @@ export function bindElement(
     const constructorStack = [];
     processElement(element, hostBinding, constructorStack);
     let injector = parentInjector || bindingInjector;
-    providers && (injector = injector.create(providers));
+    injector = injector.create(providers);
     const ref = new NeBindingRef(constructorStack, parent, injector, null, skipError);
     return ref;
 }
@@ -352,12 +352,13 @@ function createAttributEBindingRefFactory(
             const constructorStack = [];
             processElement(hostElement, hostBinding, constructorStack);
             let injector = parentInjector || bindingInjector;
-            providers && (injector = injector.create(providers));
+            injector = injector.create(providers);
             const ref = hostElement instanceof Node
                 ? new NeAttributeBindingRef(constructorStack, hostElement, hostBindingRef, injector, null, skipError)
                 : null; // TODO
-            const buildInProviders = buildinBindingProviders(ref);
-            const instance = createAttributeBindingInstance(selector, buildInProviders, injector);
+            const buildInProviders = buildinBindingProviders(ref, injector);
+            injector.providers(buildInProviders);
+            const instance = createAttributeBindingInstance(selector, injector);
             injectTempalateVaribles(instance, ref);
             ref.bind(instance);
             return ref;
@@ -467,13 +468,14 @@ function processUIBindingNode(node: IHTMLASTNode, constructorStack: INeTemplateC
         const factory: IBindingRefFactory = {
             newInstance: (providers?: Provider[]) => {
                 let injector = parentInjector || bindingInjector;
-                providers && (injector = injector.create(providers));
+                injector = injector.create(providers);
                 // binding
                 const tpl = compile(metadata.template);
                 const bindingRef = new NeBindingRef(tpl.constructorStack, parentBindingRef, injector, null, skipError);
                 // injector
-                const buildInProviders = buildinBindingProviders(bindingRef);
-                const instance = createUIBindingInstance(selector, buildInProviders, injector);
+                const buildInProviders = buildinBindingProviders(bindingRef, injector);
+                injector.providers(buildInProviders);
+                const instance = createUIBindingInstance(selector, injector);
                 injectTempalateVaribles(instance, bindingRef);
                 // 绑定
                 bindingRef.bind(instance);
@@ -598,7 +600,7 @@ function processRepeatNode(node: IHTMLASTNode, constructorStack: INeTemplateComp
         const factory: IBindingRefFactory = {
             newInstance: (providers?: Provider[]) => {
                 let injector = parentInjector || bindingInjector;
-                providers && (injector = injector.create(providers));
+                injector = injector.create(providers);
                 return new NeImplicitsBindingRef(stack, bindingRef, injector, hooks, skipError);
             }
         };
@@ -677,7 +679,7 @@ function processIfNode(node: IHTMLASTNode, constructorStack: INeTemplateCompileF
         const factory: IBindingRefFactory = {
             newInstance: (providers?: Provider[]) => {
                 let injector = parentInjector || bindingInjector;
-                providers && (injector = injector.create(providers));
+                injector = injector.create(providers);
                 return new NeImplicitsBindingRef(stack, bindingRef, injector, hooks, skipError);
             }
         };

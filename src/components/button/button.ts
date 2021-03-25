@@ -1,5 +1,4 @@
 import { Binding, Property, Element } from '../../binding/factory/decorator';
-import { StateChanges } from '../../binding/common/interfaces';
 import { theme } from '../style/theme';
 import { uniqueId, color } from 'neurons-utils';
 import { replaceCSSString } from 'neurons-dom';

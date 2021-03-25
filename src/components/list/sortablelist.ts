@@ -1,12 +1,13 @@
 import { List, DefaultItemState } from './list';
-import { Binding, Property, Element, Emitter } from '../../binding/factory/decorator';
+import { Binding, Property, Element, Emitter, Inject } from '../../binding/factory/decorator';
 import { dragManager } from '../../cdk/dragdrop/manager';
-import { bind } from '../../binding';
+import { bind, BINDING_TOKENS } from '../../binding';
 import { IDragSource, DropPosition, DragValidator, DropValidator, DropDetecting, DroppingLifeHook } from '../../cdk/dragdrop/interfaces';
 import { ISVGIcon } from 'neurons-dom/dom/element';
 import { IEmitter } from 'neurons-emitter';
 import { moveIndexTo } from 'neurons-utils';
 import { IBindingRef } from '../../binding/common/interfaces';
+import { IInjector } from 'neurons-injector';
 
 @Binding({
     selector: 'ne-sortable-list-item',
@@ -26,6 +27,7 @@ export class SortableListItemWrapper {
     @Property() functions: any;
 
     @Element('conainer') conainer: HTMLElement;
+    @Inject(BINDING_TOKENS.INJECTOR) injector: IInjector;
 
     private _ref: IBindingRef<any>;
     onInit() {
@@ -58,7 +60,8 @@ export class SortableListItemWrapper {
             this._ref = bind(this.itemRenderer, {
                 container: this.conainer,
                 hostBinding: this.itemRendererBinding,
-                state: this._getState()
+                state: this._getState(),
+                parentInjector: this.injector,
             });
             reseted = true;
         }

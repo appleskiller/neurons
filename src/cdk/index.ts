@@ -15,6 +15,7 @@ export { ThemeManager } from './theme/manager';
 export { bindTheme } from './theme';
 
 export { StringBindingRef, compileStringTemplate, renderStringTemplate, bindStringTemplate } from './stringtemplate';
+export { renderTemplate } from './htmltemplate';
 
 export const themeManager: IThemeManager = new ThemeManager();
 export const loading: ILoadingService = new LoadingService();

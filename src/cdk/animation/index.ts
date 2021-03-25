@@ -1,5 +1,5 @@
 import { Style } from '../../binding/factory/decorator';
-import { isEmpty, requestFrame } from 'neurons-utils';
+import { isDefined, isEmpty, requestFrame } from 'neurons-utils';
 
 export interface IAnimationConfig {
     duration?: number;
@@ -187,7 +187,7 @@ export class Animation {
             this._config.onEnter && this._config.onEnter();
             this._doneTimeID = setTimeout(() => {
                 this._config.onDone && this._config.onDone();
-            }, this._config.duration || 300);
+            }, isDefined(this._config.duration) ? this._config.duration : 300);
         });
         return () => {
             this._cancel();

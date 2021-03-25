@@ -31,6 +31,7 @@ import { ISVGIcon } from 'neurons-dom/dom/element';
             font-size: inherit;
             transition: border-color 280ms cubic-bezier(.4,0,.2,1);
             box-sizing: border-box;
+            transition: ${theme.transition.normal('border', 'color', 'background-color', 'opacity')};
         }
         .ne-number-input[readonly] {
             cursor: default;
@@ -75,6 +76,7 @@ export class NumberInput {
     @Property() readonly: boolean = false;
     @Property() required: boolean = false;
     @Property() disabled: boolean = false;
+    @Property() integer: boolean = false;
     @Property() focus: boolean = false;
     @Property() alwaysTriggerChange: boolean = false;
     @Property() mouseWheel: boolean = true;
@@ -84,6 +86,7 @@ export class NumberInput {
     @Emitter() focusChange: IEmitter<boolean>;
     @Emitter() invalidChange: IEmitter<boolean>;
     @Emitter() change: IEmitter<void>;
+    @Emitter() commit: IEmitter<number | string>;
     
     invalid: boolean = false;
     @Element('input') input: HTMLInputElement;
@@ -91,6 +94,7 @@ export class NumberInput {
     private _inputing = false;
     private _focused = false;
     private _mousewheelEvent = null;
+    private _inputChanged = false;
 
     onDestroy() {
         this._mousewheelEvent && this._mousewheelEvent();
@@ -126,6 +130,7 @@ export class NumberInput {
         }
         if (!changes || 'value' in changes) {
             this._setValue(this.value);
+            this._inputChanged = false;
         }
     }
     onKeyDown(e: KeyboardEvent) {
@@ -142,12 +147,23 @@ export class NumberInput {
     onKeyUp(e: KeyboardEvent) {
         if (e.keyCode == 13) {
             if (!this.invalid && !this.disabled) {
+                this._setValue(this.value);
                 this.enterPressed.emit(e);
+                if (this._inputChanged) {
+                    this._inputChanged = false;
+                    this.commit.emit(this.value);
+                }
             }
         }
     }
     onInputChange(e: KeyboardEvent) {
-        this.input.value = this.input.value.replace(/[^-|.|0-9]/g, '');
+        let value = this.input.value.replace(/[^-|.|0-9]/g, '');
+        const arr = value.split('.');
+        if (arr.length > 2) {
+            arr.length = 2;
+            value = arr.join('.');
+        }
+        this.input.value = value;
         this._setValue(this.input.value);
     }
     onFocus() {
@@ -162,6 +178,7 @@ export class NumberInput {
                     // 滑轮向上
                     this._plus();
                 }
+                e.preventDefault();
             }
         });
         this.focusChange.emit(true);
@@ -172,18 +189,28 @@ export class NumberInput {
         this._mousewheelEvent && this._mousewheelEvent();
         this._setValue(this.input.value);
         this.focusChange.emit(false);
+        if (this._inputChanged) {
+            this._inputChanged = false;
+            this.commit.emit(this.value);
+        }
     }
-    private _plus() {
+    protected setInputValue(value) {
+        this.input.value = (!isDefined(value) || (typeof value === 'number' && isNaN(value))) ? '' : value;
+    }
+    protected _plus() {
         const step = (!this.step && this.step !== 0) ? 1 : parseFloat(this.step as string);
         const value = this.input.value.trim() === '' ? 0 : math.plus(this._toNumber(this.input.value), step);
         this._setValue(this._toNumber(value));
     }
-    private _minus() {
+    protected _minus() {
         const step = (!this.step && this.step !== 0) ? 1 : parseFloat(this.step as string);
         const value = this.input.value.trim() === '' ? 0 : math.minus(this._toNumber(this.input.value), step);
         this._setValue(this._toNumber(value));
     }
-    private _toNumber(value) {
+    protected _toNumber(value) {
+        return !this.integer ? this._toFloat(value) : this._toInt(value);
+    }
+    private _toFloat(value) {
         if (typeof value === 'string') {
             value = value.trim();
             value = value.replace(/[^-|.|0-9]/g, '');
@@ -196,15 +223,25 @@ export class NumberInput {
         }
         return value;
     }
-    private _setValue(value) {
+    private _toInt(value) {
+        if (typeof value === 'string') {
+            value = value.trim();
+            value = value.replace(/[^-|.|0-9]/g, '');
+            value = parseFloat(value);
+        }
+        if (!isNaN(value)) {
+            const max = (!this.max && this.max !== 0) ? Number.POSITIVE_INFINITY : parseFloat(this.max as string);
+            const min = (!this.min && this.min !== 0) ? Number.NEGATIVE_INFINITY : parseFloat(this.min as string);
+            value = parseInt(Math.max(min, Math.min(value, max)) + '');
+        }
+        return value;
+    }
+    protected _setValue(value) {
         let oriValue = value;
-        if (value !== '') {
+        if (!isNaN(value) && isDefined(value) && value !== '') {
             value = this._toNumber(value);
         }
-        if (isNaN(value)) {
-            value = '';
-        }
-        const invalid = (oriValue + '') !== (value + '') || !!this._validateValue(oriValue);
+        const invalid = !!this._validateValue(oriValue);
         // 如果正在输入则保持
         if (this._inputing) {
             this.input.value = (!isDefined(oriValue) || (typeof oriValue === 'number' && isNaN(oriValue))) ? '' : oriValue;
@@ -215,7 +252,7 @@ export class NumberInput {
                 this._changeValue(value);
             }
         } else {
-            this.input.value = (!isDefined(value) || (typeof value === 'number' && isNaN(value))) ? '' : value;
+            this.setInputValue(value);
             this._changeInvalid(invalid);
             this._changeValue(value);
         }
@@ -223,6 +260,7 @@ export class NumberInput {
     private _changeValue(value) {
         if (this.value !== value) {
             this.value = value;
+            this._inputChanged = true;
             this.valueChange.emit(this.value);
             this.change.emit();
         }

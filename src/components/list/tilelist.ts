@@ -1,4 +1,4 @@
-import { createElement, getScrollbarWidth, getSuggestSize, removeMe } from 'neurons-dom';
+import { createElement, getClientHeight, getScrollbarWidth, getSuggestSize, removeMe } from 'neurons-dom';
 import { findAValidValue, isDefined, asPromise } from 'neurons-utils';
 import { ObservableLike } from 'neurons-utils/utils/asyncutils';
 import { IChangeDetector } from '../../binding/common/interfaces';
@@ -164,7 +164,7 @@ export interface IAsyncDataProvider<T> {
 @Binding({
     selector: 'ne-infinite-tile-list',
     template: `
-        <div #container [class]="{'ne-tile-list': true, 'ne-list': true, 'enable-selection': enableSelection}" (scroll)="onScroll($event)">
+        <div #container [class]="{'ne-infinite-tile-list': true, 'ne-tile-list': true, 'ne-list': true, 'enable-selection': enableSelection}" (scroll)="onScroll($event)">
             <div #shim class="ne-list-shim" [style.height]="contentHeight">
                 <div #content class="ne-list-content" [style.top]="offset">
                     <div [class.ne-list-item]="true"
@@ -186,6 +186,15 @@ export interface IAsyncDataProvider<T> {
         </div>
     `,
     style: `
+        .ne-infinite-tile-list {
+            .more-info {
+                position: absolute;
+                height: 20px;
+                width: 100%;
+                bottom: 0;
+                text-align: center;
+            }
+        }
     `,
     requirements: [
         List,
@@ -202,60 +211,93 @@ export class InfiniteTileList extends TileList {
     retry;
 
     private initialLoaded = false;
-    private querying = false;
+    private _querying = false;
+    private _isArriveBottom = false;
     private _destroyed = false;
     onDestroy() {
         this._destroyed = true;
     }
     onChanges(changes) {
         super.onChanges(changes);
-        if ((!changes || 'fetch' in changes) && !!this.fetch) {
-            this.requestDatas();
-        }
+        this.requestDatas();
     }
     onResize() {
         super.onResize();
-        // TODO
+        this._updateScroll();
+    }
+    onScroll(e) {
+        super.onScroll(e);
+        this._updateScroll();
     }
     protected requestDatas() {
         if (this._destroyed) return;
         if (!this.fetch) return;
         const request = () => {
+            this._querying = true;
             this.requestError = false;
-            this.hasMoreMessage = this.initialLoaded ? '正在请求...' : '';
+            this.hasMoreMessage = '';
             asPromise(this.fetch()).then(results => {
                 if (this._destroyed) return;
+                this._querying = false;
                 this.initialLoaded = true;
                 this.requestError = false;
                 this.hasMoreMessage = '';
-                // TODO
+                this.dataProvider = (results || []).concat();
+                this._resetDataProvider();
+                this.cdr.detectChanges();
+                this._updateScroll();
             }).catch(error => {
                 if (this._destroyed) return;
+                this._querying = false;
                 this.requestError = true;
                 this.hasMoreMessage = '查询异常，请点击重试';
                 this.retry = request;
+                this.cdr.detectChanges();
             })
         }
         request();
     }
     protected requestMore() {
         if (this._destroyed) return;
+        if (!this.initialLoaded) return;
+        if (this._querying) return;
         if (!this.more) return;
         const request = () => {
+            this._querying = true;
             this.requestError = false;
-            this.hasMoreMessage = this.initialLoaded ? '正在请求...' : '';
+            this.hasMoreMessage = this.initialLoaded ? '加载中...' : '';
             asPromise(this.more()).then(results => {
-                // TODO
                 if (this._destroyed) return;
+                this._querying = false;
                 this.requestError = false;
                 this.hasMoreMessage = '';
+                this.dataProvider = (this.dataProvider || []).concat(results || []);
+                this._resetDataProvider();
+                this.cdr.detectChanges();
+                this._updateScroll();
             }).catch(error => {
                 if (this._destroyed) return;
+                this._querying = false;
                 this.requestError = true;
                 this.hasMoreMessage = '查询异常，请点击重试';
                 this.retry = request;
+                this.cdr.detectChanges();
             })
         }
         request();
+    }
+    private _updateScroll() {
+        this._isArriveBottom = this.isScrollArriveBottom(this.container);
+        if (this.hasMore && this.hasMore() && this._isArriveBottom) {
+            this.requestMore();
+            this.cdr.detectChanges();
+        }
+    }
+    private isScrollArriveBottom(scrollContainer: HTMLElement) {
+        // 判断距离底部的距离
+        const scrollHight = scrollContainer.scrollHeight;
+        const scrollTop = scrollContainer.scrollTop;
+        const height = getClientHeight(scrollContainer);
+        return scrollTop + height >= scrollHight;
     }
 }

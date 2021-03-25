@@ -11,6 +11,7 @@ import { ISVGIcon } from 'neurons-dom/dom/element';
     template: `<input #input
         [class]="{'ne-input': true, 'invalid': invalid}"
         [placeholder]="placeholder"
+        [maxlength]="maxLength"
         (propertychange)="onInputChange($event)"
         (keydown)="onKeyDown($event)"
         (keyup)="onKeyUp($event)"
@@ -30,6 +31,7 @@ import { ISVGIcon } from 'neurons-dom/dom/element';
             font-size: inherit;
             transition: border-color 280ms cubic-bezier(.4,0,.2,1);
             box-sizing: border-box;
+            transition: ${theme.transition.normal('border', 'color', 'background-color', 'opacity')};
         }
         .ne-input[readonly] {
             cursor: default;
@@ -66,7 +68,7 @@ import { ISVGIcon } from 'neurons-dom/dom/element';
 })
 export class Input {
     @Property() type: string = 'text';
-    @Property() value: string = '';
+    @Property() value: number | string = '';
     @Property() name: string = '';
     @Property() placeholder: string = '';
     @Property() readonly: boolean = false;
@@ -74,23 +76,30 @@ export class Input {
     @Property() disabled: boolean = false;
     @Property() invalid: boolean = false;
     @Property() focus: boolean = false;
+    @Property() selected: boolean = false;
     @Property() autocomplete: boolean = false;
     @Property() alwaysTriggerChange: boolean = false;
     @Property() mouseWheel: boolean = false;
+    @Property() maxLength: number = undefined;
     
     @Emitter() enterPressed: IEmitter<KeyboardEvent>;
-    @Emitter() valueChange: IEmitter<string>;
+    @Emitter() escPressed: IEmitter<KeyboardEvent>;
+    @Emitter() valueChange: IEmitter<number | string>;
     @Emitter() focusChange: IEmitter<boolean>;
     @Emitter() invalidChange: IEmitter<boolean>;
     @Emitter() change: IEmitter<void>;
+    @Emitter() commit: IEmitter<number | string>;
     
     @Element('input') input: HTMLInputElement;
     
     private _inputing = false;
     private _mousewheelEvent = null;
     private _focused = false;
+    private _destroyed = false;
+    private _inputChanged = false;
 
     onDestroy() {
+        this._destroyed = true;
         this._mousewheelEvent && this._mousewheelEvent();
     }
     onChanges(changes?: StateChanges) {
@@ -143,6 +152,10 @@ export class Input {
         }
         if (!changes || 'value' in changes) {
             this._setValue(this.value);
+            this._inputChanged = false;
+        }
+        if (!changes || 'selected' in changes) {
+            this._laterUpdateSelected();
         }
     }
     onInputChange(e: KeyboardEvent) {
@@ -160,6 +173,7 @@ export class Input {
                     // 滑轮向上
                     this._plus();
                 }
+                e.preventDefault();
             }
         });
         this.focusChange.emit(true);
@@ -168,8 +182,12 @@ export class Input {
         this._focused = false;
         this._inputing = false;
         this._mousewheelEvent && this._mousewheelEvent();
-        this._setValue(this.input.value);
+        this._inputChanged && this._setValue(this.input.value);
         this.focusChange.emit(false);
+        if (this._inputChanged) {
+            this._inputChanged = false;
+            this.commit.emit(this.value);
+        }
     }
     onKeyDown(e: KeyboardEvent) {
         if (e.keyCode == 38) {
@@ -183,13 +201,19 @@ export class Input {
         }
     }
     onKeyUp(e: KeyboardEvent) {
-        if (e.keyCode == 13) {
-            if (!this.invalid && !this.disabled) {
+        if (!this.invalid && !this.disabled) {
+            if (e.keyCode == 13) {
                 this.enterPressed.emit(e);
+                if (this._inputChanged) {
+                    this._inputChanged = false;
+                    this.commit.emit(this.value);
+                }
+            } else if (e.keyCode === 27) {
+                this.escPressed.emit(e);
             }
         }
     }
-    private _plus() {
+    protected _plus() {
         const rangeText = getCursorSelection(this.input);
         const range = getCursorRange(this.input);
         const numberRange = this._findNumberRange(this.input.value, range, rangeText);
@@ -198,7 +222,7 @@ export class Input {
         replaceCursorTextRange(this.input, value + '', numberRange.range);
         this._setValue(this.input.value);
     }
-    private _minus() {
+    protected _minus() {
         const rangeText = getCursorSelection(this.input);
         const range = getCursorRange(this.input);
         const numberRange = this._findNumberRange(this.input.value, range, rangeText);
@@ -215,7 +239,7 @@ export class Input {
         }
         return value;
     }
-    private _setValue(value) {
+    protected _setValue(value) {
         const oriValue = value;
         const invalid = !!this._validateValue(value);
         // 如果正在输入则保持
@@ -236,6 +260,7 @@ export class Input {
     private _changeValue(value) {
         if (this.value !== value) {
             this.value = value;
+            this._inputChanged = true;
             this.valueChange.emit(this.value);
             this.change.emit();
         }
@@ -286,5 +311,13 @@ export class Input {
             }
         }
         return null;
+    }
+    private _laterUpdateSelected() {
+        setTimeout(() => {
+            if (this._destroyed) return;
+            if (this.selected) {
+                this.input.select();
+            }
+        }, 0);
     }
 }

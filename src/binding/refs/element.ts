@@ -82,6 +82,16 @@ export function wrapElement2ElementRef(
     customElement: INeElement
 ): IElementRef {
     const element: IElementRef = {
+        isElementRef: true,
+        element(id: string): Node | HTMLElement | IElementRef {
+            const element = customElement.getTemplateVarible(id);
+            if (!element) return null;
+            if (element instanceof Node) {
+                return element;
+            } else {
+                return wrapElement2ElementRef(element);
+            }
+        },
         hasAttached: function () {
             return customElement.attached;
         },
@@ -112,6 +122,16 @@ export function wrapBindingRef2ElementRef(
     bindingRef: INeBindingRef
 ): IElementRef {
     const element: IElementRef = {
+        isElementRef: true,
+        element(id: string): Node | HTMLElement | IElementRef {
+            const element = bindingRef.getTemplateVarible(id);
+            if (!element) return null;
+            if (element instanceof Node) {
+                return element;
+            } else {
+                return wrapElement2ElementRef(element);
+            }
+        },
         hasAttached: function () {
             return bindingRef.attached;
         },
