@@ -40,6 +40,7 @@ export interface IDropDownPopupOption<T> {
             bottom: 0px;
             right: 4px;
             width: initial;
+            height: 19px;
             margin: auto;
         }
         .ne-dropdown-button .ne-dropdown-button-inffix {
@@ -124,18 +125,18 @@ export class DropDownButton<T> {
             user-select: none;
             border: solid 1px transparent;
             border-radius: 4px;
-            background-color: rgba(125, 125, 125, 0.12);
+            background-color: ${theme.gray.normal};
             transition: ${theme.transition.normal('background-color', 'border-color', 'opacity')};
             box-sizing: border-box;
         }
         .ne-dropdown-list-trigger:hover {
-            background-color: rgba(125, 125, 125, 0.12);
+            background-color: ${theme.gray.normal};
         }
         .ne-dropdown-list-trigger.opened {
-            background-color: rgba(125, 125, 125, 0.24);
+            background-color: ${theme.gray.heavy};
         }
         .ne-dropdown-list-trigger:active {
-            background-color: rgba(125, 125, 125, 0.24);
+            background-color: ${theme.gray.heavy};
         }
         .ne-dropdown-list-trigger.disabled {
             cursor: default;
@@ -153,6 +154,7 @@ export class DropDownButton<T> {
             bottom: 0px;
             right: 4px;
             width: initial;
+            height: 19px;
             margin: auto;
         }
         .ne-dropdown-list-trigger.invalid {

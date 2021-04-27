@@ -77,7 +77,7 @@ export interface IPopupOption<T extends StateObject> extends IPopupOptionBase {
     disableFadeInOut?: boolean;
     popupMode?: 'modal' | 'dropdown' | 'tooltip' | string;
     canBeClosed?: () => boolean;
-    onBeforeOpen?: (popupRef: IPopupRef<any>) => void;
+    onBeforeOpen?: (popupRef: IPopupRef<any>) => any;
 }
 
 export interface IPopupPanelState {
@@ -90,7 +90,7 @@ export interface IPopupPanelState {
     height?: number | string;
     binding?: IBindingDefinition;
     state?: StateObject;
-    onBeforeOpen?: (popupRef: IPopupRef<any>) => void;
+    onBeforeOpen?: (popupRef: IPopupRef<any>) => any;
 }
 
 export interface IToolTipOption extends IPopupOptionBase {

@@ -12,8 +12,9 @@ import { caret_down } from '../icon/icons';
 import { List, DefaultItemState, defaultLabelFunction } from '../list/list';
 import { SearchableList } from '../list/seachablelist';
 import { theme } from '../style/theme';
-import { isDefined } from 'neurons-utils';
+import { asPromise, isDefined, isObservabeLike, isPromiseLike } from 'neurons-utils';
 import { ClassLike } from 'neurons-injector';
+import { ObservableLike } from 'neurons-utils/utils/asyncutils';
 
 @Binding({
     selector: 'ne-dropdown-trigger',
@@ -61,6 +62,7 @@ import { ClassLike } from 'neurons-injector';
             bottom: 0px;
             right: 4px;
             width: initial;
+            height: 19px;
             margin: auto;
         }
         .ne-dropdown-trigger .ne-dropdown-trigger-inffix {
@@ -83,7 +85,7 @@ export class DropDownTrigger {
     @Property() invalid: boolean = false;
     @Property() label = '';
     @Property() placeholder: string = '请选择...';
-    @Property() openFunction: (container: HTMLElement, popupRef: IPopupRef<any>) => IBindingRef<any>;
+    @Property() openFunction: (container: HTMLElement, popupRef: IPopupRef<any>) => IBindingRef<any> | Promise<IBindingRef<any>> | ObservableLike<IBindingRef<any>>;
     
     @Property() panelClass: string = '';
     @Property() position: string = '';
@@ -104,11 +106,13 @@ export class DropDownTrigger {
     _opened = false;
 
     private _popupRef: IPopupRef<any>;
+    private _destroyed;
 
     onChanges(changes) {
         
     }
     onDestroy() {
+        this._destroyed = true;
         this._popupRef && this._popupRef.close();
     }
     onClick(e) {
@@ -129,7 +133,16 @@ export class DropDownTrigger {
             width: this.width,
             height: this.height,
             onBeforeOpen: (popupRef: IPopupRef<any>) => {
-                innerPanel = this.openFunction ? this.openFunction(container, popupRef) : null;
+                if (this._destroyed) return;
+                const ret = this.openFunction ? this.openFunction(container, popupRef) : null;
+                if (isObservabeLike(ret) || isPromiseLike(ret)) {
+                    return asPromise(ret).then(panel => {
+                        if (this._destroyed) return;
+                        innerPanel = panel;
+                    });
+                } else {
+                    innerPanel = ret as IBindingRef<any>;
+                }
             }
         });
         ref.onOpened.listen(() => {

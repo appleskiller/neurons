@@ -193,6 +193,7 @@ export interface IAsyncDataProvider<T> {
                 width: 100%;
                 bottom: 0;
                 text-align: center;
+                pointer-events: none;
             }
         }
     `,
@@ -214,8 +215,10 @@ export class InfiniteTileList extends TileList {
     private _querying = false;
     private _isArriveBottom = false;
     private _destroyed = false;
+    private _timeID;
     onDestroy() {
         this._destroyed = true;
+        clearTimeout(this._timeID);
     }
     onChanges(changes) {
         super.onChanges(changes);
@@ -232,6 +235,7 @@ export class InfiniteTileList extends TileList {
     protected requestDatas() {
         if (this._destroyed) return;
         if (!this.fetch) return;
+        clearTimeout(this._timeID);
         const request = () => {
             this._querying = true;
             this.requestError = false;
@@ -255,7 +259,7 @@ export class InfiniteTileList extends TileList {
                 this.cdr.detectChanges();
             })
         }
-        request();
+        this._timeID = setTimeout(request, 30);
     }
     protected requestMore() {
         if (this._destroyed) return;

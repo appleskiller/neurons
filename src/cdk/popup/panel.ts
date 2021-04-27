@@ -6,7 +6,7 @@ import { bindingFactory } from '../../binding/factory/factory';
 import { Animation } from '../animation';
 import { BINDING_TOKENS } from '../../binding/factory/injector';
 import { emitter, EventEmitter, IEmitter } from 'neurons-emitter';
-import { isBrowser, isDefined, geometry } from 'neurons-utils';
+import { isBrowser, isDefined, geometry, isObservabeLike, isPromiseLike, asPromise } from 'neurons-utils';
 import { getPixel, value2CssValue } from 'neurons-dom';
 
 const popupPosition2AnimationType = {
@@ -265,7 +265,16 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         if (this._showen) return;
         this._showen = true;
         // 某些需要检测size的子视图会需要在套用animation type之前进行测量。
-        this.onBeforeOpen && this.onBeforeOpen(this.popupRef);
+        const ret = this.onBeforeOpen ? this.onBeforeOpen(this.popupRef) : null;
+        if (isObservabeLike(ret) || isPromiseLike(ret)) {
+            asPromise(ret).then(() => {
+                this._invokeShow();
+            });
+        } else {
+            this._invokeShow();
+        }
+    }
+    private _invokeShow() {
         this.changeDetector.detectChanges();
         this._updateAnimationType();
         this._updatePosition();
