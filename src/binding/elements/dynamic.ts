@@ -170,7 +170,7 @@ export class NeDynamicElement implements INeElement {
         this._bindingRef && this._bindingRef.destroy();
     }
     private _applyChanges(recursive: boolean = false) {
-        if (this.destroyed || isEmpty(this._dirtyChanges)) return;
+        if (this.destroyed) return;
         const dirtyChanges = this._dirtyChanges;
         this._dirtyChanges = {};
         let changed = false, rebind = false;

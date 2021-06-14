@@ -207,7 +207,7 @@ export class DropDownList<T> {
     @Property() searchableThreshold = 20;
     @Property() enableSelection = true;
     @Property() enableMultiSelection = false;
-    @Property() dataProvider: T[] = [];
+    @Property() dataProvider: T[] | (() => T[]) = [];
     @Property() selectedItem: T = undefined;
     @Property() selectedItems: T[] = [];
     @Property() placeholder: string = '请选择...';
@@ -246,11 +246,12 @@ export class DropDownList<T> {
         }
     }
     openMultiSelectionList() {
+        const dataProvider = typeof this.dataProvider === 'function' ? this.dataProvider() : this.dataProvider;
         const state = {
             focus: true, // searchable
             active: this.active,
             enableMultiSelection: this.enableMultiSelection,
-            dataProvider: this.dataProvider,
+            dataProvider: dataProvider,
             selectedItems: this.selectedItems || [],
             labelField: this.labelField,
             labelFunction: this.labelFunction,
@@ -270,8 +271,8 @@ export class DropDownList<T> {
                 this.selectedItemsChange.emit(e);
             },
         }
-        const clazz: any = this._isSearchable() ? this._getSearchableListClass() : this._getListClass();
-        const extraClass = this._isSearchable() ? 'ne-searchable-list-popup' : '';
+        const clazz: any = this._isSearchable(dataProvider) ? this._getSearchableListClass() : this._getListClass();
+        const extraClass = this._isSearchable(dataProvider) ? 'ne-searchable-list-popup' : '';
         const ref = popupManager.open(clazz, {
             connectElement: this.trigger,
             popupMode: 'dropdown',
@@ -304,12 +305,13 @@ export class DropDownList<T> {
         });
     }
     openSingleSelectctionList() {
+        const dataProvider = typeof this.dataProvider === 'function' ? this.dataProvider() : this.dataProvider;
         const state = {
             focus: true, // searchable
             active: this.active,
             enableSelection: this.enableSelection,
             enableMultiSelection: false,
-            dataProvider: this.dataProvider,
+            dataProvider: dataProvider,
             selectedItem: this.selectedItem,
             labelField: this.labelField,
             labelFunction: this.labelFunction,
@@ -330,8 +332,8 @@ export class DropDownList<T> {
                 this.selectedItemChange.emit(e);
             },
         }
-        const clazz: any = this._isSearchable() ? this._getSearchableListClass() : this._getListClass();
-        const extraClass = this._isSearchable() ? 'ne-searchable-list-popup' : '';
+        const clazz: any = this._isSearchable(dataProvider) ? this._getSearchableListClass() : this._getListClass();
+        const extraClass = this._isSearchable(dataProvider) ? 'ne-searchable-list-popup' : '';
         const ref = popupManager.open(clazz, {
             connectElement: this.trigger,
             popupMode: 'dropdown',
@@ -383,8 +385,8 @@ export class DropDownList<T> {
     protected _getSearchableListClass(): ClassLike {
         return SearchableList;
     }
-    private _isSearchable() {
-        return this.dataProvider && this.dataProvider.length > this.searchableThreshold;
+    private _isSearchable(dataProvider) {
+        return dataProvider && dataProvider.length > this.searchableThreshold;
     }
     private _getItemLabel(item) {
         if (!isDefined(item)) {
@@ -404,7 +406,7 @@ export class DropDownList<T> {
                 }
             } else {
                 if (this.dataProvider) {
-                    return this.dataProvider.indexOf(this.selectedItem) === -1;
+                    return !isDefined(this.selectedItem);
                 } else {
                     return false;
                 }

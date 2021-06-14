@@ -13,7 +13,7 @@ import { BINDING_TOKENS } from '../../binding';
 @Binding({
     selector: 'ne-rename-input',
     template: `
-        <div class="ne-rename-input-label"
+        <div class="ne-rename-input ne-rename-input-label"
             #renameInput
             [class.invalid]="invalid"
             [disabled]="isDisabled()"
