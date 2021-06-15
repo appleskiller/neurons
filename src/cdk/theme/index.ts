@@ -109,7 +109,7 @@ function firstChar(str: string): string {
     return '{';
 }
 
-function pickCSSBody(css: string, selector: string = '') {
+function pickCSSBody(css: string, selectors: string[] = ['']) {
     css = css || '';
     if (!css) return {rest: '', blocks: []};
     let rest = css, blocks = [], body;
@@ -119,18 +119,18 @@ function pickCSSBody(css: string, selector: string = '') {
         if (openIndex === -1 || openIndex > closeIndex) {
             // 直接结束
             body = rest.substr(0, closeIndex);
-            !!body.trim() && blocks.push(`${selector} {${body}\n}`);
+            !!body.trim() && selectors.forEach(selector => blocks.push(`${selector} {${body}\n}`));
             rest = rest.substr(closeIndex + 1);
             return {rest: rest, blocks: blocks};
         } else {
             let index = (rest.substr(0, openIndex)).lastIndexOf(';');
             if (index !== -1) {
                 body = rest.substr(0, index + 1);
-                !!body.trim() && blocks.push(`${selector} {${body}\n}`);
+                !!body.trim() && selectors.forEach(selector => blocks.push(`${selector} {${body}\n}`));
                 rest = rest.substr(index + 1);
             }
             // 子节点
-            const ret = pickCSSBlocks(rest, selector);
+            const ret = pickCSSBlocks(rest, selectors);
             // const ret = pickCSSBlocks(`${selector} { ${rest}`);
             rest = ret.rest;
             blocks = blocks.concat(ret.blocks);
@@ -140,7 +140,7 @@ function pickCSSBody(css: string, selector: string = '') {
     }
     rest = rest.trim();
     if (rest) {
-        blocks.push(`${selector} {${rest}\n}`);
+        selectors.forEach(selector => blocks.push(`${selector} {${rest}\n}`));
     }
     return {rest: rest, blocks: blocks};
 }
@@ -168,7 +168,7 @@ function subStringByPaired(str: string) {
     return str.substr(0, index + 1);
 }
 const keyframesRegExp = /\@[a-zA-Z\-]{0,}keyframes/;
-function pickAtCSSBlocks(css: string, selector = '', prefix: string = '') {
+function pickAtCSSBlocks(css: string, selector = '', prefix: string[] = ['']) {
     let ret, rest;
     if (selector.search(keyframesRegExp) === 0) {
         const tmp = `${selector} { ${css}`;
@@ -194,7 +194,7 @@ function pickAtCSSBlocks(css: string, selector = '', prefix: string = '') {
     }
 }
 
-function pickCSSBlocks(css: string, prefix: string = '') {
+function pickCSSBlocks(css: string, prefixies: string[] = ['']) {
     css = css || '';
     if (!css) return {rest: '', blocks: []};
     let rest = css, blocks = [], openIndex, closeIndex, index;
@@ -205,15 +205,22 @@ function pickCSSBlocks(css: string, prefix: string = '') {
             if (selector) {
                 let ret;
                 if (selector.charAt(0) === '@') {
-                    ret = pickAtCSSBlocks(rest.substr(openIndex + 1), selector, prefix);
+                    ret = pickAtCSSBlocks(rest.substr(openIndex + 1), selector, prefixies);
                 } else {
-                    // &作为连接符
-                    if (selector.charAt(0) === '&') {
-                        selector = prefix + selector.substr(1);
-                    } else {
-                        selector = prefix ? prefix + ' ' + selector : selector;
-                    }
-                    ret = pickCSSBody(rest.substr(openIndex + 1), selector);
+                    let selectors = [];
+                    const tmp = selector.split(',').map(s => s.trim()).filter(s => !!s);
+                    prefixies.forEach(prefix => {
+                        tmp.forEach(selector => {
+                            // &作为连接符
+                            if (selector.charAt(0) === '&') {
+                                selector = prefix + selector.substr(1);
+                            } else {
+                                selector = prefix ? prefix + ' ' + selector : selector;
+                            }
+                            selectors.push(selector);
+                        })
+                    })
+                    ret = pickCSSBody(rest.substr(openIndex + 1), selectors);
                 }
                 rest = ret.rest;
                 blocks = blocks.concat(ret.blocks);
@@ -241,6 +248,8 @@ export interface IThemeBinding {
 export function bindTheme(css: string, theme: any, prefix: string = ''): IThemeBinding {
     let compiledCSS = compiledCSSCache.get(css);
     if (!compiledCSS) {
+        // 清理注释
+        css = css.replace(/\/\*[\s\S]*?\*\//g, '');
         const ret = pickCSSBlocks(css);
         const blocks = ret.blocks;
         compiledCSS = blocks.reduce((ret, current) => {
