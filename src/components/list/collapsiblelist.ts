@@ -180,6 +180,7 @@ export class CollapsibleList<T> {
             || 'itemRenderer' in changes
             || 'itemRendererParams' in changes
             || 'listStyle' in changes
+            || 'selectedItem' in changes
             || 'selectedItems' in changes
             || 'active' in changes
         ) {

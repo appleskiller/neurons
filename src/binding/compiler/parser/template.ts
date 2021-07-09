@@ -61,6 +61,30 @@ export interface IHTMLASTRoot {
     childNodes: IHTMLASTNode[];
 }
 
+function parseContentNodes(nodes: IHTMLASTNode[]) {
+    let node;
+    for (let i = nodes.length - 1; i >= 0; i--) {
+        node = nodes[i];
+        if (node) {
+            if (node && node.type === HTMLASTNodeType.TEXT && !!node['unParsed']) {
+                delete node['unParsed'];
+                const content = (node.content || '').trim();
+                if (!content) {
+                    nodes.splice(i, 1);
+                } else {
+                    nodes[i] = parseContentNode(node);
+                }
+            }
+            // children
+            if (node.childNodes && node.childNodes.length) {
+                parseContentNodes(node.childNodes);
+            }
+        } else {
+            nodes.splice(i, 1);
+        }
+    }
+}
+
 /**
  * Parses xml
  * @param content 
@@ -76,7 +100,7 @@ export function parseHTML(content: string): IHTMLASTRoot {
         childNodes: [],
     };
     let parent: any = result;
-    let current;
+    let current, previous;
     let underSVGNamespacing = false;
     const parser = new Parser({
         onprocessinginstruction: function (name, data) {
@@ -106,16 +130,32 @@ export function parseHTML(content: string): IHTMLASTRoot {
             parent = parent.parentNode;
         },
         ontext: function (text) {
-            text = text.trim();
-            if (!text) return;
-            current = parseContentNode({
-                type: HTMLASTNodeType.TEXT,
-                startIndex: parser.startIndex,
-                endIndex: parser.endIndex,
-                parentNode: parent,
-                content: text,
-            });
-            parent.childNodes.push(current);
+            previous = parent.childNodes[parent.childNodes.length - 1];
+            if (previous && previous.type === HTMLASTNodeType.TEXT && previous.endIndex + 1 === parser.startIndex) {
+                current = previous;
+                current.endIndex = parser.endIndex;
+                current.content = previous.content + text;
+            } else {
+                current = {
+                    unParsed: true,
+                    type: HTMLASTNodeType.TEXT,
+                    startIndex: parser.startIndex,
+                    endIndex: parser.endIndex,
+                    parentNode: parent,
+                    content: text,
+                }
+                parent.childNodes.push(current);
+            }
+            // text = text.trim();
+            // if (!text) return;
+            // current = parseContentNode({
+            //     type: HTMLASTNodeType.TEXT,
+            //     startIndex: parser.startIndex,
+            //     endIndex: parser.endIndex,
+            //     parentNode: parent,
+            //     content: text,
+            // });
+            // parent.childNodes.push(current);
         },
         oncomment: function (data) {
             // skip
@@ -124,16 +164,33 @@ export function parseHTML(content: string): IHTMLASTRoot {
             let cdata = '';
             const startIndex = parser.startIndex + 9;
             const endIndex = parser.endIndex - 2;
-            cdata = content.substring(startIndex, endIndex).trim();
-            if (!cdata) return;
-            current = parseContentNode({
-                type: HTMLASTNodeType.TEXT,
-                startIndex: parser.startIndex,
-                endIndex: parser.endIndex,
-                parentNode: parent,
-                content: cdata,
-            });
-            parent.childNodes.push(current);
+            cdata = content.substring(startIndex, endIndex);
+            previous = parent.childNodes[parent.childNodes.length - 1];
+            if (previous && previous.type === HTMLASTNodeType.TEXT && previous.endIndex + 1 === parser.startIndex) {
+                current = previous;
+                current.endIndex = parser.endIndex;
+                current.content = previous.content + cdata;
+            } else {
+                current = {
+                    unParsed: true,
+                    type: HTMLASTNodeType.TEXT,
+                    startIndex: parser.startIndex,
+                    endIndex: parser.endIndex,
+                    parentNode: parent,
+                    content: cdata,
+                }
+                parent.childNodes.push(current);
+            }
+            // cdata = content.substring(startIndex, endIndex).trim();
+            // if (!cdata) return;
+            // current = parseContentNode({
+            //     type: HTMLASTNodeType.TEXT,
+            //     startIndex: parser.startIndex,
+            //     endIndex: parser.endIndex,
+            //     parentNode: parent,
+            //     content: cdata,
+            // });
+            // parent.childNodes.push(current);
         },
         onerror: function (error) {
             throw error;
@@ -147,6 +204,8 @@ export function parseHTML(content: string): IHTMLASTRoot {
     });
     parser.write(content);
     parser.end();
+    // 处理content
+    result.childNodes.length && parseContentNodes(result.childNodes);
     return result;
 }
 // -------------------------------------------------------
