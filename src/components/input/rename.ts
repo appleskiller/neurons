@@ -153,7 +153,8 @@ export class RenameInput {
             onEsc: () => {
                 state.name = this.name;
             }
-        })
+        });
+        const box = this.renameInput.getBoundingClientRect();
         this.popupRef = popupManager.open(`
             <div class="ne-rename-input-panel"
                 [style.font]="font"
@@ -171,6 +172,8 @@ export class RenameInput {
             position: 'center',
             connectElement: this.renameInput,
             overlayBackgroundColor: 'rgba(0,0,0,0)',
+            width: box.width,
+            height: box.height,
             state: state,
         });
         this.popupRef.onClose.listen(() => {

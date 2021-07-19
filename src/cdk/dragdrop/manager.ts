@@ -417,10 +417,25 @@ export class DragManager extends EventEmitter implements IDragManager {
             placeholder.setAttribute('drag-scope', dragSource.scope || '');
             placeholder.setAttribute('drop-touching-scope', dropOption.scope || '');
             placeholder.setAttribute('drop-touching-position', position);
-            if (position === DropPosition.top || position === DropPosition.left) {
-                insertBefore(placeholder, touching.element);
+            let attachTo = dropOption.placeholderAttachTo ? touching.element.querySelector(dropOption.placeholderAttachTo) : touching.element;
+            attachTo = attachTo || touching.element;
+            if (dropOption.placeholderAttachAs === 'child') {
+                if (position === DropPosition.top || position === DropPosition.left) {
+                    const refChild = attachTo.children.item(0);
+                    if (refChild) {
+                        insertBefore(placeholder, refChild);
+                    } else {
+                        attachTo.appendChild(placeholder);
+                    }
+                } else {
+                    attachTo.appendChild(placeholder);
+                }
             } else {
-                insertAfter(placeholder, touching.element);
+                if (position === DropPosition.top || position === DropPosition.left) {
+                    insertBefore(placeholder, attachTo);
+                } else {
+                    insertAfter(placeholder, attachTo);
+                }
             }
         }
     }
@@ -562,6 +577,14 @@ export class DragManager extends EventEmitter implements IDragManager {
         //     }
         // }
     }
+    private _isSameScope(dropOption: IDroppableOption, dragSource: IDragSource) {
+        if (!dropOption.scope) return true;
+        if (dropOption.scope) {
+            if (!dragSource.scope) return true;
+            return dropOption.scope === dragSource.scope;
+        }
+        return true;
+    }
     private _canDrop(position: DropPosition, dropOption: IDroppableOption, dragSource: IDragSource) {
         if (!dropOption.scope && !dropOption.canDrop) return true;
         if (dropOption.canDrop) {
@@ -596,6 +619,14 @@ export class DragManager extends EventEmitter implements IDragManager {
                 whatevers.push(doms);
             }
         }
+        // filter by scope ----------
+        for (let i = doms.length - 1; i >= 0; i--) {
+            const option: IDroppableOption = doms[i]['_dropOptions'];
+            // 排除並監測
+            if (!this._isSameScope(option, this.dragSource)) {
+                doms.splice(i, 1);
+            }
+        }
         // intersected --------------
         // 上次的命中如果仍然命中，则不变更
         // 如果当前位置与placeholder相交则取消检测
@@ -625,13 +656,14 @@ export class DragManager extends EventEmitter implements IDragManager {
                 }
             }
         }
-        if (intersected) {
-            return {
-                position: DropPosition.intersected,
-                element: intersected,
-                whatevers: whatevers
-            }
-        }
+        // 稍后根据优先级和距离确定命中
+        // if (intersected) {
+        //     return {
+        //         position: DropPosition.intersected,
+        //         element: intersected,
+        //         whatevers: whatevers
+        //     }
+        // }
         // top bottom left right ------------------------------------
         let detecteds = [];
         for (let i = doms.length - 1; i >= 0; i--) {
@@ -656,20 +688,40 @@ export class DragManager extends EventEmitter implements IDragManager {
                 }
             })
         }
-        // 否则排序，按最短距离确定命中
-        detecteds = detecteds.sort((a, b) => {
-            return a.distance - b.distance;
+        if (!detecteds.length && !intersected) return null;
+        // 按优先级排序
+        const sortedByPriority = [];
+        let dropPriority = -Infinity;
+        detecteds.forEach(d => {
+            const option: IDroppableOption = d.element['_dropOptions'];
+            const priority = option.dropPriority || 0;
+            if (priority > dropPriority) {
+                dropPriority = priority;
+                sortedByPriority.length = 0;
+                sortedByPriority.push(d);
+            } else if (priority === dropPriority) {
+                sortedByPriority.push(d);
+            }
         });
-        if (detecteds[0]) {
-            const position = detecteds[0].position;
-            const element = detecteds[0].element;
+        const intersectedPriority = intersected && intersected['_dropOptions'] && intersected['_dropOptions'].dropPriority ? intersected['_dropOptions'].dropPriority : 0;
+        if (!sortedByPriority.length || (intersected && intersectedPriority >= dropPriority)) {
             return {
-                position: position,
-                element: element,
+                position: DropPosition.intersected,
+                element: intersected,
                 whatevers: whatevers
             }
         }
-        return null;
+        // 否则排序，按最短距离确定命中
+        detecteds = sortedByPriority.sort((a, b) => {
+            return a.distance - b.distance;
+        });
+        const position = detecteds[0].position;
+        const element = detecteds[0].element;
+        return {
+            position: position,
+            element: element,
+            whatevers: whatevers
+        };
     }
     private _pointIntersectRect(dragOption: IDraggableOption, mousePoint, detectRect) {
         if (dragOption.direction === 'x') {
@@ -736,10 +788,10 @@ export class DragManager extends EventEmitter implements IDragManager {
         } else if (position === DropPosition.right) {
             // check width
             detectRect = {
-                x: targetRect.x + targetRect.width + this._getSize(detectRect.x, 0, targetRect.width),
-                y: targetRect.y + this._getSize(detectRect.y, 0, targetRect.height),
+                x: targetRect.x + targetRect.width + this._getSize(offsetRect.x, 0, targetRect.width),
+                y: targetRect.y + this._getSize(offsetRect.y, 0, targetRect.height),
                 width: this._getSize(offsetRect.width, 999999, targetRect.width),
-                height: this._getSize(detectRect.height, targetRect.height, targetRect.height),
+                height: this._getSize(offsetRect.height, targetRect.height, targetRect.height),
             }
         }
         return detectRect;

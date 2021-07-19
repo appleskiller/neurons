@@ -60,8 +60,11 @@ export interface IDraggableOption {
 export interface IDroppableOption {
     scope?: string;
     dropTarget?: string;
+    dropPriority?: number;
     dropMode?: 'accept' | 'drop' | 'revert';
     placeholderClass?: string;
+    placeholderAttachTo?: string;
+    placeholderAttachAs?: 'child' | 'sibling';
     detecting?: DropDetecting,
     canDrop?: DropValidator;
 
