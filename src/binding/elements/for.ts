@@ -13,6 +13,8 @@ import { BuildInsVaribles } from '../common/enums';
 import { GeometryRect } from 'neurons-utils/utils/geometryutils';
 import { registerBindingElement, BindingElementTypes } from '../factory/element';
 
+const takenItemPlaceholder = '__taken_array_item_placeholder__';
+
 export class NeForElement implements INeLogicElement {
     constructor(
         logicSelector: string,
@@ -144,7 +146,7 @@ export class NeForElement implements INeLogicElement {
     addEventListener(eventName: string, handler: any): RemoveEventListenerFunction {
         return noop;
     }
-    getBoundingClientRect(): ClientRect {
+    getBoundingClientRect() {
         if (this.destroyed) return { left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0, };
         const refs = this._refs || [];
         let result: GeometryRect;
@@ -261,6 +263,8 @@ export class NeForElement implements INeLogicElement {
                     ref.attachTo(placeholder || this._endPlaceholder);
                     ref.bind(this._context, (this._implicits || []).concat([this._mergeItemImplicits({}, item, i, array)]));
                 } else {
+                    // 使用takenItemPlaceholder占位，确保对于重复的项目能够正常创建
+                    oldArray[oldIndex] = takenItemPlaceholder;
                     ref = refs[oldIndex];
                     if (diffs.remains.length && refs[diffs.remains[0]] === ref) {
                         // 当前位置刚好是即将调整位置的元素
@@ -286,16 +290,19 @@ export class NeForElement implements INeLogicElement {
         }
     }
     private _diffMembers(array, oldArray): {remains: any[], removes: any[]} {
-        array = array || [];
+        array = (array || []).concat();
         oldArray = oldArray || [];
         const remains = [];
         const removes = [];
         let changed = array.length !== oldArray.length;
         for (var i: number = 0; i < oldArray.length; i++) {
             changed = changed || array[i] !== oldArray[i];
-            if (array.indexOf(oldArray[i]) === -1) {
+            const index = array.indexOf(oldArray[i]);
+            if (index === -1) {
                 removes.push(i);
             } else {
+                // 使用takenItemPlaceholder占位，确保对于重复的项目能够正常创建
+                array[index] = takenItemPlaceholder;
                 remains.push(i);
             }
         }
