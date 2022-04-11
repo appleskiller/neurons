@@ -1,4 +1,4 @@
-import { IPopupPanelRef, IPopupOption, PopupPosition, PopupAnimation, PopupMode, TOKENS, IPopupRef, IPopupPanelState } from './interfaces';
+import { IPopupPanelRef, IPopupOption, PopupPosition, PopupAnimation, PopupMode, TOKENS, IPopupRef, IPopupPanelState, IConnectPoint } from './interfaces';
 import { nativeApi } from '../../binding/common/domapi';
 import { StateObject, IElementRef, BindingTemplate, BindingSelector, IUIStateStatic, IUIState, StateChanges, IChangeDetector, IBindingDefinition, IBindingRef } from '../../binding/common/interfaces';
 import { Binding, Property, Element, Emitter, Inject } from '../../binding/factory/decorator';
@@ -106,7 +106,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
     
     @Property() popupMode: PopupMode = null;
     @Property() position: PopupPosition = null;
-    @Property() connectElement?: HTMLElement | MouseEvent | IElementRef = null;
+    @Property() connectElement?: HTMLElement | MouseEvent | IConnectPoint | IElementRef = null;
     
     @Property() show?: boolean = false;
 
@@ -419,7 +419,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             this.relativeWidth = '';
         }
     }
-    private _getConnectBoundingBox(connectElement: HTMLElement | MouseEvent | IElementRef) {
+    private _getConnectBoundingBox(connectElement: HTMLElement | MouseEvent | IConnectPoint | IElementRef) {
         if (!connectElement) {
             if (!this.popupContainer) {
                 return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
@@ -428,16 +428,22 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             }
         }
         if ('nodeType' in connectElement) {
-            return (this.connectElement as HTMLElement).getBoundingClientRect();
-        } else if ((this.connectElement as IElementRef).isElementRef) {
-            return (this.connectElement as IElementRef).getBoundingClientRect();
+            return (connectElement as HTMLElement).getBoundingClientRect();
+        } else if ((connectElement as IElementRef).isElementRef) {
+            return (connectElement as IElementRef).getBoundingClientRect();
         } else {
-            const e: MouseEvent = this.connectElement as MouseEvent;
-            return { left: e.clientX - 12, top: e.clientY - 12, width: 24, height: 24 };
+            if ('left' in connectElement && 'top' in connectElement) {
+                return { left: connectElement.left - 12, top: connectElement.top - 12, width: 24, height: 24 };
+            } else if ('x' in connectElement && 'y' in connectElement) {
+                return { left: connectElement.x - 12, top: connectElement.y - 12, width: 24, height: 24 };
+            } else {
+                const e: MouseEvent = connectElement as any;
+                return { left: e.clientX - 12, top: e.clientY - 12, width: 24, height: 24 };
+            }
         }
     }
     // 计算相对connectElement的弹出位置，如果指定一侧空间不足则默认推向另外一侧
-    private _calcDropdownRelativePosition(position, connectElement: HTMLElement | MouseEvent | IElementRef, connectPosition) {
+    private _calcDropdownRelativePosition(position, connectElement: HTMLElement | MouseEvent | IConnectPoint | IElementRef, connectPosition) {
         const offset = 0;
         const box = this._getConnectBoundingBox(connectElement);
         const width = window.innerWidth;
@@ -513,7 +519,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             relativeWidth: relativeWidth,
         }
     }
-    private _calcTooltipRelativePosition(position, connectElement: HTMLElement | MouseEvent | IElementRef, connectPosition) {
+    private _calcTooltipRelativePosition(position, connectElement: HTMLElement | MouseEvent | IConnectPoint | IElementRef, connectPosition) {
         const offset = 0;
         const box = this._getConnectBoundingBox(connectElement);
         const width = window.innerWidth;
@@ -589,7 +595,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
         }
     }
     // 计算侧面板的位置，如果不指定宽度或高度，则横向撑满或纵向撑满
-    private _calcSidepanelRelativePosition(position, connectElement: HTMLElement | MouseEvent | IElementRef, connectPosition) {
+    private _calcSidepanelRelativePosition(position, connectElement: HTMLElement | MouseEvent | IConnectPoint | IElementRef, connectPosition) {
         const offset = 0;
         const box = this._getConnectBoundingBox(connectElement);
         const isWidthDefined = isDefined(this.width);
@@ -648,7 +654,7 @@ export class PopupPanelState<T extends StateObject> implements IUIState, IPopupO
             relativeHeight: relativeHeight,
         }
     }
-    private _calcModalRelativePosition(position, connectElement: HTMLElement | MouseEvent | IElementRef, connectPosition) {
+    private _calcModalRelativePosition(position, connectElement: HTMLElement | MouseEvent | IConnectPoint | IElementRef, connectPosition) {
         const offset = 0;
         const box = this._getConnectBoundingBox(connectElement);
         const isWidthDefined = isDefined(this.width);
@@ -811,7 +817,7 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
         });
         this.updatePosition();
     }
-    updatePosition(connectElement?: HTMLElement | MouseEvent): void {
+    updatePosition(connectElement?: HTMLElement | MouseEvent | IConnectPoint): void {
         if (this._destroyed) return;
         if (connectElement) {
             this._ref.setState({

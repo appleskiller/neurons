@@ -171,13 +171,25 @@ export class ToolTipRef implements IToolTipRef {
         } else {
             result.delayTime = isDefined(newOption.delayTime) ? newOption.delayTime : 500;
         }
-        if (newOption.panelClass) {
-            result.panelClass = `ne-tooltip ${newOption.panelClass}`;
-        } else {
-            result.panelClass = 'ne-tooltip';
-        }
+        result.panelClass = this._unionTooltipClasses(result.panelClass, newOption.panelClass);
         result.popupMode = 'tooltip';
         result.hasOverlay = false;
         return result;
+    }
+    private _unionTooltipClasses(classes: string, newClasses: string) {
+        let classNames = (classes || '').trim().match(/[^\x20\t\r\n\f]+/g);
+        classNames = classNames || [];
+        if (classNames.indexOf('ne-tooltip') === -1) {
+            classNames.push('ne-tooltip');
+        }
+        let newClassNames = (newClasses || '').trim().match(/[^\x20\t\r\n\f]+/g);
+        if (newClassNames && newClassNames.length) {
+            newClassNames.forEach(c => {
+                if (classNames.indexOf(c) === -1) {
+                    classNames.push(c);
+                }
+            });
+        }
+        return classNames.join(' ');
     }
 }

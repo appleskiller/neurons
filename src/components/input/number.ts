@@ -170,7 +170,7 @@ export class NumberInput {
         this._focused = true;
         this._inputing = true;
         this._mousewheelEvent && this._mousewheelEvent();
-        this._mousewheelEvent = addEventListener(this.input, 'wheel', (e: MouseWheelEvent) => {
+        this._mousewheelEvent = addEventListener(this.input, 'wheel', (e) => {
             if (this.mouseWheel && !this.readonly && !this.disabled) {
                 if (e.deltaY > 0) {
                     this._minus();

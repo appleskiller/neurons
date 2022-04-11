@@ -37,7 +37,7 @@ import { ObservableLike } from 'neurons-utils/utils/asyncutils';
             cursor: pointer;
             user-select: none;
             border: solid 1px transparent;
-            border-radius: 4px;
+            border-radius: 3px;
             background-color: rgba(125, 125, 125, 0.12);
             transition: ${theme.transition.normal('background-color', 'border-color', 'opacity')};
             box-sizing: border-box;

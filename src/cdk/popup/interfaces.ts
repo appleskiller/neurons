@@ -52,13 +52,15 @@ export interface IPopupManagerConfig {
     hostClass?: string;
 }
 
+export type IConnectPoint = {top: number, left: number} | {x: number, y: number};
+
 export interface IPopupOptionBase {
     panelClass?: string;
     position?: 'center' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom' | string;
     width?: number | string;
     height?: number | string;
     popupContainer?: HTMLElement;
-    connectElement?: HTMLElement | MouseEvent | IElementRef;
+    connectElement?: HTMLElement | MouseEvent | IConnectPoint | IElementRef;
     binding?: IBindingDefinition;
     state?: StateObject;
     providers?: Provider[];
@@ -116,7 +118,7 @@ export interface IPopupPanelRef<T extends StateObject> {
     appear();
     disappear();
     changeState(state: IPopupPanelState): void;
-    updatePosition(connectElement?: HTMLElement | MouseEvent): void;
+    updatePosition(connectElement?: HTMLElement | MouseEvent | IConnectPoint): void;
     detectChanges(): void;
 }
 
@@ -132,7 +134,7 @@ export interface IPopupRef<T extends StateObject> {
     option: IPopupOption<T>;
     overlay: IPopupOverlayRef<T>;
     panel: IPopupPanelRef<T>;
-    updatePosition(connectElement?: HTMLElement | MouseEvent): void;
+    updatePosition(connectElement?: HTMLElement | MouseEvent | IConnectPoint): void;
     open(source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>, option?: IPopupOption<T>): void;
     close(): void;
     onClose: IEmitter<IPopupRef<T>>;
@@ -141,8 +143,8 @@ export interface IPopupRef<T extends StateObject> {
 }
 
 export interface IToolTipRef {
-    open(connectElement?: HTMLElement | MouseEvent): void;
-    updatePosition(connectElement?: HTMLElement | MouseEvent): void;
+    open(connectElement?: HTMLElement | MouseEvent | IConnectPoint): void;
+    updatePosition(connectElement?: HTMLElement | MouseEvent | IConnectPoint): void;
     updateOption(option?: IToolTipOption): void;
     close(): void;
 }

@@ -87,14 +87,14 @@ export class PopupManager implements IPopupManager {
         const container = option && option.popupContainer ? option.popupContainer : this._container;
         const popup = new PopupRef<T>(this, container, this._container !== container);
         this._addPopup(popup);
-        popup.open(component, option);
+        popup.open(component, option ? {...option} : null);
         return popup;
     }
     close() {
         this._popups.forEach(popup => popup.close());
     }
     tooltip(component: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<any>, option?: IToolTipOption): IToolTipRef {
-        return new ToolTipRef(this, component, option);
+        return new ToolTipRef(this, component, option ? {...option} : null);
     }
     updatePosition(): void {
         this._popups.forEach(popup => popup.updatePosition());
