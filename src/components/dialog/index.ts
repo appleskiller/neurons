@@ -358,13 +358,15 @@ appendCSSTagOnce('ne-ui-dialog', `
     border-radius: 0;
     vertical-align: bottom;
 }
+.ne-popup-panel.ne-side-panel-modal .ne-popup-panel-content {
+    box-shadow: 0px 0 20px ${theme.black.light};
+}
 .ne-dialog.ne-side-panel {
     position: relative;
     background-color: ${theme.white.pure};
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    box-shadow: 0px 0 20px ${theme.black.light};
 }
 .ne-dialog.ne-side-panel .ne-dialog-title {
     padding: 18px 24px 18px 24px;
