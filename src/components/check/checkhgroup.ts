@@ -36,7 +36,7 @@ export class HorizontalCheckGroupItemWrapper implements IItemState<any> {
     style: `
         .ne-check-h-group {
             overflow: auto;
-            border-radius: 4px;
+            border-radius: 3px;
             transition: ${theme.transition.normal('background-color')};
         }
         .ne-check-h-group.invalid {

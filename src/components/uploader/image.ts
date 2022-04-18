@@ -57,7 +57,7 @@ import { ObservableLike } from 'neurons-utils/utils/asyncutils';
             height: 128px;
             border: solid 2px ${theme.gray.normal};
             box-sizing: border-box;
-            border-radius: 4px;
+            border-radius: 3px;
             background-repeat: no-repeat;
             background-position: center center;
             background-size: cover;

@@ -27,7 +27,7 @@ import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
             user-select: none;
             cursor: pointer;
             color: rgba(0, 0, 0, 0.8);
-            border-radius: 4px;
+            border-radius: 3px;
             -webkit-box-sizing: border-box;
             -moz-box-sizing: border-box;
             box-sizing: border-box;

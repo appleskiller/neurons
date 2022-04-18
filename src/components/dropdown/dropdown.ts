@@ -124,7 +124,7 @@ export class DropDownButton<T> {
             cursor: pointer;
             user-select: none;
             border: solid 1px transparent;
-            border-radius: 4px;
+            border-radius: 3px;
             background-color: ${theme.gray.normal};
             transition: ${theme.transition.normal('background-color', 'border-color', 'opacity')};
             box-sizing: border-box;
