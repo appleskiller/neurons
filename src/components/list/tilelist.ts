@@ -6,6 +6,7 @@ import { bind, BINDING_TOKENS } from '../../binding';
 import { Binding, Inject, Property } from '../../binding/factory/decorator';
 import { DefaultItemState, List } from './list';
 import { errorToMessage } from '../../binding/common/exception';
+import { emitter, EventEmitter, IEmitter } from 'neurons-emitter';
 
 @Binding({
     selector: 'ne-tile-list',
@@ -108,7 +109,7 @@ export class TileList extends List<any> {
             this.content.appendChild(container);
             const getItemLabel = () => {
                 const label = this.getItemLabel(typicalData);
-                return isDefined(label) ? label : '国';
+                return isDefined(label) && label !== '' ? label : '国';
             }
             const typicalRef = bind((this.itemRenderer || DefaultItemState), {
                 container: container,
@@ -161,6 +162,46 @@ export interface IAsyncDataProvider<T> {
     hasMore(): boolean;
 }
 
+export interface IAsyncListDataControl {
+    addItem(index, item): void;
+    updateItem(index, newItem, oldItem): void;
+    removeItem(index, oldItem): void;
+    reset(): void;
+    destroy(): void;
+
+    itemAdded: IEmitter<{index: number, item: any}>;
+    itemUpdated: IEmitter<{index: number, oldItem: any, newItem: any}>;
+    itemRemoved: IEmitter<{index: number, item: any}>;
+    reseted: IEmitter<void>;
+}
+
+export class AsyncListDataControl implements IAsyncListDataControl {
+    static create(): IAsyncListDataControl {
+        return new AsyncListDataControl();
+    }
+    private _nativeEmitter = new EventEmitter();
+
+    itemAdded: IEmitter<{index: number, item: any}> = emitter('item_added', this._nativeEmitter);
+    itemUpdated: IEmitter<{index: number, oldItem: any, newItem: any}> = emitter('item_updated', this._nativeEmitter);
+    itemRemoved: IEmitter<{index: number, item: any}> = emitter('item_remove', this._nativeEmitter);
+    reseted: IEmitter<void> = emitter('reseted', this._nativeEmitter);
+    addItem(index, item): void {
+        this.itemAdded.emit({item: item, index: index});
+    }
+    updateItem(index, newItem, oldItem): void {
+        this.itemUpdated.emit({index: index, newItem: newItem, oldItem: oldItem});
+    }
+    removeItem(index, oldItem): void {
+        this.itemRemoved.emit({index: index, item: oldItem});
+    }
+    reset(): void {
+        this.reseted.emit();
+    }
+    destroy() {
+        this._nativeEmitter.off();
+    }
+}
+
 @Binding({
     selector: 'ne-infinite-tile-list',
     template: `
@@ -205,23 +246,61 @@ export class InfiniteTileList extends TileList {
     @Property() fetch: () => Promise<any[]> | ObservableLike<any[]>;
     @Property() more: () => Promise<any[]> | ObservableLike<any[]>;
     @Property() hasMore: () => boolean;
+    @Property() dataControl: IAsyncListDataControl;
     @Inject(BINDING_TOKENS.CHANGE_DETECTOR) cdr: IChangeDetector;
 
     requestError = false;
     hasMoreMessage = '';
     retry;
 
+    private _nativeControl: IAsyncListDataControl;
     private initialLoaded = false;
     private _querying = false;
     private _isArriveBottom = false;
     private _destroyed = false;
     private _timeID;
+    private _listeners = [];
     onDestroy() {
         this._destroyed = true;
         clearTimeout(this._timeID);
+        this._nativeControl && this._nativeControl.destroy();
+        this._nativeControl = null;
+        this._listeners.length && this._listeners.forEach(fn => fn());
+        this._listeners = [];
     }
     onChanges(changes) {
         super.onChanges(changes);
+        if (!changes || 'dataControl' in changes) {
+            this._listeners.length && this._listeners.forEach(fn => fn());
+            this._listeners = [];
+            this._nativeControl && this._nativeControl.destroy();
+            this._nativeControl = this.dataControl;
+            if (this._nativeControl) {
+                this._listeners.push(this._nativeControl.itemAdded.listen(e => {
+                    if (this._destroyed) return;
+                    this.requestDatas();
+                }));
+                this._listeners.push(this._nativeControl.itemRemoved.listen(e => {
+                    if (this._destroyed) return;
+                    this.dataProvider = (this.dataProvider || []).concat();
+                    this.dataProvider.splice(e.index, 1);
+                    this._resetDataProvider();
+                    this.cdr.detectChanges();
+                    this._updateScroll();
+                }));
+                this._listeners.push(this._nativeControl.itemUpdated.listen(e => {
+                    this.dataProvider = (this.dataProvider || []).concat();
+                    this.dataProvider.splice(e.index, 1, e.newItem);
+                    this._resetDataProvider();
+                    this.cdr.detectChanges();
+                    this._updateScroll();
+                }));
+                this._listeners.push(this._nativeControl.reseted.listen(e => {
+                    if (this._destroyed) return;
+                    this.requestDatas();
+                }));
+            }
+        }
         this.requestDatas();
     }
     onResize() {

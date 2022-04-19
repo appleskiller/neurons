@@ -98,6 +98,7 @@ export {
     List,
     TileList,
     InfiniteTileList,
+    AsyncListDataControl,
     SearchableList,
     SortableList,
     Tree,
