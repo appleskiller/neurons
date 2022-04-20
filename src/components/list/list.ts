@@ -300,7 +300,7 @@ export class List<T> {
         if (this.content.children.length > 1) {
             const child = this.content.children.item(0);
             const size = child.getBoundingClientRect();
-            this._typicalHeight = Math.ceil(size.height);
+            this._typicalHeight = Math.ceil(Math.max(size.height, child.clientHeight));
         } else {
             const typicalData = findAValidValue(this.dataProvider);
             const container = createElement('div', 'ne-list-item');
@@ -320,7 +320,8 @@ export class List<T> {
                 }
             })
             const size = container.getBoundingClientRect();
-            this._typicalHeight = Math.ceil(size.height);
+            const height = Math.max(size.height, container.clientHeight);
+            this._typicalHeight = Math.ceil(height);
             typicalRef.destroy();
             removeMe(container);
         }
@@ -332,7 +333,8 @@ export class List<T> {
             if (this.content.children.length > 1) {
                 const child = this.content.children.item(0);
                 const size = child.getBoundingClientRect();
-                if (size.height && size.height !== this._typicalHeight) {
+                const height = Math.max(size.height, child.clientHeight);
+                if (height && height !== this._typicalHeight) {
                     return true;
                 } else {
                     return false;

@@ -101,8 +101,8 @@ export class TileList extends List<any> {
         if (this.content.children.length > 1) {
             const child = this.content.children.item(0);
             const size = child.getBoundingClientRect();
-            this._typicalHeight = Math.ceil(size.height);
-            this._typicalWidth = Math.ceil(size.width);
+            this._typicalHeight = Math.ceil(Math.max(size.height, child.clientHeight));
+            this._typicalWidth = Math.ceil(Math.max(size.width, child.clientWidth));
         } else {
             const typicalData = findAValidValue(this.dataProvider);
             const container = createElement('div', 'ne-list-item');
@@ -122,8 +122,8 @@ export class TileList extends List<any> {
                 }
             })
             const size = container.getBoundingClientRect();
-            this._typicalHeight = Math.ceil(size.height);
-            this._typicalWidth = Math.ceil(size.width);
+            this._typicalHeight = Math.ceil(Math.max(size.height, container.clientHeight));
+            this._typicalWidth = Math.ceil(Math.max(size.width, container.clientWidth));
             typicalRef.destroy();
             removeMe(container);
         }
@@ -144,7 +144,9 @@ export class TileList extends List<any> {
             if (this.content.children.length > 1) {
                 const child = this.content.children.item(0);
                 const size = child.getBoundingClientRect();
-                if (size.height && size.width && (size.height !== this._typicalHeight || size.width !== this._typicalWidth)) {
+                const height = Math.max(size.height, child.clientHeight);
+                const width = Math.max(size.width, child.clientWidth);
+                if (height && width && (height !== this._typicalHeight || width !== this._typicalWidth)) {
                     return true;
                 } else {
                     return false;
