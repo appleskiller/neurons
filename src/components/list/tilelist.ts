@@ -168,12 +168,14 @@ export interface IAsyncListDataControl {
     addItem(index, item): void;
     updateItem(index, newItem, oldItem): void;
     removeItem(index, oldItem): void;
+    removeRowsBy(ids: any[]): void;
     reset(): void;
     destroy(): void;
 
     itemAdded: IEmitter<{index: number, item: any}>;
     itemUpdated: IEmitter<{index: number, oldItem: any, newItem: any}>;
     itemRemoved: IEmitter<{index: number, item: any}>;
+    rowRemovedBy: IEmitter<{ids: any[]}>;
     reseted: IEmitter<void>;
 }
 
@@ -186,6 +188,7 @@ export class AsyncListDataControl implements IAsyncListDataControl {
     itemAdded: IEmitter<{index: number, item: any}> = emitter('item_added', this._nativeEmitter);
     itemUpdated: IEmitter<{index: number, oldItem: any, newItem: any}> = emitter('item_updated', this._nativeEmitter);
     itemRemoved: IEmitter<{index: number, item: any}> = emitter('item_remove', this._nativeEmitter);
+    rowRemovedBy: IEmitter<{ids: any[]}> = emitter('row_remove_by', this._nativeEmitter);
     reseted: IEmitter<void> = emitter('reseted', this._nativeEmitter);
     addItem(index, item): void {
         this.itemAdded.emit({item: item, index: index});
@@ -195,6 +198,10 @@ export class AsyncListDataControl implements IAsyncListDataControl {
     }
     removeItem(index, oldItem): void {
         this.itemRemoved.emit({index: index, item: oldItem});
+    }
+    removeRowsBy(ids: any[]): void {
+        if (!ids || !ids.length) return;
+        this.rowRemovedBy.emit({ids: ids});
     }
     reset(): void {
         this.reseted.emit();
@@ -248,6 +255,7 @@ export class InfiniteTileList extends TileList {
     @Property() fetch: () => Promise<any[]> | ObservableLike<any[]>;
     @Property() more: () => Promise<any[]> | ObservableLike<any[]>;
     @Property() hasMore: () => boolean;
+    @Property() idGetter: (item) => any;
     @Property() dataControl: IAsyncListDataControl;
     @Inject(BINDING_TOKENS.CHANGE_DETECTOR) cdr: IChangeDetector;
 
@@ -289,6 +297,28 @@ export class InfiniteTileList extends TileList {
                     this._resetDataProvider();
                     this.cdr.detectChanges();
                     this._updateScroll();
+                }));
+                this._listeners.push(this._nativeControl.rowRemovedBy.listen(e => {
+                    if (this._destroyed) return;
+                    if (!e.ids || !e.ids.length) return;
+                    if (this.idGetter) {
+                        const idMap = {};
+                        e.ids.forEach(id => { idMap[id] = id });
+                        this.dataProvider = (this.dataProvider || []).concat();
+                        let changed = false;
+                        for (let i = this.dataProvider.length - 1; i >= 0; i--) {
+                            const id = this.idGetter(this.dataProvider[i]);
+                            if (isDefined(id) && id in idMap) {
+                                this.dataProvider.splice(i, 1);
+                                changed = true;
+                            }
+                        }
+                        if (changed) {
+                            this._resetDataProvider();
+                            this.cdr.detectChanges();
+                            this._updateScroll();
+                        }
+                    }
                 }));
                 this._listeners.push(this._nativeControl.itemUpdated.listen(e => {
                     this.dataProvider = (this.dataProvider || []).concat();
