@@ -283,6 +283,57 @@ export class NeBindingRef implements INeBindingRef {
         if (!this.inited || this.destroyed) return;
         this._detach();
     }
+    // 将添加到文档的行为向下传递
+    passOnAttach(skipRoots = false): void {
+        if (!this.inited || this.destroyed) return;
+
+        let needDetectChange = false;
+        this._invokeLifeCircleHook('onAttach') && (needDetectChange = true);
+        // 检测detach后发生的变更
+        const dirtyState = this._pendingChanges;
+        this._pendingChanges = {};
+        const stateChanges = this._applyStateChanges(dirtyState);
+        if (stateChanges) {
+            this._invokeLifeCircleHook('onChanges', stateChanges) && (needDetectChange = true);
+        }
+        (stateChanges || needDetectChange) && this._detectChanges();
+
+        let customElements = this._customElements;
+        if (skipRoots) {
+            customElements = customElements.concat();
+            this._rootElements.forEach(el => {
+                if (el instanceof Node) return;
+                const index = customElements.indexOf(el);
+                if (index !== -1) {
+                    customElements.splice(index, 1);
+                }
+            })
+        }
+        customElements.forEach(element => {
+            element.passOnAttach();
+        });
+    }
+    // 将添加到文档的行为向下传递
+    passOnDetach(skipRoots = false): void {
+        if (!this.inited || this.destroyed) return;
+
+        this._invokeLifeCircleHook('onDetach');
+
+        let customElements = this._customElements;
+        if (skipRoots) {
+            customElements = customElements.concat();
+            this._rootElements.forEach(el => {
+                if (el instanceof Node) return;
+                const index = customElements.indexOf(el);
+                if (index !== -1) {
+                    customElements.splice(index, 1);
+                }
+            })
+        }
+        customElements.forEach(element => {
+            element.passOnDetach();
+        });
+    }
     destroy(): void {
         if (this.destroyed) return;
         cancelChangeDetection(this);
@@ -522,16 +573,7 @@ export class NeBindingRef implements INeBindingRef {
                 customElement.attach();
             });
             this.attached = true;
-            let needDetectChange = false;
-            this._invokeLifeCircleHook('onAttach') && (needDetectChange = true);
-            // 检测detach后发生的变更
-            const dirtyState = this._pendingChanges;
-            this._pendingChanges = {};
-            const stateChanges = this._applyStateChanges(dirtyState);
-            if (stateChanges) {
-                this._invokeLifeCircleHook('onChanges', stateChanges) && (needDetectChange = true);
-            }
-            (stateChanges || needDetectChange) && this._detectChanges();
+            this.passOnAttach(true);
         }
     }
     protected _detach() {
@@ -544,7 +586,7 @@ export class NeBindingRef implements INeBindingRef {
                 }
             });
             this.attached = false;
-            this._invokeLifeCircleHook('onDetach');
+            this.passOnDetach(true);
         }
     }
     private _updateScope(context: any, implicits?: any[]): void {

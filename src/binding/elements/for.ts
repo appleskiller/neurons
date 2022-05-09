@@ -99,6 +99,18 @@ export class NeForElement implements INeLogicElement {
         this.onDetach();
         this.attached = false;
     }
+    passOnAttach(): void {
+        if (this.destroyed) return;
+        this._refs && this._refs.forEach(ref => {
+            ref.passOnAttach();
+        });
+    }
+    passOnDetach(): void {
+        if (this.destroyed) return;
+        this._refs && this._refs.forEach(ref => {
+            ref.passOnDetach();
+        });
+    }
     resize() {
         if (!this.inited || this.destroyed) return;
         this.onResize();

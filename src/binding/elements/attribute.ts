@@ -82,6 +82,14 @@ export class NeAttributeElement implements INeAttributeElement {
         this.onDetach();
         this.attached = false;
     }
+    passOnAttach(): void {
+        if (this.destroyed) return;
+        this._bindingRef && this._bindingRef.passOnAttach();
+    }
+    passOnDetach(): void {
+        if (this.destroyed) return;
+        this._bindingRef && this._bindingRef.passOnDetach();
+    }
     resize() {
         if (!this.inited || this.destroyed) return;
         this.onResize();

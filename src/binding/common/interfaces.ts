@@ -114,6 +114,8 @@ export interface INeElement {
 
     attach(): void;
     detach(): void;
+    passOnAttach(): void;
+    passOnDetach(): void;
     resize();
     detectChanges(recursive?: boolean): void;
     destroy();
@@ -209,6 +211,8 @@ export interface INeBindingRef {
     attachTo(placeholder: Node): void;
     attach(): void;
     detach(): void;
+    passOnAttach(): void;
+    passOnDetach(): void;
     resize(): void;
     destroy(): void;
 

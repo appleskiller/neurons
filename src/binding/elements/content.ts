@@ -29,6 +29,14 @@ export class NeContentElement implements INeElement {
         this.onDetach();
         this.attached = false;
     }
+    passOnAttach(): void {
+        if (this.destroyed) return;
+        // TODO
+    }
+    passOnDetach(): void {
+        if (this.destroyed) return;
+        // TODO
+    }
     resize() {}
     appendChild<T extends Node>(newChild: T) {
         if (this.destroyed) return;
