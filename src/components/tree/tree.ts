@@ -12,6 +12,7 @@ import { ISVGIcon } from 'neurons-dom/dom/element';
 import { SvgIcon } from '../icon/svgicon';
 import { List, defaultLabelFunction } from '../list/list';
 import { arrow_left, arrow_right } from '../icon/icons';
+import { IInjector } from 'neurons-injector';
 
 class TreeDataItem {
     constructor(
@@ -459,6 +460,7 @@ export class DefaultTreeItemRendererWrapper {
     @Property() params: any;
 
     @Element('content') content: HTMLElement;
+    @Inject(BINDING_TOKENS.INJECTOR) injector: IInjector;
 
     icon = arrow_right;
     ref: IBindingRef<any>;
@@ -492,7 +494,8 @@ export class DefaultTreeItemRendererWrapper {
                             '[selected]': 'selected',
                             '[params]': 'params',
                         },
-                        state: state
+                        state: state,
+                        parentInjector: this.injector,
                     })
                 } else {
                     this.ref.setState(state);
@@ -512,6 +515,7 @@ export class DefaultTreeItemRendererWrapper {
         this.ref && this.ref.destroy();
     }
     onClick(e: MouseEvent) {
+        if (e.defaultPrevented) return;
         if (this.params && this.params.onlyLeafSelection && this.item && !this.item.isLeaf) {
             e.preventDefault();
         }

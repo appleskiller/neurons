@@ -191,13 +191,6 @@ export class List<T> {
         return typeof this.itemRendererParams === 'function' ? this.itemRendererParams.call(null, item, index) : this.itemRendererParams;
     }
     onItemClick(e: MouseEvent, item: T, index: number) {
-        if (!e.defaultPrevented) {
-            if (this.enableMultiSelection) {
-                this.applyMultiSelection(item, index);
-            } else {
-                this.applySingleSelection(item, index);
-            }
-        }
         this.itemClick.emit({
             item: item,
             index: index,
@@ -205,6 +198,13 @@ export class List<T> {
             element: e.currentTarget as HTMLElement,
             causeEvent: e
         });
+        if (!e.defaultPrevented) {
+            if (this.enableMultiSelection) {
+                this.applyMultiSelection(item, index);
+            } else {
+                this.applySingleSelection(item, index);
+            }
+        }
     }
     onItemMousedown(e: MouseEvent, item: T, index: number) {
         this.itemMouseDown.emit({
