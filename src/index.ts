@@ -99,6 +99,7 @@ export {
     TileList,
     InfiniteTileList,
     AsyncListDataControl,
+    SearchableTileList,
     SearchableList,
     SortableList,
     Tree,

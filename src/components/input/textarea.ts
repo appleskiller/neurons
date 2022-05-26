@@ -31,6 +31,7 @@ import { theme } from '../style/theme';
             transition: border-color 280ms cubic-bezier(.4,0,.2,1);
             box-sizing: border-box;
             font-family: inherit;
+            cursor: auto;
         }
         .ne-textarea[readonly] {
             cursor: default;

@@ -30,6 +30,8 @@ register({
                     </div>
                     <div class="list-demo-container">
                         <ne-dropdown-list
+                            modalMode="true"
+                            enableMultiSelection="true"
                             [dataProvider]="dataProvider"
                             [searchableThreshold]="data.threshold"
                         ></ne-dropdown-list>

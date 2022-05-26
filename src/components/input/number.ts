@@ -10,6 +10,7 @@ import { ISVGIcon } from 'neurons-dom/dom/element';
 @Binding({
     selector: 'ne-number-input',
     template: `<input #input
+        type="number"
         [class]="{'ne-number-input': true, 'invalid': invalid}"
         [name]="name" [placeholder]="placeholder"
         (keydown)="onKeyDown($event)"
@@ -32,6 +33,15 @@ import { ISVGIcon } from 'neurons-dom/dom/element';
             transition: border-color 280ms cubic-bezier(.4,0,.2,1);
             box-sizing: border-box;
             transition: ${theme.transition.normal('border', 'color', 'background-color', 'opacity')};
+        }
+        .ne-number-input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+        }
+        .ne-number-input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+        .ne-number-input[type=number] {
+            -moz-appearance: textfield;
         }
         .ne-number-input[readonly] {
             cursor: default;

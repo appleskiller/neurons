@@ -13,6 +13,7 @@ import { SearchableList } from '../list/seachablelist';
 import { theme } from '../style/theme';
 import { isDefined } from 'neurons-utils';
 import { ClassLike } from 'neurons-injector';
+import { SearchableTileList, TileList } from '../list/tilelist';
 
 export interface IDropDownPopupOption<T> {
     component: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>,
@@ -54,7 +55,8 @@ export interface IDropDownPopupOption<T> {
         }
     `,
     requirements: [
-        SvgIcon
+        SvgIcon,
+        TileList
     ]
 })
 export class DropDownButton<T> {
@@ -190,11 +192,38 @@ export class DropDownButton<T> {
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
         }
+
+        .ne-dropdown-popup-list.modal-mode .ne-popup-panel-content {
+            padding: 0;
+        }
+        .ne-dropdown-popup-list.modal-mode .ne-tile-list {
+            width: 600px;
+            height: 400px;
+        }
+        .ne-dropdown-popup-list.modal-mode .ne-tile-list .ne-list-item {
+            width: 25%;
+        }
+        .ne-dropdown-popup-list.modal-mode .ne-dropdown-popup-list-buttons {
+            text-align: right;
+            border-top: solid 1px ${theme.gray.heavy};
+        }
+        .ne-dropdown-popup-list.modal-mode .ne-dropdown-popup-list-buttons > .ne-button {
+            min-width: 92px;
+            padding: 8px 12px;
+            vertical-align: top;
+            width: 50%;
+            border-radius: 0;
+        }
+        .ne-dropdown-popup-list.modal-mode .ne-searchable-tile-list-input {
+            padding: 8px 12px;
+        }
     `,
     requirements: [
         SvgIcon,
         List,
-        SearchableList
+        SearchableList,
+        TileList,
+        SearchableTileList
     ]
 })
 export class DropDownList<T> {
@@ -203,6 +232,7 @@ export class DropDownList<T> {
     @Property() disabled: boolean = false;
     @Property() readonly: boolean = false;
     @Property() required = false;
+    @Property() modalMode = false;
     @Property() active = true;
     @Property() searchableThreshold = 20;
     @Property() enableSelection = true;
@@ -247,12 +277,12 @@ export class DropDownList<T> {
     }
     openMultiSelectionList() {
         const dataProvider = typeof this.dataProvider === 'function' ? this.dataProvider() : this.dataProvider;
-        const state = {
+        const state: any = {
             focus: true, // searchable
             active: this.active,
             enableMultiSelection: this.enableMultiSelection,
             dataProvider: dataProvider,
-            selectedItems: this.selectedItems || [],
+            selectedItems: this.modalMode ? (this.selectedItems || []).concat() : (this.selectedItems || []),
             labelField: this.labelField,
             labelFunction: this.labelFunction,
             itemRenderer: this.itemRenderer,
@@ -271,28 +301,58 @@ export class DropDownList<T> {
                 this.selectedItemsChange.emit(e);
             },
         }
-        const clazz: any = this._isSearchable(dataProvider) ? this._getSearchableListClass() : this._getListClass();
+        const binding = {
+            '[focus]': 'focus',
+            '[active]': 'active',
+            '[enableSelection]': 'true',
+            '[enableMultiSelection]': 'true',
+            '[dataProvider]': 'dataProvider',
+            '[selectedItems]': 'selectedItems',
+            '[labelField]': 'labelField',
+            '[labelFunction]': 'labelFunction',
+            '[itemRenderer]': 'itemRenderer',
+            '(itemClick)': 'onItemClick($event)',
+            '(multiSelectionChange)': 'onMultiSelectionChange($event)',
+            '(selectedItemsChange)': 'onMultiSelectionItemChange($event)',
+        };
+        let ref;
+        let template = this._isSearchable(dataProvider) ? this._getSearchableListTemplate(binding) : this._getListTemplate(binding);
+        if (this.modalMode) {
+            template = `
+                ${template}
+                <div class="ne-dropdown-popup-list-buttons">
+                    <ne-button mode="flat" (click)="onCancel()">取消</ne-button>
+                    <ne-button mode="flat" color="primary" (click)="onOk()">确定</ne-button>
+                </div>
+            `;
+            state.onMultiSelectionChange = () => {};
+            state.onMultiSelectionItemChange = (e) => { state.selectedItems = e };
+            state.onCancel = () => {
+                ref && ref.close();
+            }
+            state.onOk = () => {
+                const oldSelectedItems = this.selectedItems;
+                this.selectedItems = state.selectedItems;
+                this.selectedItemsChange.emit(this.selectedItems);
+                this.label = this.getItemLabel();
+                this.invalid = this._isInvalid();
+                this.multiSelectionChange.emit({
+                    selectedItems: this.selectedItems,
+                    dataProvider: dataProvider,
+                    oldSelectedItems: oldSelectedItems
+                });
+                this.changeDetector.detectChanges();
+                ref && ref.close();
+            }
+        }
+        
         const extraClass = this._isSearchable(dataProvider) ? 'ne-searchable-list-popup' : '';
-        const ref = popupManager.open(clazz, {
-            connectElement: this.trigger,
-            popupMode: 'dropdown',
-            position: this.dropdownPosition || 'bottomLeft',
-            panelClass: `${this.dropdownClass} ne-dropdown-popup-list ${extraClass}`,
+        ref = popupManager.open(template, {
+            connectElement: this.modalMode ? null : this.trigger,
+            popupMode: this.modalMode ? 'modal' : 'dropdown',
+            position: this.modalMode ? 'center' : this.dropdownPosition || 'bottomLeft',
+            panelClass: `${this.dropdownClass} ne-dropdown-popup-list ${extraClass}${this.modalMode ? ' modal-mode' : ''}`,
             overlayClass: this.dropdownOverlayClass,
-            binding: {
-                '[focus]': 'focus',
-                '[active]': 'active',
-                '[enableSelection]': 'true',
-                '[enableMultiSelection]': 'true',
-                '[dataProvider]': 'dataProvider',
-                '[selectedItems]': 'selectedItems',
-                '[labelField]': 'labelField',
-                '[labelFunction]': 'labelFunction',
-                '[itemRenderer]': 'itemRenderer',
-                '(itemClick)': 'onItemClick($event)',
-                '(multiSelectionChange)': 'onMultiSelectionChange($event)',
-                '(selectedItemsChange)': 'onMultiSelectionItemChange($event)',
-            },
             state: state,
         })
         ref.onOpened.listen(() => {
@@ -332,29 +392,29 @@ export class DropDownList<T> {
                 this.selectedItemChange.emit(e);
             },
         }
-        const clazz: any = this._isSearchable(dataProvider) ? this._getSearchableListClass() : this._getListClass();
+        const binding = {
+            '[focus]': 'focus',
+            '[active]': 'active',
+            '[enableSelection]': 'enableSelection',
+            '[enableMultiSelection]': 'false',
+            '[dataProvider]': 'dataProvider',
+            '[selectedItem]': 'selectedItem',
+            '[selectedIndex]': 'selectedIndex',
+            '[labelField]': 'labelField',
+            '[labelFunction]': 'labelFunction',
+            '[itemRenderer]': 'itemRenderer',
+            '(itemClick)': 'onItemClick($event)',
+            '(selectionChange)': 'onSelectionChange($event)',
+            '(selectedItemChange)': 'onSelectionItemChange($event)',
+        }
+        const template = this._isSearchable(dataProvider) ? this._getSearchableListTemplate(binding) : this._getListTemplate(binding);
         const extraClass = this._isSearchable(dataProvider) ? 'ne-searchable-list-popup' : '';
-        const ref = popupManager.open(clazz, {
-            connectElement: this.trigger,
-            popupMode: 'dropdown',
-            position: this.dropdownPosition || 'bottomLeft',
-            panelClass: `${this.dropdownClass} ne-dropdown-popup-list ${extraClass}`,
+        const ref = popupManager.open(template, {
+            connectElement: this.modalMode ? null : this.trigger,
+            popupMode: this.modalMode ? 'modal' : 'dropdown',
+            position: this.modalMode ? 'center' : this.dropdownPosition || 'bottomLeft',
+            panelClass: `${this.dropdownClass} ne-dropdown-popup-list ${extraClass}${this.modalMode ? ' modal-mode' : ''}`,
             overlayClass: this.dropdownOverlayClass,
-            binding: {
-                '[focus]': 'focus',
-                '[active]': 'active',
-                '[enableSelection]': 'enableSelection',
-                '[enableMultiSelection]': 'false',
-                '[dataProvider]': 'dataProvider',
-                '[selectedItem]': 'selectedItem',
-                '[selectedIndex]': 'selectedIndex',
-                '[labelField]': 'labelField',
-                '[labelFunction]': 'labelFunction',
-                '[itemRenderer]': 'itemRenderer',
-                '(itemClick)': 'onItemClick($event)',
-                '(selectionChange)': 'onSelectionChange($event)',
-                '(selectedItemChange)': 'onSelectionItemChange($event)',
-            },
             state: state,
         })
         ref.onOpened.listen(() => {
@@ -379,11 +439,45 @@ export class DropDownList<T> {
             return this._getItemLabel(this.selectedItem);
         }
     }
-    protected _getListClass(): ClassLike {
-        return List;
+    protected _getListTemplate(binding): string {
+        binding = binding || {};
+        if (this.modalMode) {
+            return `
+                <ne-tile-list
+                    ${Object.keys(binding).map(key => {
+                        return `${key}="${binding[key]}"`
+                    }).join(' ')}
+                ></ne-tile-list>
+            `;
+        } else {
+            return `
+                <ne-list
+                    ${Object.keys(binding).map(key => {
+                        return `${key}="${binding[key]}"`
+                    }).join(' ')}
+                ></ne-list>
+            `;
+        }
     }
-    protected _getSearchableListClass(): ClassLike {
-        return SearchableList;
+    protected _getSearchableListTemplate(binding): string {
+        binding = binding || {};
+        if (this.modalMode) {
+            return `
+                <ne-searchable-tile-list
+                    ${Object.keys(binding).map(key => {
+                        return `${key}="${binding[key]}"`
+                    }).join(' ')}
+                ></ne-searchable-tile-list>
+            `;
+        } else {
+            return `
+                <ne-searchable-list
+                    ${Object.keys(binding).map(key => {
+                        return `${key}="${binding[key]}"`
+                    }).join(' ')}
+                ></ne-searchable-list>
+            `;
+        }
     }
     private _isSearchable(dataProvider) {
         return dataProvider && dataProvider.length > this.searchableThreshold;
