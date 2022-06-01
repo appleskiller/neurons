@@ -28,6 +28,14 @@ let windowListenerAttached = false;
 function attachWindowListener() {
     if (isBrowser && !windowListenerAttached) {
         windowListenerAttached = true;
+        // 对于某些无法正常触发'popstate'和'hashchange'事件的特殊的环境，可以通过该自定义事件完成popup的自动关闭
+        nativeApi.addEventListener(window, 'ne_auto_close_popup', () => {
+            sortedPopups.forEach(popup => {
+                if (!popup.option || popup.option.autoClose !== false) {
+                    popup.close()
+                }
+            });
+        });
         nativeApi.addEventListener(window, 'hashchange', () => {
             sortedPopups.forEach(popup => {
                 if (!popup.option || popup.option.autoClose !== false) {
