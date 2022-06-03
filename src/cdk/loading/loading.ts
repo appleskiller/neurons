@@ -25,6 +25,9 @@ export type IRetryFunction<T> = () => Promise<T> | ObservableLike<T>;
         width: 100%;
         height: 100%;
     }
+    .ne-popup-panel.ne-loading-mask-panel .ne-popup-panel-content {
+        background-color: transparent;
+    }
 `)
 export class LoadingService implements ILoadingService {
     constructor() {
