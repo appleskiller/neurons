@@ -413,7 +413,7 @@ export interface ITreeItemClickEvent<T> {
             [title]="label"
             (click)="onClick($event)"
         >
-            <ne-icon [icon]="icon" [style.left]="paddingLeft"></ne-icon>
+            <ne-icon [icon]="icon" [style.left]="paddingLeft" (click)="onClickIcon($event)"></ne-icon>
             <div class="ne-tree-item-renderer-inffix"
                 #content
             >{{label}}</div>
@@ -428,22 +428,23 @@ export interface ITreeItemClickEvent<T> {
             word-break: break-all;
             line-height: 32px;
             user-select: none;
-            .ne-icon {
+            & > .ne-icon {
                 display: inline-block;
                 position: absolute;
                 left: 0;
                 top: 0;
                 bottom: 0;
                 width: 32px;
+                z-index: 1;
                 transition: ${theme.transition.normal('transform')};
             }
             &.opened {
-                .ne-icon {
+                & > .ne-icon {
                     transform: rotateZ(90deg);
                 }
             }
             &.leaf-node {
-                .ne-icon {
+                & > .ne-icon {
                     visibility: hidden;
                 }
             }
@@ -456,6 +457,9 @@ export interface ITreeItemClickEvent<T> {
     `
 })
 export class DefaultTreeItemRendererWrapper {
+    @Property() depth = 0;
+    @Property() opened = false;
+    @Property() isLeaf: boolean = false;
     @Property() item: TreeDataItem;
     @Property() params: any;
 
@@ -465,9 +469,7 @@ export class DefaultTreeItemRendererWrapper {
     icon = arrow_right;
     ref: IBindingRef<any>;
     label = '';
-    depth = 0;
-    opened = false;
-    isLeaf = false;
+    // isLeaf = false;
     paddingLeft = 0;
 
     onChanges(changes) {
@@ -513,6 +515,13 @@ export class DefaultTreeItemRendererWrapper {
     }
     onDestroy() {
         this.ref && this.ref.destroy();
+    }
+    onClickIcon(e: MouseEvent) {
+        e.preventDefault();
+        if (this.item) {
+            this.item.expanded ? this.item.collapse() : this.item.expand();
+            this.opened = this.item.expanded;
+        }
     }
     onClick(e: MouseEvent) {
         if (e.defaultPrevented) return;
@@ -588,6 +597,7 @@ export class Tree<T> {
     // }
     @Property() itemRendererParams: any;
 
+    @Emitter() treeUpdated: IEmitter<void>;
     @Emitter() selectionChange: IEmitter<ITreeSelectionChangeEvent<T>>;
     @Emitter() selectedItemChange: IEmitter<T>;
     @Emitter() multiSelectionChange: IEmitter<ITreeMultiSelectionChangeEvent<T>>;
@@ -599,6 +609,9 @@ export class Tree<T> {
 
     itemWrapperRenderer = DefaultTreeItemRendererWrapper;
     itemWrapperRendererBinding = {
+        '[isLeaf]': 'item ? item.isLeaf : false',
+        '[opened]': 'item ? item.expanded : false',
+        '[depth]': 'item ? item.depth : 0',
         '[item]': 'item',
         '[params]': 'params',
     }
@@ -609,6 +622,7 @@ export class Tree<T> {
     treeDataProvider: TreeDataProvider;
 
     private _firstSelected = false;
+    private _destroyed = false;
 
     onInit() {
         this.treeDataProvider = new TreeDataProvider(
@@ -635,6 +649,10 @@ export class Tree<T> {
                 this.selectedTreeItem = this.treeDataProvider.selectedItems ? this.treeDataProvider.selectedItems[0] : null;
             }
             this.list && this.list.detectChanges(true);
+            setTimeout(() => {
+                if (this._destroyed) return;
+                this.treeUpdated.emit();
+            })
         });
     }
     onChanges(changes: StateChanges) {
@@ -673,6 +691,9 @@ export class Tree<T> {
                 }
             }
         }
+    }
+    onDestroy() {
+        this._destroyed = true;
     }
     protected onSelectedItemChange(e: TreeDataItem) {
         if (!this.enableMultiSelection) {
