@@ -457,64 +457,43 @@ export interface ITreeItemClickEvent<T> {
     `
 })
 export class DefaultTreeItemRendererWrapper {
-    @Property() depth = 0;
-    @Property() opened = false;
-    @Property() isLeaf: boolean = false;
     @Property() item: TreeDataItem;
     @Property() params: any;
-
+    
     @Element('content') content: HTMLElement;
+    
+    @Inject(BINDING_TOKENS.CHANGE_DETECTOR) cdr: IChangeDetector;
     @Inject(BINDING_TOKENS.INJECTOR) injector: IInjector;
-
+    
+    depth = 0;
+    opened = false;
+    isLeaf: boolean = false;
     icon = arrow_right;
     ref: IBindingRef<any>;
     label = '';
     // isLeaf = false;
     paddingLeft = 0;
 
+    private _listeners = [];
+
+    onInit() {
+        const updated: IEmitter<void> = this.injector.get('tree_data_updated');
+        updated && this._listeners.push(updated.listen(() => {
+            this.updateDisplay();
+            this.cdr.detectChanges();
+        }))
+    }
+
     onChanges(changes) {
         if (!changes || 'item' in changes || 'params' in changes) {
-            // itemRenderer: this.itemRenderer,
-            // itemRendererBinding: this.itemRendererBinding,
-            // itemRendererParams: this.itemRendererParams,
-            if (this.params && this.params.itemRenderer) {
-                this.label = '';
-                const state = {
-                    'item': this.item.data,
-                    'itemIndex': this.item.index,
-                    'label': this.item.label,
-                    'selected': this.item.selected,
-                    'params': this.params.itemRendererParams,
-                }
-                if (!this.ref) {
-                    this.ref = bind(this.params.itemRenderer, {
-                        container: this.content,
-                        hostBinding: {
-                            '[item]': 'item',
-                            '[itemIndex]': 'itemIndex',
-                            '[label]': 'label',
-                            '[selected]': 'selected',
-                            '[params]': 'params',
-                        },
-                        state: state,
-                        parentInjector: this.injector,
-                    })
-                } else {
-                    this.ref.setState(state);
-                }
-            } else {
-                this.ref && this.ref.destroy();
-                this.label = this.item ? this.item.label : '';
-            }
+            this.updateDisplay();
         }
-        this.depth = this.item ? this.item.depth : 0;
-        this.opened = this.item ? this.item.expanded : false;
-        this.isLeaf = this.item ? this.item.isLeaf : false;
-        const indentSize = this.params && isDefined(this.params.indentSize) ? this.params.indentSize : 16;
-        this.paddingLeft = this.item ? this.item.depth * indentSize : 0;
+        
     }
     onDestroy() {
         this.ref && this.ref.destroy();
+        this._listeners.forEach(fn => fn());
+        this._listeners = [];
     }
     onClickIcon(e: MouseEvent) {
         e.preventDefault();
@@ -532,6 +511,42 @@ export class DefaultTreeItemRendererWrapper {
             this.item.expanded ? this.item.collapse() : this.item.expand();
             this.opened = this.item.expanded;
         }
+    }
+    protected updateDisplay() {
+        if (this.params && this.params.itemRenderer) {
+            this.label = '';
+            const state = {
+                'item': this.item.data,
+                'itemIndex': this.item.index,
+                'label': this.item.label,
+                'selected': this.item.selected,
+                'params': this.params.itemRendererParams,
+            }
+            if (!this.ref) {
+                this.ref = bind(this.params.itemRenderer, {
+                    container: this.content,
+                    hostBinding: {
+                        '[item]': 'item',
+                        '[itemIndex]': 'itemIndex',
+                        '[label]': 'label',
+                        '[selected]': 'selected',
+                        '[params]': 'params',
+                    },
+                    state: state,
+                    parentInjector: this.injector,
+                })
+            } else {
+                this.ref.setState(state);
+            }
+        } else {
+            this.ref && this.ref.destroy();
+            this.label = this.item ? this.item.label : '';
+        }
+        this.depth = this.item ? this.item.depth : 0;
+        this.opened = this.item ? this.item.expanded : false;
+        this.isLeaf = this.item ? this.item.isLeaf : false;
+        const indentSize = this.params && isDefined(this.params.indentSize) ? this.params.indentSize : 16;
+        this.paddingLeft = this.item ? this.item.depth * indentSize : 0;
     }
 }
 
@@ -598,6 +613,7 @@ export class Tree<T> {
     @Property() itemRendererParams: any;
 
     @Emitter() treeUpdated: IEmitter<void>;
+    @Emitter() treeRefreshed: IEmitter<void>;
     @Emitter() selectionChange: IEmitter<ITreeSelectionChangeEvent<T>>;
     @Emitter() selectedItemChange: IEmitter<T>;
     @Emitter() multiSelectionChange: IEmitter<ITreeMultiSelectionChangeEvent<T>>;
@@ -607,11 +623,10 @@ export class Tree<T> {
 
     @Element('list') list: IElementRef;
 
+    @Inject(BINDING_TOKENS.INJECTOR) injector: IInjector;
+
     itemWrapperRenderer = DefaultTreeItemRendererWrapper;
     itemWrapperRendererBinding = {
-        '[isLeaf]': 'item ? item.isLeaf : false',
-        '[opened]': 'item ? item.expanded : false',
-        '[depth]': 'item ? item.depth : 0',
         '[item]': 'item',
         '[params]': 'params',
     }
@@ -625,6 +640,10 @@ export class Tree<T> {
     private _destroyed = false;
 
     onInit() {
+        this.injector.providers([{
+            token: 'tree_data_updated',
+            use: this.treeUpdated
+        }])
         this.treeDataProvider = new TreeDataProvider(
             this.dataProvider,
             this.enableMultiSelection ? this.selectedItems : (this.selectedItem === undefined ? null : [this.selectedItem]),
@@ -648,7 +667,7 @@ export class Tree<T> {
             } else {
                 this.selectedTreeItem = this.treeDataProvider.selectedItems ? this.treeDataProvider.selectedItems[0] : null;
             }
-            this.list && this.list.detectChanges(true);
+            this.list && this.list.detectChanges();
             setTimeout(() => {
                 if (this._destroyed) return;
                 this.treeUpdated.emit();
@@ -694,6 +713,7 @@ export class Tree<T> {
     }
     onDestroy() {
         this._destroyed = true;
+        this.treeDataProvider && this.treeDataProvider.destroy();
     }
     protected onSelectedItemChange(e: TreeDataItem) {
         if (!this.enableMultiSelection) {
