@@ -92,9 +92,11 @@ import { theme } from '../style/theme';
         }
         .ne-search-input .ne-search-input-inffix {
             width: 100%;
+            height: 100%;
         }
         .ne-search-input .ne-search-input-inffix .ne-search-input-inffix-content {
             padding: 0 24px;
+            height: 100%;
         }
         .ne-search-input .ne-search-input-inffix .ne-search-input-inffix-content .ne-input {
             display: block;

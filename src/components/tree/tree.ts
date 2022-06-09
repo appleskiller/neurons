@@ -35,6 +35,7 @@ class TreeDataItem {
 }
 
 export interface ITreeDataProviderOption {
+    onlyLeafSelection?: boolean;
     childrenField?: string;
     childrenFunction?: (item) => any[];
     labelField?: string;
@@ -66,9 +67,9 @@ class TreeDataProvider {
     private _childrenMap = new Map<TreeDataItem, TreeDataItem[]>();
     private _parentMap = new Map<TreeDataItem, TreeDataItem>();
 
-    setSource(source: any[]) {
+    setSource(source: any[], expandAll = false) {
         this.source = source;
-        this.refresh();
+        this.refresh(expandAll);
     }
     setSelectedDatas(datas: any[], autoExpand = false) {
         const selectedDatas = datas || [];
@@ -102,11 +103,11 @@ class TreeDataProvider {
             this.updated.emit();
         }
     }
-    refresh() {
+    refresh(expandAll = false) {
         const source = this.source || [];
         const token = {index: 0};
         source.forEach((data, i) => {
-            this._refreshItem(null, data, token, 0);
+            this._refreshItem(null, data, token, 0, expandAll);
         });
         for (let i = this.flatCollection.length - 1; i >= token.index; i--) {
             const item = this.flatCollection.pop();
@@ -115,6 +116,9 @@ class TreeDataProvider {
         // 更新selectedItem
         this._updateSelection();
         this.updated.emit();
+    }
+    expandAll() {
+        this.refresh(true);
     }
     expand(data) {
         const item = this._itemMap.get(data);
@@ -258,7 +262,7 @@ class TreeDataProvider {
         }
         return result;
     }
-    private _refreshItem(parent: TreeDataItem, data, token: {index: number}, depth: number) {
+    private _refreshItem(parent: TreeDataItem, data, token: {index: number}, depth: number, expandAll = false) {
         let item = this._itemMap.get(data);
         const children = this._getChildren(data);
         if (item) {
@@ -268,10 +272,17 @@ class TreeDataProvider {
             item.label = this._getLabel(data);
             item.selected = this._selectedDatas ? this._selectedDatas.indexOf(data) !== -1 : false;
             item.depth = depth;
+            if (expandAll && !item.isLeaf) {
+                item.expanded = true;
+            }
             // collection
-            moveItemTo(this.flatCollection, item, item.index);
+            if (this.flatCollection.indexOf(item) === -1) {
+                this.flatCollection.splice(item.index, 0, item);
+            } else {
+                moveItemTo(this.flatCollection, item, item.index);
+            }
         } else {
-            item = this._createItem(parent, data, token.index, depth);
+            item = this._createItem(parent, data, token.index, depth, expandAll);
             // collection
             this.flatCollection.splice(item.index, 0, item);
         }
@@ -292,7 +303,7 @@ class TreeDataProvider {
             const childItems = [];
             this._childrenMap.set(item, childItems);
             children.forEach(d => {
-                childItems.push(this._refreshItem(item, d, token, depth + 1));
+                childItems.push(this._refreshItem(item, d, token, depth + 1, expandAll));
             });
         }
         return item;
@@ -319,11 +330,11 @@ class TreeDataProvider {
         index = this.selectedItems.indexOf(item);
         index !== -1 && this.selectedItems.splice(index, 1);
     }
-    private _createItem(parent: TreeDataItem, data, index: number, depth: number) {
+    private _createItem(parent: TreeDataItem, data, index: number, depth: number, expanded = false) {
         const children = this._getChildren(data);
         const isleaf = !children;
         const selected = this._selectedDatas ? this._selectedDatas.indexOf(data) !== -1 : false;
-        const item = new TreeDataItem(data, index, depth, this._getLabel(data), selected, isleaf, false, this);
+        const item = new TreeDataItem(data, index, depth, this._getLabel(data), selected, isleaf, expanded, this);
         this._parentMap.set(item, parent);
         this._itemMap.set(data, item);
         return item;
@@ -561,6 +572,7 @@ export class DefaultTreeItemRendererWrapper {
             [enableSelection]="enableSelection"
             [enableMultiSelection]="enableMultiSelection"
             [dataProvider]="flatDataProvider"
+            [filterFunction]="_filterFunction"
             [itemRenderer]="itemWrapperRenderer"
             [itemRendererBinding]="itemWrapperRendererBinding"
             [itemRendererParams]="itemWrapperRendererParams"
@@ -592,6 +604,7 @@ export class Tree<T> {
     @Property() active = true;
     @Property() onlyLeafSelection = false;
     @Property() autoExpand = false;
+    // 每次数据刷新时强制展开所有节点
     @Property() enableSelection = true;
     @Property() enableMultiSelection = false;
     @Property() dataProvider: T[] = [];
@@ -601,7 +614,7 @@ export class Tree<T> {
     @Property() labelFunction = (item: T) => defaultLabelFunction(item, this.labelField);
     @Property() childrenField: string;
     @Property() childrenFunction: (item: T) => T[];
-    // @Property() filterFunction: (item: T) => boolean;
+    @Property() filterFunction: (item: T) => boolean;
     @Property() itemRenderer: IItemStateStatic<T>;
     // @Property() itemRendererBinding = {
     //     '[item]': 'item',
@@ -613,7 +626,6 @@ export class Tree<T> {
     @Property() itemRendererParams: any;
 
     @Emitter() treeUpdated: IEmitter<void>;
-    @Emitter() treeRefreshed: IEmitter<void>;
     @Emitter() selectionChange: IEmitter<ITreeSelectionChangeEvent<T>>;
     @Emitter() selectedItemChange: IEmitter<T>;
     @Emitter() multiSelectionChange: IEmitter<ITreeMultiSelectionChangeEvent<T>>;
@@ -635,9 +647,10 @@ export class Tree<T> {
     selectedTreeItem: TreeDataItem = undefined;
     selectedTreeItems: TreeDataItem[] = [];
     treeDataProvider: TreeDataProvider;
+    _filterFunction = null;
 
     private _firstSelected = false;
-    private _destroyed = false;
+    protected _destroyed = false;
 
     onInit() {
         this.injector.providers([{
@@ -675,10 +688,22 @@ export class Tree<T> {
         });
     }
     onChanges(changes: StateChanges) {
+        let filterChanged = false;
+        if (!changes || 'filterFunction' in changes) {
+            const old = this._filterFunction;
+            if (this.filterFunction) {
+                this._filterFunction = item => this.filterFunction(item.data);
+            } else {
+                this._filterFunction = null;
+            }
+            filterChanged = old !== this._filterFunction;
+        }
         if (changes) {
             let changed = false;
-            if ('dataProvider' in changes) {
-                this.treeDataProvider.setSource(this.dataProvider);
+
+            if ('dataProvider' in changes || 'filterFunction' in changes) {
+                const expandAll = filterChanged && this._filterFunction;
+                this.treeDataProvider.setSource(this.dataProvider, expandAll);
             }
             if ('selectedItem' in changes || 'enableSelection' in changes) {
                 if (this.selectedItem && !this._firstSelected) {
@@ -773,7 +798,7 @@ export class Tree<T> {
         'labelFunction',
         'childrenField',
         'childrenFunction',
-        'onlyLeafSelection'
+        'onlyLeafSelection',
     ];
     private _collectTreeDataProviderOption(changes: StateChanges) {
         if (!changes) return null;
