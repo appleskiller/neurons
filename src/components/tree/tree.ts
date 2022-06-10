@@ -66,6 +66,7 @@ class TreeDataProvider {
     private _itemMap = new Map<any, TreeDataItem>();
     private _childrenMap = new Map<TreeDataItem, TreeDataItem[]>();
     private _parentMap = new Map<TreeDataItem, TreeDataItem>();
+    private _savedExpands: TreeDataItem[];
 
     setSource(source: any[], expandAll = false) {
         this.source = source;
@@ -85,7 +86,6 @@ class TreeDataProvider {
             const item = this._itemMap.get(data);
             item && (item.selected = false);
         });
-        // TODO 暂时不支持展开到集合所有元素
         autoExpand && this._expandTo(this._selectedDatas[0]);
         // 更新selectedItem
         this._updateSelection();
@@ -116,6 +116,18 @@ class TreeDataProvider {
         // 更新selectedItem
         this._updateSelection();
         this.updated.emit();
+    }
+    saveExpands() {
+        this._savedExpands = [];
+        this.flatCollection.forEach(item => {
+            if (item && !item.isLeaf && item.expanded) {
+                this._savedExpands.push(item.data);
+            }
+        })
+    }
+    restoreExpands() {
+        this.refresh();
+        this._savedExpands = null;
     }
     expandAll() {
         this.refresh(true);
@@ -272,8 +284,18 @@ class TreeDataProvider {
             item.label = this._getLabel(data);
             item.selected = this._selectedDatas ? this._selectedDatas.indexOf(data) !== -1 : false;
             item.depth = depth;
-            if (expandAll && !item.isLeaf) {
-                item.expanded = true;
+            if (expandAll) {
+                if (!item.isLeaf) {
+                    item.expanded = true;
+                }
+            } else {
+                if (this._savedExpands && this._savedExpands.length) {
+                    if (this._savedExpands.indexOf(item.data) !== -1) {
+                        item.expanded = true;
+                    } else {
+                        item.expanded = false;
+                    }
+                }
             }
             // collection
             if (this.flatCollection.indexOf(item) === -1) {
@@ -282,7 +304,13 @@ class TreeDataProvider {
                 moveItemTo(this.flatCollection, item, item.index);
             }
         } else {
-            item = this._createItem(parent, data, token.index, depth, expandAll);
+            let itemExpanded = false;
+            if (expandAll) {
+                itemExpanded = true;
+            } else {
+                itemExpanded = this._savedExpands && this._savedExpands.length ? this._savedExpands.indexOf(item.data) !== -1 : false;
+            }
+            item = this._createItem(parent, data, token.index, depth, itemExpanded);
             // collection
             this.flatCollection.splice(item.index, 0, item);
         }
@@ -572,7 +600,7 @@ export class DefaultTreeItemRendererWrapper {
             [enableSelection]="enableSelection"
             [enableMultiSelection]="enableMultiSelection"
             [dataProvider]="flatDataProvider"
-            [filterFunction]="_filterFunction"
+            [filterFunction]="filterFunction"
             [itemRenderer]="itemWrapperRenderer"
             [itemRendererBinding]="itemWrapperRendererBinding"
             [itemRendererParams]="itemWrapperRendererParams"
@@ -647,7 +675,6 @@ export class Tree<T> {
     selectedTreeItem: TreeDataItem = undefined;
     selectedTreeItems: TreeDataItem[] = [];
     treeDataProvider: TreeDataProvider;
-    _filterFunction = null;
 
     private _firstSelected = false;
     protected _destroyed = false;
@@ -688,22 +715,11 @@ export class Tree<T> {
         });
     }
     onChanges(changes: StateChanges) {
-        let filterChanged = false;
-        if (!changes || 'filterFunction' in changes) {
-            const old = this._filterFunction;
-            if (this.filterFunction) {
-                this._filterFunction = item => this.filterFunction(item.data);
-            } else {
-                this._filterFunction = null;
-            }
-            filterChanged = old !== this._filterFunction;
-        }
         if (changes) {
             let changed = false;
 
             if ('dataProvider' in changes || 'filterFunction' in changes) {
-                const expandAll = filterChanged && this._filterFunction;
-                this.treeDataProvider.setSource(this.dataProvider, expandAll);
+                this.treeDataProvider.setSource(this.dataProvider);
             }
             if ('selectedItem' in changes || 'enableSelection' in changes) {
                 if (this.selectedItem && !this._firstSelected) {

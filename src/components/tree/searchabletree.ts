@@ -68,14 +68,31 @@ export class SearchableTree<T> extends Tree<T> {
     @Inject(BINDING_TOKENS.CHANGE_DETECTOR) cdr: IChangeDetector;
 
     searchKey = '';
-    showSearchTree = false;
-    searchedDataProvider = [];
-    searchedSelectedItem = null;
-    searchedSelectedItems = [];
-    searchedDataMapping = [];
+    showSearch = false;
+    _filterFunction = null;
+    searchedItems = [];
+
+    onInit() {
+        super.onInit();
+        this._filterFunction = this.filterFunction ? item => this.filterFunction(item.data) : null;
+    }
+    onChanges(changes) {
+        super.onChanges(changes);
+        if (changes && 'filterfunction' in changes) {
+            if (this.showSearch) {
+                this._filterFunction = item => {
+                    const visible = this.filterFunction ? this.filterFunction(item.data) : true;
+                    if (!visible) return false;
+                    return this.searchedItems.indexOf(item.data) !== -1;
+                }
+            } else {
+                this._filterFunction = this.filterFunction ? item => this.filterFunction(item.data) : null;
+            }
+        }
+    }
 
     onSearch() {
-        this.laterSearch()
+        this.laterSearch();
     }
     
     private _searchId;
@@ -89,47 +106,43 @@ export class SearchableTree<T> extends Tree<T> {
     }
     private _doSearch() {
         const searchKey = (this.searchKey || '').trim().toLowerCase();
-        // if (!searchKey) {
-        //     this.showSearchTree = false;
-        //     this.searchedDataProvider = [];
-        // } else {
-        //     this.showSearchTree = true;
-        //     this.searchedDataMapping = [];
-        //     this.searchedDataProvider = this._searchBy(this.dataProvider, searchKey, this.searchedDataMapping);
-        // }
         if (!searchKey) {
-            this._filterFunction = item => {
-                if (!this.filterFunction) return true;
-                return this.filterFunction(item.data);
-            };
+            this.showSearch = false;
+            this._filterFunction = this.filterFunction ? item => this.filterFunction(item.data) : null;
+            this.treeDataProvider.restoreExpands();
         } else {
-            this.searchedDataMapping = [];
-            this.searchedDataProvider = this._searchBy(this.dataProvider, searchKey, this.searchedDataMapping);
-            this._filterFunction = item => {
-                return !!this.searchedDataMapping.find(arr => arr && arr[1] === item.data);
+            if (this.showSearch !== true) {
+                this.treeDataProvider.saveExpands();
+                this.showSearch = true;
             }
+            this.searchedItems = [];
+            this._searchBy(this.dataProvider, searchKey, this.searchedItems);
+            this._filterFunction = item => {
+                const visible = this.filterFunction ? this.filterFunction(item.data) : true;
+                if (!visible) return false;
+                return this.searchedItems.indexOf(item.data) !== -1;
+            }
+            this.treeDataProvider.expandAll();
         }
     }
-    private _searchBy(nodes: any[], searchKey: string, mappings?, result?) {
-        if (!nodes || !nodes.length) return {result};
+    private _searchBy(nodes: any[], searchKey: string, allMatched?, result?) {
+        if (!nodes || !nodes.length) return result;
         nodes.forEach(node => {
             const children = this._getChildren(node);
-            let matched, clone;
+            let matched;
             if (children && children.length) {
-                matched = this._searchBy(children, searchKey, mappings, matched);
+                matched = this._searchBy(children, searchKey, allMatched, matched);
             }
             if (matched && matched.length) {
                 result = result || [];
-                clone = this._cloneNode(node, matched);
-                mappings && mappings.push([clone, node]);
-                result.push(clone);
+                allMatched && allMatched.push(node);
+                result.push(node);
             } else {
                 const label = this._getSearchLabel(node).toLowerCase();
                 if (label.indexOf(searchKey) !== -1) {
                     result = result || [];
-                    clone = this._cloneNode(node);
-                    mappings && mappings.push([clone, node]);
-                    result.push(clone);
+                    allMatched && allMatched.push(node);
+                    result.push(node);
                 }
             }
         })
