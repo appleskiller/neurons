@@ -1,13 +1,12 @@
-import { Binding, Property, Element, Emitter, Inject } from '../../binding/factory/decorator';
-import { getMaxHeight, createElement, removeMe } from 'neurons-dom';
+import { createElement, getScrollbarWidth, getSuggestSize, removeMe } from 'neurons-dom';
 import { IEmitter } from 'neurons-emitter';
-import { StateChanges, IChangeDetector } from '../../binding/common/interfaces';
-import { ISelectionChangeEvent, IItemStateStatic, IItemState, IItemClickEvent, IMultiSelectionChangeEvent } from '../interfaces';
+import { findAValidValue, isDate, isDefined, ObjectAccessor } from 'neurons-utils';
 import { bind } from '../../binding';
+import { IChangeDetector, StateChanges } from '../../binding/common/interfaces';
+import { Binding, Element, Emitter, Inject, Property } from '../../binding/factory/decorator';
 import { BINDING_TOKENS } from '../../binding/factory/injector';
-import { isDefined, isDate, ObjectAccessor, findAValidValue } from 'neurons-utils';
+import { IItemClickEvent, IItemState, IItemStateStatic, IMultiSelectionChangeEvent, ISelectionChangeEvent } from '../interfaces';
 import { theme } from '../style/theme';
-import { ISVGIcon } from 'neurons-dom/dom/element';
 
 export function defaultLabelFunction(item, labelField): string {
     if (isDefined(item)) {
@@ -152,6 +151,8 @@ export class List<T> {
     contentHeight: number | string = 0;
 
     protected _typicalHeight = undefined;
+    protected _containerBoundary: {minWidth: number, maxWidth: number, minHeight: number, maxHeight: number, percentWidth: boolean, percentHeight: boolean};
+    protected _containerSize: {width: number, height: number};
 
     onInit() {
         this.dataProvider = this.dataProvider || [];
@@ -170,6 +171,7 @@ export class List<T> {
         }
     }
     onResize() {
+        this._measureSize();
         this._resetNativeDataProvider();
     }
     onScroll(e) {
@@ -275,28 +277,38 @@ export class List<T> {
     }
     protected _resetNativeDataProvider() {
         if (!this.active) return;
-        // const scrollBarSize = utils.dom.getScrollbarWidth();
-        const containerSize = getMaxHeight(this.container);
-        this.contentHeight = this._typicalHeight * this.filteredDataProvider.length;
-        if (this.contentHeight <= 0) {
-            this.offset = 0;
-            this.startIndex = 0;
-            this.endIndex = 0;
-        } else if (this.contentHeight <= containerSize) {
+        const containerSize = this._containerSize;
+        if (containerSize.height === Number.POSITIVE_INFINITY) {
+            this.contentHeight = this._typicalHeight * this.filteredDataProvider.length;
+        } else {
+            if (this.filteredDataProvider.length && containerSize.height && this._typicalHeight) {
+                this.contentHeight = this._typicalHeight * this.filteredDataProvider.length;
+            } else {
+                this.contentHeight = 0;
+            }
+        }
+        const isInfinition = containerSize.height && this.contentHeight <= containerSize.height;
+        if (isInfinition) {
             this.offset = 0;
             this.startIndex = 0;
             this.endIndex = this.filteredDataProvider.length - 1;
+        } else if (this.contentHeight <= 0) {
+            this.offset = 0;
+            this.startIndex = 0;
+            this.endIndex = 0;
         } else {
-            const itemsPerCol = Math.max(1, Math.floor(containerSize / this._typicalHeight)) + 4;
+            const rows = Math.max(1, Math.floor(containerSize.height / this._typicalHeight)) + 4;
             const scrollTop = this.container.scrollTop;
             let scrollIndex = Math.floor(scrollTop / this._typicalHeight);
-            this.endIndex = Math.min(this.filteredDataProvider.length - 1, scrollIndex + itemsPerCol);
-            this.startIndex = this.endIndex - Math.min(itemsPerCol, this.filteredDataProvider.length - 1);
+            this.endIndex = Math.min(this.filteredDataProvider.length - 1, scrollIndex + rows);
+            this.startIndex = this.endIndex - Math.min(rows, this.filteredDataProvider.length - 1);
             this.offset = this.startIndex * this._typicalHeight;
         }
         this.sliceDataProvider(this.filteredDataProvider, this.startIndex, this.endIndex);
     }
     protected _measureSize() {
+        this._containerBoundary = this._updateSizeBoundary(this.container, this._containerBoundary);
+        this._containerSize = this._getSuggestSize(this.container, this._containerBoundary);
         if (this.content.children.length > 1) {
             const child = this.content.children.item(0);
             const size = child.getBoundingClientRect();
@@ -343,6 +355,140 @@ export class List<T> {
                 return false;
             }
         }
+    }
+    protected _updateSizeBoundary(dom: HTMLElement, boundary: {minWidth: number, maxWidth: number, minHeight: number, maxHeight: number, percentWidth: boolean, percentHeight: boolean}) {
+        if (!boundary) {
+            boundary = this._getSizeBoundary(dom);
+        } else if (boundary.percentWidth || boundary.percentHeight) {
+            const b = this._getMaxSizeBoundary(dom);
+            boundary.maxWidth = b.maxWidth;
+            boundary.maxHeight = b.maxHeight;
+        }
+        return boundary;
+    }
+    protected _getMaxSizeBoundary(dom: HTMLElement) {
+        let maxWidth, maxHeight;
+        let clientSize;
+        const testWidth = 9999999, testHeight = 9999999;
+        const testDom = createElement('div');
+        dom.appendChild(testDom);
+        // 测试最大宽高
+        testDom.style.width = testWidth + 'px';
+        testDom.style.height = testHeight + 'px';
+        clientSize = dom.getBoundingClientRect();
+        maxWidth = clientSize.width;
+        maxHeight = clientSize.height;
+        removeMe(testDom);
+        return {
+            maxWidth: maxWidth,
+            maxHeight: maxHeight,
+        }
+    }
+    protected _getSizeBoundary(dom: HTMLElement) {
+        let minWidth, maxWidth, minHeight, maxHeight;
+        let clientSize, testSize;
+        const testWidth = 9999999, testHeight = 9999999;
+        const testDom = createElement('div');
+        dom.appendChild(testDom);
+        // 测试最小宽高
+        testDom.style.width = '0';
+        testDom.style.height = '0';
+        clientSize = dom.getBoundingClientRect();
+        minWidth = clientSize.width;
+        minHeight = clientSize.height;
+        // 测试最大宽高
+        testDom.style.width = testWidth + 'px';
+        testDom.style.height = testHeight + 'px';
+        clientSize = dom.getBoundingClientRect();
+        testDom.style.width = testWidth + 9 + 'px';
+        testDom.style.height = testHeight + 9 + 'px';
+        testSize = dom.getBoundingClientRect();
+        if (testSize.width > clientSize.width) {
+            maxWidth = Number.POSITIVE_INFINITY;
+        } else {
+            maxWidth = clientSize.width;
+        }
+        if (testSize.height > clientSize.height) {
+            maxHeight = Number.POSITIVE_INFINITY;
+        } else {
+            maxHeight = clientSize.height;
+        }
+        removeMe(testDom);
+        // 检查是否是百分比宽高
+        const stl = document.defaultView.getComputedStyle(dom);
+        const width = stl['width'];
+        const height = stl['height'];
+        const position = stl['position'];
+        return {
+            minWidth: minWidth,
+            maxWidth: maxWidth,
+            minHeight: minHeight,
+            maxHeight: maxHeight,
+            percentWidth: position === 'absolute' || (typeof width === 'string' && width.indexOf('%') !== -1),
+            percentHeight: position === 'absolute' || (typeof height === 'string' && height.indexOf('%') !== -1),
+        }
+    }
+    protected _getSuggestSize(dom: HTMLElement, boundary: {minWidth: number, maxWidth: number, minHeight: number, maxHeight: number, percentWidth: boolean, percentHeight: boolean}) {
+        const clientSize = dom.getBoundingClientRect();
+        return {
+            width: Math.min(boundary.maxWidth, Math.max(clientSize.width, boundary.minWidth)),
+            height: boundary.maxHeight === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : boundary.maxHeight,
+        }
+        // 检查是否设置了最大尺寸
+        // const stl = document.defaultView.getComputedStyle(dom);
+        // const stlMinWidth = stl['minWidth'];
+        // const stlMaxWidth = stl['maxWidth'];
+        // const stlMinHeight = stl['minHeight'];
+        // const stlMaxHeight = stl['maxHeight'];
+        // if (!stlMinWidth || stlMinWidth === 'none') {
+        //     minWidth = 0;
+        // } else if (stlMinWidth.indexOf('%') !== -1) {
+        //     minWidth = stlMinWidth;
+        // } else {
+        //     minWidth = parseInt(stlMinWidth);
+        //     minWidth = isNaN(minWidth) ? 0 : minWidth;
+        // }
+        // if (!stlMaxWidth || stlMaxWidth === 'none') {
+        //     maxWidth = Number.POSITIVE_INFINITY;
+        // } else if (stlMaxWidth.indexOf('%') !== -1) {
+        //     maxWidth = stlMaxWidth;
+        // } else {
+        //     maxWidth = parseInt(stlMaxWidth);
+        //     maxWidth = isNaN(maxWidth) ? Number.POSITIVE_INFINITY : maxWidth;
+        // }
+        // if (!stlMinHeight || stlMinHeight === 'none') {
+        //     minHeight = 0;
+        // } else if (stlMinHeight.indexOf('%') !== -1) {
+        //     minHeight = stlMinHeight;
+        // } else {
+        //     minHeight = parseInt(stlMinHeight);
+        //     minHeight = isNaN(minHeight) ? 0 : minHeight;
+        // }
+        // if (!stlMaxHeight || stlMaxHeight === 'none') {
+        //     maxHeight = Number.POSITIVE_INFINITY;
+        // } else if (stlMaxHeight.indexOf('%') !== -1) {
+        //     maxHeight = stlMaxHeight;
+        // } else {
+        //     maxHeight = parseInt(stlMaxHeight);
+        //     maxHeight = isNaN(maxHeight) ? Number.POSITIVE_INFINITY : maxHeight;
+        // }
+        // // 建议宽度
+        // width = Math.max(clientSize.width, dom.clientWidth);
+        // width = Math.max((typeof minWidth === 'string' ? width : minWidth), width);
+        // width = Math.min(width, (typeof maxWidth === 'string' ? width : maxWidth));
+        // // 建议高度
+        // height = Math.max(clientSize.height, dom.clientHeight);
+        // height = Math.max((typeof minHeight === 'string' ? height : minHeight), height);
+        // height = Math.min(height, (typeof maxHeight === 'string' ? height : maxHeight));
+
+        // return {
+        //     width: width,
+        //     height: height,
+        //     minWidth: minWidth,
+        //     maxWidth: maxWidth,
+        //     minHeight: minHeight,
+        //     maxHeight: maxHeight,
+        // };
     }
 }
 

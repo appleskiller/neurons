@@ -1,58 +1,56 @@
 
-import { Binding, Property, Element, Emitter, Inject } from '../../binding/factory/decorator';
-import { getMaxHeight, createElement, removeMe } from 'neurons-dom';
-import { IEmitter, EventEmitter, emitter } from 'neurons-emitter';
-import { StateChanges, IChangeDetector, IBindingRef, IElementRef } from '../../binding/common/interfaces';
-import { ISelectionChangeEvent, IItemStateStatic, IItemState, IItemClickEvent, IMultiSelectionChangeEvent } from '../interfaces';
-import { bind } from '../../binding';
+import { IEmitter } from 'neurons-emitter';
+import { IChangeDetector } from '../../binding/common/interfaces';
+import { Binding, Emitter, Inject, Property } from '../../binding/factory/decorator';
 import { BINDING_TOKENS } from '../../binding/factory/injector';
-import { isDefined, isDate, ObjectAccessor, findAValidValue, Map, moveItemTo, isEmpty, isArray } from 'neurons-utils';
-import { theme } from '../style/theme';
-import { ISVGIcon } from 'neurons-dom/dom/element';
 import { SvgIcon } from '../icon/svgicon';
-import { List, defaultLabelFunction } from '../list/list';
-import { arrow_left, arrow_right, search } from '../icon/icons';
 import { SearchInput } from '../input/search';
-import { ITreeItemClickEvent, ITreeMultiSelectionChangeEvent, ITreeSelectionChangeEvent, Tree } from './tree';
+import { defaultLabelFunction } from '../list/list';
+import { theme } from '../style/theme';
+import { Tree } from './tree';
 
 @Binding({
     selector: 'ne-searchable-tree',
     template: `
         <div class="ne-searchable-tree">
-        <div class="ui-select-org-header">
             <ne-search-input
+                *if="!hideSeachInput"
                 [(value)]="searchKey"
                 (change)="onSearch()"
             ></ne-search-input>
-        </div>
-            <div class="ui-select-org-body">
-                <ne-list
-                    #list
-                    class="ne-tree"
-                    [class.only-leaf-selection]="onlyLeafSelection"
-                    [active]="active"
-                    [enableSelection]="enableSelection"
-                    [enableMultiSelection]="enableMultiSelection"
-                    [dataProvider]="flatDataProvider"
-                    [filterFunction]="_filterFunction"
-                    [itemRenderer]="itemWrapperRenderer"
-                    [itemRendererBinding]="itemWrapperRendererBinding"
-                    [itemRendererParams]="itemWrapperRendererParams"
-                    [selectedItem]="selectedTreeItem"
-                    (selectedItem)="onSelectedItemChange($event)"
-                    [selectedItems]="selectedTreeItems"
-                    (selectedItems)="onSelectedItemsChange($event)"
-                    (selectionChange)="onSelectionChange($event)"
-                    (multiSelectionChange)="onMultiSelectionChange($event)"
-                    (itemClick)="onItemClick($event)"
-                    (itemMouseDown)="onItemMouseDown($event)"
-                ></ne-list>
-            </div>
+            <ne-list
+                #list
+                class="ne-tree"
+                [class.only-leaf-selection]="onlyLeafSelection"
+                [style.top]="hideSeachInput ? '0' : ''"
+                [active]="active"
+                [enableSelection]="enableSelection"
+                [enableMultiSelection]="enableMultiSelection"
+                [dataProvider]="flatDataProvider"
+                [filterFunction]="_filterFunction"
+                [itemRenderer]="itemWrapperRenderer"
+                [itemRendererBinding]="itemWrapperRendererBinding"
+                [itemRendererParams]="itemWrapperRendererParams"
+                [selectedItem]="selectedTreeItem"
+                (selectedItem)="onSelectedItemChange($event)"
+                [selectedItems]="selectedTreeItems"
+                (selectedItems)="onSelectedItemsChange($event)"
+                (selectionChange)="onSelectionChange($event)"
+                (multiSelectionChange)="onMultiSelectionChange($event)"
+                (itemClick)="onItemClick($event)"
+                (itemMouseDown)="onItemMouseDown($event)"
+            ></ne-list>
         </div>
     `,
     style: `
         .ne-searchable-tree {
-            
+            & > .ne-search-input {
+                height: 36px;
+                line-height: 36px;
+                background-color: ${theme.gray.light};
+                border-bottom: solid 1px ${theme.gray.normal};
+                box-sizing: border-box;
+            }
         }
     `,
     requirements: [
@@ -64,10 +62,13 @@ import { ITreeItemClickEvent, ITreeMultiSelectionChangeEvent, ITreeSelectionChan
 export class SearchableTree<T> extends Tree<T> {
 
     @Property() searchField: string;
+    @Property() searchKey = '';
+    @Property() hideSeachInput = false;
+
+    @Emitter() searchKeyChange: IEmitter<string>;
     
     @Inject(BINDING_TOKENS.CHANGE_DETECTOR) cdr: IChangeDetector;
 
-    searchKey = '';
     showSearch = false;
     _filterFunction = null;
     searchedItems = [];
@@ -75,6 +76,9 @@ export class SearchableTree<T> extends Tree<T> {
     onInit() {
         super.onInit();
         this._filterFunction = this.filterFunction ? item => this.filterFunction(item.data) : null;
+        if (this.searchKey) {
+            this._doSearch();
+        }
     }
     onChanges(changes) {
         super.onChanges(changes);
@@ -89,9 +93,17 @@ export class SearchableTree<T> extends Tree<T> {
                 this._filterFunction = this.filterFunction ? item => this.filterFunction(item.data) : null;
             }
         }
+        if (changes && 'searchKey' in changes) {
+            this.laterSearch();
+        }
+    }
+    onDestroy() {
+        clearTimeout(this._searchId);
+        super.onDestroy();
     }
 
     onSearch() {
+        this.searchKeyChange.emit(this.searchKey);
         this.laterSearch();
     }
     
@@ -102,7 +114,7 @@ export class SearchableTree<T> extends Tree<T> {
             if (this._destroyed) return;
             this._doSearch();
             this.cdr.detectChanges();
-        }, 300);
+        }, 150);
     }
     private _doSearch() {
         const searchKey = (this.searchKey || '').trim().toLowerCase();

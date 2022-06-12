@@ -1,6 +1,6 @@
 
 import { Binding, Property, Element, Emitter, Inject } from '../../binding/factory/decorator';
-import { getMaxHeight, createElement, removeMe } from 'neurons-dom';
+import { createElement, removeMe } from 'neurons-dom';
 import { IEmitter, EventEmitter, emitter } from 'neurons-emitter';
 import { StateChanges, IChangeDetector, IBindingRef, IElementRef } from '../../binding/common/interfaces';
 import { ISelectionChangeEvent, IItemStateStatic, IItemState, IItemClickEvent, IMultiSelectionChangeEvent } from '../interfaces';
@@ -324,6 +324,9 @@ class TreeDataProvider {
             if (parentChildItems) {
                 const ind = parentChildItems.indexOf(item)
                 ind !== -1 && parentChildItems.splice(ind, 1);
+                if (!parentChildItems.length) {
+                    this._childrenMap.del(oldParent);
+                }
             }
         }
         // children
@@ -348,6 +351,9 @@ class TreeDataProvider {
             if (parentChildItems) {
                 const ind = parentChildItems.indexOf(item)
                 ind !== -1 && parentChildItems.splice(ind, 1);
+                if (!parentChildItems.length) {
+                    this._childrenMap.del(parent);
+                }
             }
         }
         // children map
@@ -543,12 +549,18 @@ export class DefaultTreeItemRendererWrapper {
     }
     onClick(e: MouseEvent) {
         if (e.defaultPrevented) return;
+        let acceptSelect = true;
         if (this.params && this.params.onlyLeafSelection && this.item && !this.item.isLeaf) {
+            acceptSelect = false;
             e.preventDefault();
         }
         if (this.item) {
-            this.item.expanded ? this.item.collapse() : this.item.expand();
-            this.opened = this.item.expanded;
+            const api = this.injector.get('tree_wrapper_api') as any;
+            const acceptOpenClose = !acceptSelect || !api || !api.isItemSelected || api.isItemSelected(this.item.data);
+            if (acceptOpenClose) {
+                this.item.expanded ? this.item.collapse() : this.item.expand();
+                this.opened = this.item.expanded;
+            }
         }
     }
     protected updateDisplay() {
@@ -683,6 +695,17 @@ export class Tree<T> {
         this.injector.providers([{
             token: 'tree_data_updated',
             use: this.treeUpdated
+        }, {
+            token: 'tree_wrapper_api',
+            use: {
+                isItemSelected: (item) => {
+                    if (this.enableMultiSelection) {
+                        return this.selectedItems && this.selectedItems.indexOf(item) !== -1;
+                    } else {
+                        return this.selectedItem === item;
+                    }
+                }
+            }
         }])
         this.treeDataProvider = new TreeDataProvider(
             this.dataProvider,

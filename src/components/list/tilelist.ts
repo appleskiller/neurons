@@ -55,12 +55,7 @@ import { Input } from '../input/input';
     ]
 })
 export class TileList extends List<any> {
-    protected _containerSize: {width: number, height: number};
     protected _typicalWidth: number = undefined;
-    onResize() {
-        this._measureSize();
-        this._resetNativeDataProvider();
-    }
     protected _resetNativeDataProvider() {
         if (!this.active) return;
         const containerSize = this._containerSize;
@@ -99,7 +94,8 @@ export class TileList extends List<any> {
         this.sliceDataProvider(this.filteredDataProvider, this.startIndex, this.endIndex);
     }
     protected _measureSize() {
-        this._containerSize = getSuggestSize(this.container);
+        this._containerBoundary = this._updateSizeBoundary(this.container, this._containerBoundary);
+        this._containerSize = this._getSuggestSize(this.container, this._containerBoundary);
         const scrollBarWidth = getScrollbarWidth();
         this._containerSize.width = isNaN(this._containerSize.width) ? 0 : Math.max(this._containerSize.width - scrollBarWidth, 0);
         if (this.content.children.length > 1) {
