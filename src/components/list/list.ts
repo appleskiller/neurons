@@ -154,6 +154,9 @@ export class List<T> {
     protected _containerBoundary: {minWidth: number, maxWidth: number, minHeight: number, maxHeight: number, percentWidth: boolean, percentHeight: boolean};
     protected _containerSize: {width: number, height: number};
 
+    private _attached = true;
+    private _markResize = false;
+
     onInit() {
         this.dataProvider = this.dataProvider || [];
         this._resetDataProvider();
@@ -171,11 +174,26 @@ export class List<T> {
         }
     }
     onResize() {
-        this._measureSize();
-        this._resetNativeDataProvider();
+        if (this._attached) {
+            this._measureSize();
+            this._resetNativeDataProvider();
+        } else {
+            this._markResize = true;;
+        }
     }
     onScroll(e) {
         this._resetNativeDataProvider();
+    }
+    onAttach() {
+        this._attached = true;
+        if (this._markResize) {
+            this._markResize = false;
+            this._measureSize();
+            this._resetNativeDataProvider();
+        }
+    }
+    onDetach() {
+        this._attached = false;
     }
     getItemLabel(item: T) {
         if (this.labelFunction) return this.labelFunction(item);
