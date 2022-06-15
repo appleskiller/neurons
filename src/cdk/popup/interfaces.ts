@@ -134,6 +134,7 @@ export interface IPopupRef<T extends StateObject> {
     option: IPopupOption<T>;
     overlay: IPopupOverlayRef<T>;
     panel: IPopupPanelRef<T>;
+    setState(state: any): void;
     updatePosition(connectElement?: HTMLElement | MouseEvent | IConnectPoint): void;
     open(source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>, option?: IPopupOption<T>): void;
     close(): void;

@@ -63,6 +63,12 @@ export class PopupRef<T extends StateObject> implements IPopupRef<T> {
         //     this._nativeEmitter.off();
         // });
     }
+    setState(state: any) {
+        if (!state) return;
+        this.panel.changeState({
+            state: state,
+        });
+    }
     updatePosition(connectElement?: HTMLElement | MouseEvent): void {
         this.panel.updatePosition(connectElement);
     }

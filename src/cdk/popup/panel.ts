@@ -64,9 +64,6 @@ const defaultPopupPosition = {
         max-width: 100%;
         max-height: 100%;
     }
-    .ne-popup-panel.ne-internal-panel {
-        position: absolute;
-    }
     .ne-popup-panel .ne-popup-panel-content {
         overflow: hidden;
         box-sizing: border-box;
@@ -75,6 +72,16 @@ const defaultPopupPosition = {
         color: rgba(0, 0, 0, 0.8);
         box-shadow: 0 3px 9px rgba(0, 0, 0, 0.24);
         pointer-events: all;
+    }
+    .ne-popup-panel.ne-internal-panel {
+        position: absolute;
+    }
+    .ne-popup-panel.ne-internal-panel .ne-popup-panel-content {
+        box-shadow: none;
+        .ne-animation-wave {
+            width: 25px;
+            height: 20px;
+        }
     }
     .ne-popup-panel[popup-mode=sidepanel] {
         width: 100%;
