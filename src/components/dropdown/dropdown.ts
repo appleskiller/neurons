@@ -205,14 +205,13 @@ export class DropDownButton<T> {
         }
         .ne-dropdown-popup-list.modal-mode .ne-dropdown-popup-list-buttons {
             text-align: right;
-            border-top: solid 1px ${theme.gray.heavy};
+            margin-top: 8px;
         }
         .ne-dropdown-popup-list.modal-mode .ne-dropdown-popup-list-buttons > .ne-button {
             min-width: 92px;
             padding: 8px 12px;
             vertical-align: top;
-            width: 50%;
-            border-radius: 0;
+            margin-left: 8px;
         }
         .ne-dropdown-popup-list.modal-mode .ne-searchable-tile-list-input {
             padding: 8px 12px;
