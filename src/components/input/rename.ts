@@ -101,6 +101,8 @@ import { BINDING_TOKENS } from '../../binding';
     ]
 })
 export class RenameInput {
+    @Property() prefix: string = '';
+    @Property() suffix: string = '';
     @Property() name: string = '';
     @Property() nameMaxLength: number = 64;
     @Property() disabled: boolean = false;
@@ -129,7 +131,7 @@ export class RenameInput {
         this.popupRef && this.popupRef.close();
     }
     protected getName() {
-        return this.name || this.placeholder;
+        return this.name ? this.prefix + this.name + this.suffix : this.placeholder;
     }
     protected onNameClick(event: MouseEvent) {
         this.showEdit();
