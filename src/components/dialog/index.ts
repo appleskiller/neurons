@@ -55,7 +55,7 @@ export interface IModalOption {
     };
     okLabel?: string;
     cancelLabel?: string;
-    onOk?: () => void;
+    onOk?: () => any;
     onCancel?: () => void;
     onClosed?: () => void;
     hideOkButton?: boolean;
@@ -87,7 +87,7 @@ export interface ISidePanelOption {
     };
     okLabel?: string;
     cancelLabel?: string;
-    onOk?: () => void;
+    onOk?: () => any;
     onCancel?: () => void;
     onClosed?: () => void;
     hideOkButton?: boolean;
@@ -286,8 +286,18 @@ export function modal(option: IModalOption): IModalPopupRef {
             disableOkButton: 'disableOkButton' in option ? option.disableOkButton : false,
             disableCancelButton: 'disableCancelButton' in option ? option.disableCancelButton : false,
             onOk: () => {
-                option.onOk && option.onOk();
-                ref.close();
+                if (option.onOk) {
+                    const result = option.onOk();
+                    if (result !== false && !result) {
+                        ref.close();
+                    } else {
+                        if (isPromise(result)) {
+                            result.then(() => ref.close());
+                        }
+                    }
+                } else {
+                    ref.close();
+                }
             },
             onCancel: () => {
                 option.onCancel && option.onCancel();
@@ -383,8 +393,18 @@ export function sidePanel(option: ISidePanelOption): ISidePanelPopupRef {
             disableOkButton: 'disableOkButton' in option ? option.disableOkButton : false,
             disableCancelButton: 'disableCancelButton' in option ? option.disableCancelButton : false,
             onOk: () => {
-                option.onOk && option.onOk();
-                ref.close();
+                if (option.onOk) {
+                    const result = option.onOk();
+                    if (result !== false && !result) {
+                        ref.close();
+                    } else {
+                        if (isPromise(result)) {
+                            result.then(() => ref.close());
+                        }
+                    }
+                } else {
+                    ref.close();
+                }
             },
             onCancel: () => {
                 option.onCancel && option.onCancel();
