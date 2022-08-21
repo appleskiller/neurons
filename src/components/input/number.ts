@@ -139,8 +139,10 @@ export class NumberInput {
             }
         }
         if (!changes || 'value' in changes) {
-            this._setValue(this.value);
-            this._inputChanged = false;
+            if (!this._inputing) {
+                this._setValue(this.value);
+                this._inputChanged = false;
+            }
         }
     }
     onKeyDown(e: KeyboardEvent) {
@@ -167,14 +169,21 @@ export class NumberInput {
         }
     }
     onInputChange(e: KeyboardEvent) {
-        let value = this.input.value.replace(/[^-|.|0-9]/g, '');
-        const arr = value.split('.');
-        if (arr.length > 2) {
-            arr.length = 2;
-            value = arr.join('.');
-        }
-        this.input.value = value;
+        // let value = this.input.value.replace(/[^-|.|0-9]/g, '');
+        // const arr = value.split('.');
+        // if (arr.length > 2) {
+        //     arr.length = 2;
+        //     value = arr.join('.');
+        // }
+        // this.input.value = value;
         this._setValue(this.input.value);
+        // const invalid = !!this._validateValue(this.input.value);
+        // this._changeInvalid(invalid);
+        // if (!this.invalid) {
+        //     this._changeValue(value);
+        // } else if (this.alwaysTriggerChange) {
+        //     this._changeValue(value);
+        // }
     }
     onFocus() {
         this._focused = true;
@@ -209,13 +218,23 @@ export class NumberInput {
     }
     protected _plus() {
         const step = (!this.step && this.step !== 0) ? 1 : parseFloat(this.step as string);
-        const value = this.input.value.trim() === '' ? 0 : math.plus(this._toNumber(this.input.value), step);
-        this._setValue(this._toNumber(value));
+        let value = this.input.value.trim() === '' ? 0 : math.plus(this._toNumber(this.input.value), step);
+        // this._setValue(this._toNumber(value));
+        value = this._toNumber(value);
+        const invalid = !!this._validateValue(value);
+        this.setInputValue(value);
+        this._changeInvalid(invalid);
+        this._changeValue(value);
     }
     protected _minus() {
         const step = (!this.step && this.step !== 0) ? 1 : parseFloat(this.step as string);
-        const value = this.input.value.trim() === '' ? 0 : math.minus(this._toNumber(this.input.value), step);
-        this._setValue(this._toNumber(value));
+        let value = this.input.value.trim() === '' ? 0 : math.minus(this._toNumber(this.input.value), step);
+        // this._setValue(this._toNumber(value));
+        value = this._toNumber(value);
+        const invalid = !!this._validateValue(value);
+        this.setInputValue(value);
+        this._changeInvalid(invalid);
+        this._changeValue(value);
     }
     protected _toNumber(value) {
         return !this.integer ? this._toFloat(value) : this._toInt(value);
@@ -254,7 +273,7 @@ export class NumberInput {
         const invalid = !!this._validateValue(oriValue);
         // 如果正在输入则保持
         if (this._inputing) {
-            this.input.value = (!isDefined(oriValue) || (typeof oriValue === 'number' && isNaN(oriValue))) ? '' : oriValue;
+            // this.setInputValue(oriValue);
             this._changeInvalid(invalid);
             if (!this.invalid) {
                 this._changeValue(value);
