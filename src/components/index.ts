@@ -9,6 +9,7 @@ export { CheckBox } from './checkbox/checkbox';
 export { CheckBoxGroup } from './checkbox/checkboxgroup';
 export { PalletePicker } from './color/pallete';
 export { ColorWheel } from './color/colorwheel';
+export { ColorPickerPanel } from './color/colorpicker';
 export { HSlider } from './slider/hslider';
 export { DropDownButton } from './dropdown/dropdown';
 export { DropDownList } from './dropdown/dropdown';

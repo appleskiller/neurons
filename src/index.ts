@@ -83,6 +83,7 @@ export {
     CheckBoxGroup,
     PalletePicker,
     ColorWheel,
+    ColorPickerPanel,
     HSlider,
     DropDownButton,
     DropDownList,

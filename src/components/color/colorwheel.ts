@@ -64,7 +64,7 @@ function drawLightnessRect(hue, saturation, lightness, width, height, ctx: Canva
     selector: 'ne-color-wheel',
     template: `
         <div class="ne-color-wheel" #container>
-            <div class="ne-color-wheel-bg" [style.width]="_box.width" [style.height]="_box.height">
+            <div class="ne-color-wheel-bg" [style.width]="_box.width" [style.height]="_box.height" [style.padding]="_box.width * 0.15 + 'px' + ' ' + _box.height * 0.15 + 'px'">
                 <div></div>
             </div>
             <canvas #wheelCanvas ></canvas>

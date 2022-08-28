@@ -16,7 +16,7 @@ import { popupManager } from '../../cdk/popup/manager';
     selector: 'ne-h-slider',
     template: `
         <div class="ne-h-slider" tabindex="0" (focus)="onFocus()" (blur)="onBlur()">
-            <div #bar class="ne-h-slider-bar" (mousedown)="onMouseDown($event)" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+            <div #bar class="ne-h-slider-bar" (mousewheel)="onMouseWheel($event)" (mousedown)="onMouseDown($event)" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
                 <div class="ne-h-slider-bg"></div>
                 <div class="ne-h-slider-progress-wrapper">
                     <div class="ne-h-slider-progress" [style.width]="position + 'px'"></div>
@@ -34,6 +34,7 @@ import { popupManager } from '../../cdk/popup/manager';
             height: 32px;
             padding: 0 12px;
             box-sizing: border-box;
+            user-select: none;
             .ne-h-slider-bar {
                 position: relative;
                 cursor: pointer;
@@ -99,15 +100,25 @@ import { popupManager } from '../../cdk/popup/manager';
             .ne-popup-panel-content {
                 position: relative;
                 overflow: initial;
-                &:before {
-                    content: ' ';
+                .ne-hslider-value-tooltip-caret {
                     position: absolute;
-                    width: 8px;
+                    left: 0;
+                    right: 0;
+                    top: 100%;
                     height: 8px;
-                    transform: rotate(45deg);
-                    left: calc(50% - 4px);
-                    bottom: -4px;
-                    background: #262c3c;
+                    overflow: hidden;
+                    &:before {
+                        content: ' ';
+                        position: absolute;
+                        top: -4px;
+                        left: 0;
+                        right: 0;
+                        width: 8px;
+                        height: 8px;
+                        margin: auto;
+                        transform: rotate(45deg);
+                        background: ${theme.black.middle};
+                    }
                 }
             }
         }
@@ -145,6 +156,7 @@ export class HSlider extends Slider {
 
     onInit() {
         this._tipRef = popupManager.tooltip(`
+            <div class="ne-hslider-value-tooltip-caret"></div>
             {{value}}
         `, {
             panelClass: 'ne-hslider-value-tooltip',
@@ -224,6 +236,23 @@ export class HSlider extends Slider {
         if (event.target !== this.point) {
             this.updateValue(this.position2value(event.clientX - this._box.x, this._box.width))
         }
+    }
+    onMouseWheel(event: WheelEvent) {
+        if (event.defaultPrevented) return;
+        if (event.ctrlKey) {
+            if (event.deltaY > 0) {
+                this.updateValue(math.plus(this.value, this.step * 10));
+            } else {
+                this.updateValue(math.minus(this.value, this.step * 10));
+            }
+        } else {
+            if (event.deltaY > 0) {
+                this.updateValue(math.plus(this.value, this.step));
+            } else {
+                this.updateValue(math.minus(this.value, this.step));
+            }
+        }
+        event.preventDefault();
     }
     protected registerMouseEvents() {
         this.unregisterMouseEvents();
