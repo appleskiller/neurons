@@ -11,6 +11,7 @@ import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
             [class]="{'ne-button': true, 'disabled': disabled}"
             [color]="_color"
             [mode]="mode"
+            [disabled]="disabled ? '' : null"
             (click)="onClick($event)"
         >
             <style #styleEl type="text/css"></style>
@@ -49,14 +50,22 @@ import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
             width: 0;
         }
 
-        .ne-button:hover {
+        .ne-button[readonly] {
+            cursor: default;
+        }
+        .ne-button:not([readonly]):not(.disabled):not([disabled]):hover {
             color: rgba(0, 0, 0, 1);
             background-color: rgba(125,125,125,0.12);
         }
-        .ne-button:not(.disabled):active {
+        .ne-button:not([readonly]):not(.disabled):not([disabled]):active {
             background-color: rgba(125,125,125,0.24);
         }
         .ne-button.disabled {
+            opacity: 0.2;
+            color: rgba(0, 0, 0, 0.8);
+            cursor: default;
+        }
+        .ne-button[disabled] {
             opacity: 0.2;
             color: rgba(0, 0, 0, 0.8);
             cursor: default;
@@ -69,11 +78,11 @@ import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
             -webkit-box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
             box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
         }
-        .ne-button[mode="raised"]:not(.disabled):hover {
+        .ne-button[mode="raised"]:not([readonly]):not(.disabled):not([disabled]):hover {
             -webkit-box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
             box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
         }
-        .ne-button[mode="raised"]:not(.disabled):active {
+        .ne-button[mode="raised"]:not([readonly]):not(.disabled):not([disabled]):active {
             -webkit-box-shadow: 0 5px 5px -3px rgba(0,0,0,.2), 0 8px 10px 1px rgba(0,0,0,.14), 0 3px 14px 2px rgba(0,0,0,.12);
             box-shadow: 0 5px 5px -3px rgba(0,0,0,.2), 0 8px 10px 1px rgba(0,0,0,.14), 0 3px 14px 2px rgba(0,0,0,.12);
         }
@@ -81,10 +90,12 @@ import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
             color: rgba(255, 255, 255, 1);
             background-color: ${theme.color.primary};
         }
-        .ne-button[mode="raised"][color="primary"]:not(.disabled):hover {
+        .ne-button[mode="raised"][color="primary"]:not([readonly]):not(.disabled):not([disabled]):hover {
+            color: rgba(255, 255, 255, 1);
             background-color: rgba(49, 129, 234, 1);
         }
-        .ne-button[mode="raised"][color="primary"]:not(.disabled):active {
+        .ne-button[mode="raised"][color="primary"]:not([readonly]):not(.disabled):not([disabled]):active {
+            color: rgba(255, 255, 255, 1);
             background-color: rgba(72 , 143, 236, 1);
         }
 
@@ -92,10 +103,12 @@ import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
             color: rgba(255, 255, 255, 1);
             background-color: ${theme.color.primary};
         }
-        .ne-button[mode="flat"][color="primary"]:not(.disabled):hover {
+        .ne-button[mode="flat"][color="primary"]:not([readonly]):not(.disabled):not([disabled]):hover {
+            color: rgba(255, 255, 255, 1);
             background-color: rgba(49, 129, 234, 1);
         }
-        .ne-button[mode="flat"][color="primary"]:not(.disabled):active {
+        .ne-button[mode="flat"][color="primary"]:not([readonly]):not(.disabled):not([disabled]):active {
+            color: rgba(255, 255, 255, 1);
             background-color: rgba(72, 143, 236, 1);
         }
 
@@ -111,11 +124,12 @@ import { IHTMLWidgetStyleSheet } from 'neurons-dom/dom/style';
             -webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
             box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
         }
-        .ne-button[mode="simulated"]:not(.disabled):hover {
+        .ne-button[mode="simulated"]:not([readonly]):not(.disabled):not([disabled]):hover {
+            color: rgba(255, 255, 255, 1);
             background: -webkit-linear-gradient(rgba(72 , 143, 236, 1), rgba(26, 115, 232, 1));
             background: linear-gradient(rgba(72 , 143, 236, 1), rgba(26, 115, 232, 1));
         }
-        .ne-button[mode="simulated"]:not(.disabled):active {
+        .ne-button[mode="simulated"]:not([readonly]):not(.disabled):not([disabled]):active {
             color: rgba(0, 100, 217, 1) !important;
             border-color: ${theme.color.primary};
             background: -webkit-linear-gradient(rgba(49, 129, 234, 1), rgba(26, 115, 232, 1));
@@ -161,23 +175,24 @@ export class Button {
         const activeColor = color.lightenColor(hoverColor);
         return [{
             "&": { color: baseColor, },
-            "&:hover": { color: hoverColor, },
-            "&:active": { color: activeColor, },
+            "&:not([readonly]):not(.disabled):not([disabled]):hover": { color: hoverColor, },
+            "&:not([readonly]):not(.disabled):not([disabled]):active": { color: activeColor, },
             "&[mode=raised]": { backgroundColor: baseColor, color: 'rgba(255, 255, 255, 1)', },
-            "&[mode=raised]:not(.disabled):hover": { backgroundColor: hoverColor, },
-            "&[mode=raised]:not(.disabled):active": { backgroundColor: activeColor, },
+            "&[mode=raised]:not([readonly]):not(.disabled):not([disabled]):hover": { backgroundColor: hoverColor, color: 'rgba(255, 255, 255, 1)',},
+            "&[mode=raised]:not([readonly]):not(.disabled):not([disabled]):active": { backgroundColor: activeColor, color: 'rgba(255, 255, 255, 1)',},
             "&[mode=flat]": { backgroundColor: baseColor, color: 'rgba(255, 255, 255, 1)', },
-            "&[mode=flat]:not(.disabled):hover": { backgroundColor: hoverColor, },
-            "&[mode=flat]:not(.disabled):active": { backgroundColor: activeColor, },
+            "&[mode=flat]:not([readonly]):not(.disabled):not([disabled]):hover": { backgroundColor: hoverColor, color: 'rgba(255, 255, 255, 1)',},
+            "&[mode=flat]:not([readonly]):not(.disabled):not([disabled]):active": { backgroundColor: activeColor, color: 'rgba(255, 255, 255, 1)',},
             "&[mode=simulated]": {
                 color: 'rgba(255, 255, 255, 1)',
                 background: `linear-gradient(${hoverColor}, ${baseColor})`,
                 border: `solid 1px ${baseColor}`,
             },
-            "&[mode=simulated]:not(.disabled):hover": {
+            "&[mode=simulated]:not([readonly]):not(.disabled):not([disabled]):hover": {
+                color: 'rgba(255, 255, 255, 1)',
                 background: `linear-gradient(${activeColor}, ${baseColor})`,
             },
-            "&[mode=simulated]:not(.disabled):active": {
+            "&[mode=simulated]:not([readonly]):not(.disabled):not([disabled]):active": {
                 color: `${baseColor} !important`,
                 borderColor: `${baseColor}`,
                 background: `linear-gradient(${hoverColor}, ${baseColor})`,
@@ -186,10 +201,10 @@ export class Button {
             "&[mode=simulated]": {
                 background: `-webkit-linear-gradient(${hoverColor}, ${baseColor})`,
             },
-            "&[mode=simulated]:not(.disabled):hover": {
+            "&[mode=simulated]:not([readonly]):not(.disabled):not([disabled]):hover": {
                 background: `-webkit-linear-gradient(${activeColor}, ${baseColor})`,
             },
-            "&[mode=simulated]:not(.disabled):active": {
+            "&[mode=simulated]:not([readonly]):not(.disabled):not([disabled]):active": {
                 background: `-webkit-linear-gradient(${hoverColor}, ${baseColor})`,
             },
         }]

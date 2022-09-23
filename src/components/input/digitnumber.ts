@@ -32,14 +32,32 @@ export class DigitNumberInput extends NumberInput {
         }
     }
     protected _plus() {
+        // const step = (!this.step && this.step !== 0) ? 1 : parseFloat(this.step as string);
+        // const value = this.input.value.trim() === '' ? 0 : math.plus(this._toNumber(this.input.value), step);
+        // this._setValue(this._toFixNumber(this._toNumber(value + '') + ''));
+
         const step = (!this.step && this.step !== 0) ? 1 : parseFloat(this.step as string);
-        const value = this.input.value.trim() === '' ? 0 : math.plus(this._toNumber(this.input.value), step);
-        this._setValue(this._toFixNumber(this._toNumber(value + '') + ''));
+        let value = this.input.value.trim() === '' ? 0 : math.plus(this._toNumber(this.input.value), step);
+        // this._setValue(this._toNumber(value));
+        value = this._toNumber(value);
+        const invalid = !!this._validateValue(value);
+        this.setInputValue(value);
+        this._changeInvalid(invalid);
+        this._changeValue(value);
     }
     protected _minus() {
+        // const step = (!this.step && this.step !== 0) ? 1 : parseFloat(this.step as string);
+        // const value = this.input.value.trim() === '' ? 0 : math.minus(this._toNumber(this.input.value), step);
+        // this._setValue(this._toFixNumber(this._toNumber(value + '') + ''));
+
         const step = (!this.step && this.step !== 0) ? 1 : parseFloat(this.step as string);
-        const value = this.input.value.trim() === '' ? 0 : math.minus(this._toNumber(this.input.value), step);
-        this._setValue(this._toFixNumber(this._toNumber(value + '') + ''));
+        let value = this.input.value.trim() === '' ? 0 : math.minus(this._toNumber(this.input.value), step);
+        // this._setValue(this._toNumber(value));
+        value = this._toNumber(value);
+        const invalid = !!this._validateValue(value);
+        this.setInputValue(value);
+        this._changeInvalid(invalid);
+        this._changeValue(value);
     }
     protected setInputValue(value) {
         const str = (!isDefined(value) || (typeof value === 'number' && isNaN(value))) ? '' : value;

@@ -36,7 +36,11 @@ export const nativeApi = {
         return element.getAttribute(property);
     },
     setAttribute: (element: HTMLElement, property: string, value: string) => {
-        element.setAttribute(property, value);
+        if (value === undefined || value === null) {
+            element.removeAttribute(property);
+        } else {
+            element.setAttribute(property, value);
+        }
     },
     setStyle: (element: HTMLElement, property: string, value: string) => {
         const prop = cssProp2Prop(property);
@@ -69,7 +73,28 @@ export const nativeApi = {
 
 export const domapi = {
     setAttributes: (element: INeElement | HTMLElement, attrs: {[key: string]: string}) => {
-        Object.keys(attrs || {}).forEach(property => element.setAttribute(property, attrs[property]));
+        Object.keys(attrs || {}).forEach(property => {
+            if (element instanceof Node) {
+                if (attrs[property] === undefined || attrs[property] === null) {
+                    element.removeAttribute(property);
+                } else {
+                    element.setAttribute(property, attrs[property]);
+                }
+            } else {
+                element.setAttribute(property, attrs[property])
+            }
+        });
+    },
+    setAttribute: (element: INeElement | HTMLElement, property: string, value: any) => {
+        if (element instanceof Node) {
+            if (value === undefined || value === null) {
+                element.removeAttribute(property);
+            } else {
+                element.setAttribute(property, value);
+            }
+        } else {
+            element.setAttribute(property, value)
+        }
     },
     setClasses: (element: INeElement | HTMLElement, classes: { [key: string]: boolean }) => {
         classes = classes || {};

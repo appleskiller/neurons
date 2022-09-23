@@ -246,6 +246,7 @@ export interface IBindingRef<T> {
     attach(): IBindingRef<T>;
     detach(): IBindingRef<T>;
     resize(): IBindingRef<T>;
+    addEventListener(eventName: string, handler: any): RemoveEventListenerFunction;
     detectChanges(recursive?: boolean): IBindingRef<T>;
     destroy(): void;
 

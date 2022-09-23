@@ -63,6 +63,11 @@ export class PopupRef<T extends StateObject> implements IPopupRef<T> {
         //     this._nativeEmitter.off();
         // });
     }
+    getState(property?: string): any {
+        const instance = this.panel.getState();
+        if (!property) return instance ? instance.state : undefined;
+        return instance && instance.state ? instance.state[property] : undefined;
+    }
     setState(state: any) {
         if (!state) return;
         this.panel.changeState({

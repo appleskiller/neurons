@@ -1,5 +1,6 @@
 import { StateObject, INeBindingRef, IBindingRef, INeElement, IElementRef, IUIState } from '../common/interfaces';
 import { merge } from 'neurons-utils';
+import { RemoveEventListenerFunction } from '../common/domapi';
 
 export function wrapNeBindingRef<T extends IUIState>(
     bindingRef: INeBindingRef
@@ -75,6 +76,9 @@ export function wrapNeBindingRef<T extends IUIState>(
                 return wrapElement2ElementRef(element);
             }
         },
+        addEventListener(eventName: string, handler: any): RemoveEventListenerFunction {
+            return bindingRef.addEventListener(eventName, handler);
+        }
     }
 }
 

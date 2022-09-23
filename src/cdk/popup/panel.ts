@@ -814,6 +814,11 @@ export class PopupPanelRef<T extends StateObject> implements IPopupPanelRef<T> {
             this._ref && this._ref.setState({ shakeup: false });
         }, 60);
     }
+    getState(property?: string): any {
+        const instance = this._ref.instance();
+        if (!property) return instance;
+        return instance ? instance[property] : undefined;
+    }
     changeState(state: IPopupPanelState) {
         if (this._destroyed) return;
         const panelClass = this._oriState.panelClass;

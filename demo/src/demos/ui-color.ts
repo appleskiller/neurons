@@ -1,5 +1,5 @@
 import { register } from "../demos";
-import { bind, Binding, Property, Emitter, Inject, icons, HSlider, PalletePicker } from "../../../src";
+import { bind, Binding, Property, Emitter, Inject, icons, HSlider, PalletePicker, ColorPickerPanel, ColorPicker } from "../../../src";
 import { randomStrings, randomTexts } from '../utils';
 import { appendCSSTagOnce } from 'neurons-dom';
 import { Input } from '../../../src/components/input/input';
@@ -16,20 +16,44 @@ register({
             title: 'ne-color-picker-panel',
             bootstrap: container => {
                 bind(`
-                    <ne-color-picker-panel
+                    <ne-color-picker
                         [color]="color"
+                        [mini]="true"
+                        [showCommitButton]="true"
                     >
-                    </ne-color-picker-panel>
+                    </ne-color-picker>
                 `, {
-                    requirements: [PalletePicker],
+                    requirements: [ColorPicker],
                     container: container,
                     state: {
                         color: '#ff0000'
                     }
                 })
             }
-        },
-        {
+        }, {
+            title: 'ne-color-picker-panel',
+            bootstrap: container => {
+                bind(`
+                    <div>完整面板（默认）</div>
+                    <ne-color-picker-panel
+                        [color]="color"
+                    >
+                    </ne-color-picker-panel>
+                    <div>迷你面板（mini=true）</div>
+                    <ne-color-picker-panel
+                        [color]="color"
+                        [mini]="true"
+                    >
+                    </ne-color-picker-panel>
+                `, {
+                    requirements: [ColorPickerPanel],
+                    container: container,
+                    state: {
+                        color: '#ff0000'
+                    }
+                })
+            }
+        }, {
             title: 'ne-pallete-picker',
             bootstrap: container => {
                 bind(`

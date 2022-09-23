@@ -14,6 +14,7 @@ import './demos/ui-list';
 import './demos/ui-popup';
 import './demos/ui-slider';
 import './demos/ui-color';
+import './demos/ui-date';
 import './demos/ui-stepper';
 import './demos/ui-svg';
 import './demos/ui-theme';

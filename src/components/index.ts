@@ -1,7 +1,8 @@
 import { ISVGIcon } from 'neurons-dom/dom/element';
-import { setting, checkbox_uncheck, checkbox_check, radio_uncheck, radio_check, caret_down, search, edit, times, check, empty_icon, toggle_on, toggle_off, ellipsis_h, arrow_up, arrow_down, arrow_left, arrow_right, image, file, download_file, import_icon, hint_icon, page_first, page_last, page_previous, page_next, loop } from './icon/icons';
+import { setting, checkbox_uncheck, checkbox_check, radio_uncheck, radio_check, caret_down, search, edit, times, check, empty_icon, toggle_on, toggle_off, ellipsis_h, arrow_up, arrow_down, arrow_left, arrow_right, image, file, download_file, import_icon, hint_icon, page_first, page_last, page_previous, page_next, loop, switch_icon, date_icon } from './icon/icons';
 
 export { Button } from "./button/button";
+export { PopupButton } from "./button/popupbutton";
 export { SwitchButton } from "./button/switchbutton";
 export { CheckItem } from './check/check';
 export { HorizontalCheckGroup } from './check/checkhgroup';
@@ -9,7 +10,7 @@ export { CheckBox } from './checkbox/checkbox';
 export { CheckBoxGroup } from './checkbox/checkboxgroup';
 export { PalletePicker } from './color/pallete';
 export { ColorWheel } from './color/colorwheel';
-export { ColorPickerPanel } from './color/colorpicker';
+export { ColorPickerPanel, ColorPicker } from './color/colorpicker';
 export { HSlider } from './slider/hslider';
 export { DropDownButton } from './dropdown/dropdown';
 export { DropDownList } from './dropdown/dropdown';
@@ -17,6 +18,7 @@ export { DropDownTrigger } from './dropdown/trigger';
 export { SvgIcon } from './icon/svgicon';
 export { Input } from './input/input';
 export { NumberInput } from './input/number';
+export { NumberSlider } from './input/numberslider';
 export { DigitNumberInput } from './input/digitnumber';
 export { SearchInput } from './input/search';
 export { RenameInput } from './input/rename';
@@ -35,6 +37,7 @@ export { FileUploader } from './uploader/file';
 export { ImageUploader } from './uploader/image';
 export { FileUploadTrigger } from './uploader/trigger';
 export { SvgImage } from './image/svgimage';
+export { DatePickerPanel, DatePicker } from './date/datepicker';
 export { Hint } from './hint/hint';
 
 export { alert, modal, sidePanel, tooltip } from './dialog';
@@ -70,6 +73,8 @@ export const icons = {
     page_next: page_next,
     setting: setting,
     loop: loop,
+    switch_icon: switch_icon,
+    date_icon: date_icon,
 };
 export { theme } from './style/theme';
 

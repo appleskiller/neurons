@@ -76,6 +76,7 @@ export {
 // ===================================================================
 export {
     Button,
+    PopupButton,
     SwitchButton,
     CheckItem,
     HorizontalCheckGroup,
@@ -84,6 +85,7 @@ export {
     PalletePicker,
     ColorWheel,
     ColorPickerPanel,
+    ColorPicker,
     HSlider,
     DropDownButton,
     DropDownList,
@@ -91,6 +93,7 @@ export {
     SvgIcon,
     Input,
     NumberInput,
+    NumberSlider,
     DigitNumberInput,
     SearchInput,
     RenameInput,
@@ -116,6 +119,8 @@ export {
     SvgShape,
     SVGPathShape,
     SVGDataURIShape,
+    DatePickerPanel,
+    DatePicker,
 
     alert,
     modal,

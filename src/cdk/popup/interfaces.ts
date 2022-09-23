@@ -118,6 +118,7 @@ export interface IPopupPanelRef<T extends StateObject> {
     appear();
     disappear();
     changeState(state: IPopupPanelState): void;
+    getState(property?: string): IPopupPanelState | any;
     updatePosition(connectElement?: HTMLElement | MouseEvent | IConnectPoint): void;
     detectChanges(): void;
 }
@@ -134,6 +135,7 @@ export interface IPopupRef<T extends StateObject> {
     option: IPopupOption<T>;
     overlay: IPopupOverlayRef<T>;
     panel: IPopupPanelRef<T>;
+    getState(property?: string): any;
     setState(state: any): void;
     updatePosition(connectElement?: HTMLElement | MouseEvent | IConnectPoint): void;
     open(source: BindingSelector | BindingTemplate | HTMLElement | IUIStateStatic<T>, option?: IPopupOption<T>): void;

@@ -77,6 +77,7 @@ export class Input {
     @Property() invalid: boolean = false;
     @Property() focus: boolean = false;
     @Property() selected: boolean = false;
+    @Property() focusSelectable: boolean = false;
     @Property() autocomplete: boolean = false;
     @Property() alwaysTriggerChange: boolean = false;
     @Property() mouseWheel: boolean = false;
@@ -135,7 +136,8 @@ export class Input {
             } else {
                 this.input.removeAttribute('required');
             }
-            this.invalid = !!this._validateValue(this.value);
+            const invalid = !!this._validateValue(this.value);
+            this._changeInvalid(invalid);
         }
         if (!changes || 'disabled' in changes) {
             if (this.disabled) {
@@ -162,6 +164,9 @@ export class Input {
         this._setValue(this.input.value);
     }
     onFocus() {
+        if (!this._focused && this.focusSelectable) {
+            this.input.select();
+        }
         this._focused = true;
         this._inputing = true;
         this._mousewheelEvent && this._mousewheelEvent();

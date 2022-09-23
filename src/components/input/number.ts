@@ -87,7 +87,9 @@ export class NumberInput {
     @Property() required: boolean = false;
     @Property() disabled: boolean = false;
     @Property() integer: boolean = false;
+    @Property() slider: boolean = false;
     @Property() focus: boolean = false;
+    @Property() focusSelectable: boolean = false;
     @Property() alwaysTriggerChange: boolean = false;
     @Property() mouseWheel: boolean = true;
 
@@ -105,8 +107,10 @@ export class NumberInput {
     private _focused = false;
     private _mousewheelEvent = null;
     private _inputChanged = false;
+    private _destroyed = false;
 
     onDestroy() {
+        this._destroyed = true;
         this._mousewheelEvent && this._mousewheelEvent();
     }
     onChanges(changes?: StateChanges) {
@@ -123,7 +127,8 @@ export class NumberInput {
             } else {
                 this.input.removeAttribute('required');
             }
-            this.invalid = !!this._validateValue(this.value);
+            const invalid = !!this._validateValue(this.value);
+            this._changeInvalid(invalid);
         }
         if (!changes || 'disabled' in changes) {
             if (this.disabled) {
@@ -142,6 +147,8 @@ export class NumberInput {
             if (!this._inputing) {
                 this._setValue(this.value);
                 this._inputChanged = false;
+            } else {
+                this.setInputValue(this.value);
             }
         }
     }
@@ -186,6 +193,9 @@ export class NumberInput {
         // }
     }
     onFocus() {
+        if (!this._focused && this.focusSelectable) {
+            this.input.select();
+        }
         this._focused = true;
         this._inputing = true;
         this._mousewheelEvent && this._mousewheelEvent();
@@ -286,7 +296,7 @@ export class NumberInput {
             this._changeValue(value);
         }
     }
-    private _changeValue(value) {
+    protected _changeValue(value) {
         if (this.value !== value) {
             this.value = value;
             this._inputChanged = true;
@@ -294,13 +304,13 @@ export class NumberInput {
             this.change.emit();
         }
     }
-    private _changeInvalid(invalid) {
+    protected _changeInvalid(invalid) {
         if (this.invalid !== invalid) {
             this.invalid = invalid;
             this.invalidChange.emit(this.invalid);
         }
     }
-    private _validateValue(value) {
+    protected _validateValue(value) {
         if (this.required) {
             if (!isDefined(value) || value === '' || (typeof value === 'number' && isNaN(value))) {
                 return { required: true }

@@ -1,4 +1,4 @@
-import { RemoveEventListenerFunction, nativeApi } from '../common/domapi';
+import { RemoveEventListenerFunction, nativeApi, domapi } from '../common/domapi';
 import { INeBindingRef, INeTemplate, INeBindingScope, INeTemplateContext, INeElementBinding, INeBindingFunction, INeElement, noop, StateObject, StateChanges, INeTemplateCompileFunction, IBindingRefFactory, INeLogicElement, INeTemplateBindingHook, IInvokeDetectChangeFunction } from '../common/interfaces';
 import { ObjectAccessor, isEmpty, requestFrame, merge, diffMerge, geometry } from 'neurons-utils';
 import { IInjector } from 'neurons-injector';
@@ -39,43 +39,29 @@ class RootElements {
         }
     }
     setAttribute(property: string, value: string) {
-        this._elements.forEach(element => element.setAttribute(property, value));
+        this._elements.forEach(element => {
+            domapi.setAttribute(element, property, value)
+        });
     }
     setStyle(property: string, value: string) {
         this._elements.forEach(element => {
-            if (element instanceof Node) {
-                nativeApi.setStyle(element, property, value);
-            } else {
-                element.setStyle(property, value);
-            }
+            domapi.setStyle(element, property, value);
         });
     }
     addClass(className: string) {
         this._elements.forEach(element => {
-            if (element instanceof Node) {
-                nativeApi.addClass(element, className);
-            } else {
-                element.addClass(className);
-            }
+            domapi.addClass(element, className);
         });
     }
     removeClass(className: string) {
         this._elements.forEach(element => {
-            if (element instanceof Node) {
-                nativeApi.removeClass(element, className);
-            } else {
-                element.removeClass(className);
-            }
+            domapi.removeClass(element, className)
         });
     }
     addEventListener(eventName: string, handler: any): RemoveEventListenerFunction {
         const removes = [];
         this._elements.forEach(element => {
-            if (element instanceof Node) {
-                removes.push(nativeApi.addEventListener(element, eventName, handler));
-            } else {
-                removes.push(element.addEventListener(eventName, handler));
-            }
+            removes.push(domapi.addEventListener(element, eventName, handler))
         });
         return removes.length ? () => removes.forEach(fn => fn()) : noop;
     }
