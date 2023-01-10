@@ -276,4 +276,12 @@ export interface IElementOptions<T> {
     skipError?: boolean;
 }
 
+export interface IBootstrapOptions {
+    state?: any;
+    hostBinding?: IBindingDefinition;
+    providers?: Provider[];
+    requirements?: ClassLike[];
+    skipError?: boolean;
+}
+
 export function noop() {};
