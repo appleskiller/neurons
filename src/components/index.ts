@@ -1,5 +1,5 @@
 import { ISVGIcon } from 'neurons-dom/dom/element';
-import { setting, checkbox_uncheck, checkbox_check, radio_uncheck, radio_check, caret_down, search, edit, times, check, empty_icon, toggle_on, toggle_off, ellipsis_h, arrow_up, arrow_down, arrow_left, arrow_right, image, file, download_file, import_icon, hint_icon, page_first, page_last, page_previous, page_next, loop, switch_icon, date_icon } from './icon/icons';
+import { setting, checkbox_uncheck, checkbox_check, radio_uncheck, radio_check, caret_down, search, edit, times, check, empty_icon, toggle_on, toggle_off, ellipsis_h, arrow_up, arrow_down, arrow_left, arrow_right, image, file, download_file, import_icon, hint_icon, page_first, page_last, page_previous, page_next, loop, switch_icon, date_icon, trash, drag_handle, plus } from './icon/icons';
 
 export { Button } from "./button/button";
 export { PopupButton } from "./button/popupbutton";
@@ -75,6 +75,9 @@ export const icons = {
     loop: loop,
     switch_icon: switch_icon,
     date_icon: date_icon,
+    trash: trash,
+    drag_handle: drag_handle,
+    plus: plus,
 };
 export { theme } from './style/theme';
 

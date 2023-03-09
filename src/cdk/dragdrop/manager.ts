@@ -17,6 +17,7 @@ export class DragManager extends EventEmitter implements IDragManager {
     private _droppableDoms: HTMLElement[] = [];
     private _mouseMoveListener;
     private _mouseUpListener;
+    private _escKeyListener;
 
     config(opt: IDragConfig) {
         opt = opt || {} as any;
@@ -25,6 +26,7 @@ export class DragManager extends EventEmitter implements IDragManager {
     clearDrag(dom: HTMLElement): void {
         if (!dom) return;
         removeClass(dom, 'ne-dragging');
+        dom.removeAttribute('drop-touching-position');
         if (dom['_draggableListener']) dom['_draggableListener']();
         delete dom['_draggableListener'];
         delete dom['_dragOptions'];
@@ -117,6 +119,7 @@ export class DragManager extends EventEmitter implements IDragManager {
         this.dragSource = dragSource;
         if (!dragOption.canDrag || dragOption.canDrag(this.dragSource, this)) {
             this._listenMouseMove();
+            this._listenDraggingKeyUp();
         } else {
             this._clearDragging();
         }
@@ -133,6 +136,7 @@ export class DragManager extends EventEmitter implements IDragManager {
         // 检查是否产生过位移，如果没有则不回调
         const mouseMoved = canDrag(this.dragSource.startEvent, this.dragSource.moveEvent);
         removeClass(dragSource.element, 'ne-dragging');
+        dragSource.element.removeAttribute('drop-touching-position');
         const touching = dragSource.touching;
         if (!touching) {
             dragSource.dropMode = 'revert';
@@ -191,6 +195,15 @@ export class DragManager extends EventEmitter implements IDragManager {
             option.onDragLeave && option.onDragLeave(DropPosition.whatever, this.dragSource, this);
         });
 
+        // 更新拖动源的attr反馈标记
+        const sourceElement = this.dragSource.element;
+        if (sourceElement) {
+            if (touching) {
+                sourceElement.setAttribute('drop-touching-position', touching.position);
+            } else {
+                sourceElement.removeAttribute('drop-touching-position');
+            }
+        }
         const proxyElement = this.dragSource.proxyElement;
         if (proxyElement) {
             proxyElement.removeAttribute('drop-target');
@@ -322,9 +335,12 @@ export class DragManager extends EventEmitter implements IDragManager {
     private _clearDragging() {
         this._mouseMoveListener && this._mouseMoveListener();
         this._mouseMoveListener = null;
+        this._escKeyListener && this._escKeyListener();
+        this._escKeyListener = null;
         if (this.dragSource) {
             this.dragSource.discarded = true;
             removeClass(this.dragSource.element, 'ne-dragging');
+            this.dragSource.element.removeAttribute('drop-touching-position');
             this._removeProxyElement(this.dragSource);
             this._removePlaceholderElement(this.dragSource);
         }
@@ -433,8 +449,10 @@ export class DragManager extends EventEmitter implements IDragManager {
             } else {
                 if (position === DropPosition.top || position === DropPosition.left) {
                     insertBefore(placeholder, attachTo);
-                } else {
+                } else if (position === DropPosition.bottom || position === DropPosition.right) {
                     insertAfter(placeholder, attachTo);
+                } else {
+                    insertBefore(placeholder, dragSource.element);
                 }
             }
         }
@@ -458,6 +476,20 @@ export class DragManager extends EventEmitter implements IDragManager {
                         }
                     }
                 } else {
+                    this._clearDragging();
+                }
+            })
+        }
+    }
+    private _listenDraggingKeyUp() {
+        if (!this._escKeyListener) {
+            this._escKeyListener = addEventListener(document, 'keyup', (e: KeyboardEvent) => {
+                // esc
+                if (e.keyCode === 27) {
+                    if (this.dragSource) {
+                        const mouseMoved = canDrag(this.dragSource.startEvent, this.dragSource.moveEvent);
+                        mouseMoved && this.dragSource.onDragStop && this.dragSource.onDragStop(this.dragSource, this);
+                    }
                     this._clearDragging();
                 }
             })

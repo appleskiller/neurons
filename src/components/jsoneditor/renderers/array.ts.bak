@@ -1,0 +1,297 @@
+import { Binding, BINDING_TOKENS, Inject} from "../../../binding";
+import { PropertyRendererBase } from "./base";
+import * as icons from "../../icon/icons";
+import { isArray, moveIndexTo } from "neurons-utils";
+import { createElement, hasClass, removeClass } from "neurons-dom";
+import { IChangeDetector } from "../../../binding/common/interfaces";
+import { theme } from "../../style/theme";
+import { Button } from "../../button/button";
+import { Input } from "../../input/input";
+import { SvgIcon } from "../../icon/svgicon";
+import { dragManager, DropPosition } from "../../../cdk";
+
+@Binding({
+    selector: 'ui-jse-array',
+    template: `
+        <div class="ui-jse-array" jse-renderer="ARRAY"
+            [no-title]="!!title ? null : ''"
+            [style.padding-left]="indentWidth"
+        >
+            <div class="ui-jse-array-title"
+                (mouseenter)="showTooltip($event.currentTarget)"
+                (mouseleave)="hideTooltip()"
+            >{{title}}</div>
+            <div class="ui-jse-array-content">
+                <div class="ui-jse-array-list" [style.display]="!dataProvider || !dataProvider.length ? 'none' : 'block'">
+                    <div class="ui-jse-array-item" *for="item in dataProvider">
+                        <ne-icon class="ui-jse-array-item-drag-handle" [class.disabled]="disabled" [icon]="handleIcon" (mousedown)="onMouseDown($event, item)"></ne-icon>
+                        <ne-input [required]="true" [(value)]="item.data" [disabled]="disabled" (change)="onItemChange()" (enterPressed)="onEnterPressed($event, item)"></ne-input>
+                        <ne-button class="ui-jse-array-item-del-btn" [disabled]="disabled" (click)="onClickDelete(item)"><ne-icon [icon]="deleteIcon"></ne-icon></ne-button>
+                    </div>
+                </div>
+                <div class="ui-jse-array-add">
+                    <ne-button mode="stroked" color="primary" [disabled]="disabled" (click)="onClickAdd()"><ne-icon [icon]="addIcon"></ne-icon>增加项目</ne-button>
+                </div>
+            </div>
+        </div>
+    `,
+    style: `
+        .ui-jse-array {
+            position: relative;
+            user-select: none;
+            &:last-child {
+                border-bottom: none;
+            }
+            .ui-jse-array-title {
+                position: relative;
+                transition: ${theme.transition.normal('background-color')};
+                line-height: 31px;
+                padding: 4px 24px 4px 24px;
+                &:hover {
+                    background-color: ${theme.gray.light};
+                }
+            }
+            .ui-jse-array-content {
+                position: relative;
+            }
+            .ui-jse-array-list {
+                max-height: 300px;
+                overflow: auto;
+                border: solid 1px ${theme.gray.normal};
+                box-sizing: border-box;
+                border-radius: 3px;
+                padding: 4px 0;
+                margin-bottom: 4px;
+                user-select: none;
+                .ui-jse-array-item {
+                    position: relative;
+                    line-height: 21px;
+                    padding: 0 36px 0 18px;
+                    .ui-jse-array-item-drag-handle {
+                        position: absolute;
+                        top: 0;
+                        left: 4px;
+                        bottom: 0;
+                        width: 18px;
+                        z-index: 1;
+                        cursor: move;
+                        &.disabled {
+                            opacity: 0.3;
+                            cursor: default;
+                        }
+                    }
+                    .ui-jse-array-item-del-btn {
+                        position: absolute;
+                        top: 0;
+                        right: 4px;
+                        z-index: 1;
+                        padding: 5px 8px;
+                        &:hover {
+                            color: ${theme.color.error};
+                        }
+                    }
+                    .ne-input {
+                        width: 100%;
+                        padding: 6px 12px;
+                        border-top: solid 1px transparent;
+                        border-left: solid 1px transparent;
+                        border-right: solid 1px transparent;
+                        border-radius: 0;
+                        &:hover {
+                            border-top: solid 1px transparent;
+                            border-left: solid 1px transparent;
+                            border-right: solid 1px transparent;
+                        }
+                        &:focus {
+                            border-top: solid 1px transparent;
+                            border-left: solid 1px transparent;
+                            border-right: solid 1px transparent;
+                        }
+                    }
+                    &.ne-dragging {
+                        display: none;
+                    }
+                }
+            }
+            .ui-jse-array-add {
+                line-height: 19px;
+                padding-left: 24px;
+                .ne-button {
+                    display: block;
+                    width: 100%;
+                    .ne-icon {
+                        margin-right: 4px;
+                    }
+                }
+            }
+        }
+        .draggable-wrapper {
+            pointer-events: none;
+            border-radius: 3px;
+            overflow: hidden;
+            .ui-jse-array-item {
+                position: relative;
+                line-height: 21px;
+                padding: 0 36px 0 18px;
+                background-color: white;
+                opacity: 0.8;
+                transition: ${theme.transition.normal('background-color')};
+                .ui-jse-array-item-drag-handle {
+                    position: absolute;
+                    top: 0;
+                    left: 4px;
+                    bottom: 0;
+                    width: 18px;
+                    z-index: 1;
+                }
+                .ui-jse-array-item-del-btn {
+                    position: absolute;
+                    top: 0;
+                    right: 4px;
+                    z-index: 1;
+                    padding: 5px 8px;
+                    &:hover {
+                        color: ${theme.color.error};
+                    }
+                }
+                .ne-input {
+                    width: 100%;
+                    padding: 6px 12px;
+                    border-top: solid 1px transparent;
+                    border-left: solid 1px transparent;
+                    border-right: solid 1px transparent;
+                    border-radius: 0;
+                }
+            }
+            &[drop-touching-position=outside] {
+                .ui-jse-array-item {
+                    background-color: ${theme.color.error};
+                }
+            }
+        }
+    `,
+    requirements: [
+        Button,
+        Input,
+        SvgIcon
+    ]
+})
+export class ArrayRenderer extends PropertyRendererBase {
+
+    @Inject(BINDING_TOKENS.CHANGE_DETECTOR) cdr: IChangeDetector;
+
+    deleteIcon = icons.trash;
+    addIcon = icons.plus;
+    handleIcon = icons.drag_handle;
+
+    dataProvider = [];
+
+    updateComponent() {
+        super.updateComponent();
+        this.dataProvider = (this.value ? (isArray(this.value) ? this.value : [this.value]) : []).map(v => {
+            return {
+                data: v,
+            }
+        });
+    }
+    onClickAdd() {
+        if (this.disabled) return;
+        this.dataProvider.push({data: ''});
+        this._applySetValue();
+    }
+    onClickDelete(item) {
+        if (this.disabled) return;
+        const index = this.dataProvider.indexOf(item);
+        if (index !== -1) {
+            this.dataProvider.splice(index, 1);
+            this._applySetValue();
+        }
+    }
+    onItemChange() {
+        this._applySetValue();
+    }
+    onEnterPressed(event: MouseEvent, item) {
+        if (this.disabled) return;
+        const index = this.dataProvider.indexOf(item);
+        let focusNext: HTMLElement;
+        if (index === this.dataProvider.length - 1) {
+            this.dataProvider.push({data: ''});
+            this.cdr.detectChanges();
+            focusNext = (event.currentTarget as HTMLElement).parentElement.nextElementSibling as HTMLElement;
+        } else if (index !== -1) {
+            focusNext = (event.currentTarget as HTMLElement).parentElement.nextElementSibling as HTMLElement;
+        }
+        if (focusNext) {
+            const input = focusNext.querySelector('.ne-input') as HTMLInputElement;
+            input && input.focus();
+        }
+    }
+    onMouseDown(event: MouseEvent, item) {
+        if (this.disabled) return;
+        if (!this.dataProvider || this.dataProvider.length <= 1) return;
+        const el = (event.currentTarget as HTMLElement).parentElement;
+        const container = el.parentElement;
+        const children = [];
+        for (let i = 0; i < el.parentElement.children.length; i++) {
+            const e = container.children.item(i) as HTMLElement;
+            hasClass(e, 'ui-jse-array-item') && children.push(e);
+        }
+        dragManager.draggable(el, {
+            scope: 'ui-jse-array-item',
+            data: item,
+            direction: 'y',
+            onDragStart: (dragSource) => {
+                const dom = createElement('div');
+                const clone = el.cloneNode(true) as HTMLElement;
+                removeClass(clone, 'ne-dragging');
+                dom.appendChild(clone);
+                dragSource.placeholderElement = dom;
+            },
+            onDragStop: () => {
+                dragManager.clearDrag(el);
+                dragManager.clearDrop(container);
+                children.forEach(e => dragManager.clearDrop(e));
+            }
+        });
+        children.forEach((e, elIndex) => dragManager.droppable(e, {
+            scope: 'ui-jse-array-item',
+            detecting: {
+                [DropPosition.top]: {y: '50%', height: '-50%'},
+                [DropPosition.bottom]: {y: '-50%', height: '50%'},
+            },
+            onDrop: (position, dragSource) => {
+                const item = dragSource.data;
+                const index = this.dataProvider.indexOf(item);
+                if (index !== -1) {
+                    if (position === DropPosition.top) {
+                        moveIndexTo(this.dataProvider, index, elIndex)
+                        this._applySetValue();
+                        this.cdr.detectChanges();
+                    } else if (position === DropPosition.bottom) {
+                        moveIndexTo(this.dataProvider, index, elIndex + 1)
+                        this._applySetValue();
+                        this.cdr.detectChanges();
+                    }
+                }
+            }
+        }));
+        dragManager.droppable(container, {
+            scope: 'ui-jse-array-item',
+            detecting: {
+                [DropPosition.outside]: {},
+            },
+            onDrop: (position, dragSource) => {
+                const index = this.dataProvider.indexOf(dragSource.data);
+                if (index !== -1) {
+                    this.dataProvider.splice(index, 1);
+                    this._applySetValue();
+                    this.cdr.detectChanges();
+                }
+            }
+        })
+    }
+    private _applySetValue() {
+        this.setValue(this.dataProvider.map(item => (item.data || '').trim()).filter(item => !!item));
+    }
+}
+

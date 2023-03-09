@@ -12,6 +12,7 @@ import './demos/ui-dialog';
 import './demos/ui-dropdown';
 import './demos/ui-icon';
 import './demos/ui-input';
+import './demos/ui-json-editor';
 import './demos/ui-list';
 import './demos/ui-popup';
 import './demos/ui-slider';
