@@ -82,12 +82,24 @@ export class TextArea extends Input {
     @Property() resize: 'none' | 'auto' | 'horizontal' | 'vertical' = 'auto';
     @Property() autoHeight: boolean = false;
 
+    onChanges(changes) {
+        super.onChanges();
+        if (changes && 'value' in changes) {
+            this.calcAutoHeight();
+        }
+    }
+
     onInputChange(e: KeyboardEvent) {
         super.onInputChange(e);
+        this.calcAutoHeight();
+    }
+
+    protected calcAutoHeight() {
         if (this.autoHeight) {
+            const borderHeight = this.input.offsetHeight - this.input.clientHeight;
             const scrollHeight = this.input.scrollHeight;
             this.input.style.height = '';
-            this.input.style.height = Math.min(this.input.scrollHeight, scrollHeight) + 'px';
+            this.input.style.height = Math.min(this.input.scrollHeight, scrollHeight) + borderHeight + 'px';
         }
     }
 }

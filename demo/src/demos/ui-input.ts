@@ -1,5 +1,5 @@
 import { register } from "../demos";
-import { bind, Binding, Property, Emitter, Inject, icons } from "../../../src";
+import { bind, Binding, Property, Emitter, Inject, icons, Button } from "../../../src";
 import { randomStrings, randomTexts } from '../utils';
 import { appendCSSTagOnce } from 'neurons-dom';
 import { Input } from '../../../src/components/input/input';
@@ -130,6 +130,26 @@ register({
                 `, {
                     requirements: [TextArea],
                     container: container,
+                })
+            }
+        }, {
+            title: 'ne-textarea (auto height)',
+            bootstrap: container => {
+                const state = {
+                    value: '',
+                    onClick: () => {
+                        state.value = '';
+                    }
+                }
+                bind(`
+                    <div class="ui-input-demo-row">
+                        <div style="width: 100%"><ne-textarea [(value)]="value" style="width: 100%" resize="none" autoHeight="true" placeholder="搜索..." ></ne-textarea></div>
+                        <ne-button mode="flat" color="primary" (click)="onClick()">清除</ne-button>
+                    </div>
+                `, {
+                    requirements: [TextArea, Button],
+                    container: container,
+                    state: state
                 })
             }
         }
