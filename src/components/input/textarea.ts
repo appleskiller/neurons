@@ -10,6 +10,7 @@ import { theme } from '../style/theme';
         [class]="{'ne-textarea': true, 'invalid': invalid}"
         [resize]="resize"
         [name]="name"
+        [maxlength]="maxLength"
         [placeholder]="placeholder"
         [autocomplete]="autocomplete ? 'on' : 'off'"
         (propertychange)="onInputChange($event)"
