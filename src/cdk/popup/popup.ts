@@ -124,9 +124,11 @@ export class ToolTipRef implements IToolTipRef {
     private _ref: IPopupRef<any>;
     private _followMouse = false;
     private _delayTimeId;
+    private _durationTimeId;
     private _opening: boolean = false;
     open(connectElement?: HTMLElement | MouseEvent): void {
         clearTimeout(this._delayTimeId);
+        clearTimeout(this._durationTimeId);
         connectElement && (this._option.connectElement = connectElement);
         if (!this._ref) {
             this._opening = true;
@@ -135,14 +137,23 @@ export class ToolTipRef implements IToolTipRef {
                 this._delayTimeId = setTimeout(() => {
                     this._opening = false;
                     this._ref = this._manager.open(this._component, this._option);
+                    if (!!this._option.duration) {
+                        this._durationTimeId = setTimeout(() => this.close(), this._option.duration)
+                    }
                 }, delay);
             } else {
                 this._opening = false;
                 this._ref = this._manager.open(this._component, this._option);
+                if (!!this._option.duration) {
+                    this._durationTimeId = setTimeout(() => this.close(), this._option.duration)
+                }
             }
         } else {
             this._ref.updatePosition(connectElement);
             this._ref.panel.detectChanges();
+            if (!!this._option.duration) {
+                this._durationTimeId = setTimeout(() => this.close(), this._option.duration)
+            }
         }
     }
     updateOption(option?: IToolTipOption): void {
@@ -170,6 +181,7 @@ export class ToolTipRef implements IToolTipRef {
     }
     close(): void {
         clearTimeout(this._delayTimeId);
+        clearTimeout(this._durationTimeId);
         const ref = this._ref;
         this._ref = null;
         ref && ref.close();
@@ -188,7 +200,7 @@ export class ToolTipRef implements IToolTipRef {
         return result;
     }
     private _unionTooltipClasses(classes: string, newClasses: string) {
-        let classNames = (classes || '').trim().match(/[^\x20\t\r\n\f]+/g);
+        let classNames: string[] = (classes || '').trim().match(/[^\x20\t\r\n\f]+/g);
         classNames = classNames || [];
         if (classNames.indexOf('ne-tooltip') === -1) {
             classNames.push('ne-tooltip');

@@ -98,6 +98,7 @@ export interface IPopupPanelState {
 export interface IToolTipOption extends IPopupOptionBase {
     position?: 'mouse' | 'top' | 'left' | 'bottom' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom' | string;
     delayTime?: number;
+    duration?: number;
 }
 
 export interface IPopupOverlayRef<T extends StateObject> {
