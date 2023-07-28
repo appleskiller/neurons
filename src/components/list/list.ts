@@ -114,6 +114,7 @@ export class List<T> {
     @Property() active = true;
     @Property() enableSelection = true;
     @Property() enableMultiSelection = false;
+    @Property() disableClickSelection = false;
     @Property() dataProvider: T[] = [];
     @Property() selectedItem: T = undefined;
     @Property() selectedItems: T[] = [];
@@ -175,7 +176,7 @@ export class List<T> {
     }
     onResize() {
         if (this._attached) {
-            this._measureSize();
+            this._measureSize(true);
             this._resetNativeDataProvider();
         } else {
             this._markResize = true;;
@@ -188,7 +189,7 @@ export class List<T> {
         this._attached = true;
         if (this._markResize) {
             this._markResize = false;
-            this._measureSize();
+            this._measureSize(true);
             this._resetNativeDataProvider();
         }
     }
@@ -218,6 +219,7 @@ export class List<T> {
             element: e.currentTarget as HTMLElement,
             causeEvent: e
         });
+        if (this.disableClickSelection) return;
         if (!e.defaultPrevented) {
             if (this.enableMultiSelection) {
                 this.applyMultiSelection(item, index);
@@ -324,7 +326,10 @@ export class List<T> {
         }
         this.sliceDataProvider(this.filteredDataProvider, this.startIndex, this.endIndex);
     }
-    protected _measureSize() {
+    protected _measureSize(forceCalc: boolean = false) {
+        if (forceCalc) {
+            this._containerBoundary = null;
+        }
         this._containerBoundary = this._updateSizeBoundary(this.container, this._containerBoundary);
         this._containerSize = this._getSuggestSize(this.container, this._containerBoundary);
         if (this.content.children.length > 1) {

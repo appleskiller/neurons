@@ -611,6 +611,7 @@ export class DefaultTreeItemRendererWrapper {
             [active]="active"
             [enableSelection]="enableSelection"
             [enableMultiSelection]="enableMultiSelection"
+            [disableClickSelection]="disableClickSelection"
             [dataProvider]="flatDataProvider"
             [filterFunction]="filterFunction"
             [itemRenderer]="itemWrapperRenderer"
@@ -647,6 +648,7 @@ export class Tree<T> {
     // 每次数据刷新时强制展开所有节点
     @Property() enableSelection = true;
     @Property() enableMultiSelection = false;
+    @Property() disableClickSelection = false;
     @Property() dataProvider: T[] = [];
     @Property() selectedItem: T = undefined;
     @Property() selectedItems: T[] = [];

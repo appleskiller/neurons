@@ -20,6 +20,7 @@ import { BINDING_TOKENS } from '../../binding';
             [readonly]="isReadonly()"
             [style.opacity]="opened ? '0' : '1'"
             (click)="onNameClick($event);"
+            (dblclick)="onNameDblClick($event);"
         >
             <div class="ne-rename-input-label-name">{{getName()}}</div>
             <ne-icon [icon]="editIcon"></ne-icon>
@@ -105,6 +106,7 @@ export class RenameInput {
     @Property() suffix: string = '';
     @Property() name: string = '';
     @Property() nameMaxLength: number = 64;
+    @Property() dblclickToEdit: boolean = false;
     @Property() disabled: boolean = false;
     @Property() readonly: boolean = false;
     @Property() required: boolean = false;
@@ -113,7 +115,7 @@ export class RenameInput {
     @Element('renameInput') renameInput: HTMLElement;
 
     @Emitter() nameChange: IEmitter<string>;
-    @Emitter() change: IEmitter<string>;
+    @Emitter() change: IEmitter<void>;
 
     @Inject(BINDING_TOKENS.CHANGE_DETECTOR) cdr: IChangeDetector;
 
@@ -134,7 +136,14 @@ export class RenameInput {
         return this.name ? this.prefix + this.name + this.suffix : this.placeholder;
     }
     protected onNameClick(event: MouseEvent) {
-        this.showEdit();
+        if (!this.dblclickToEdit) {
+            this.showEdit();
+        }
+    }
+    protected onNameDblClick(event: MouseEvent) {
+        if (this.dblclickToEdit) {
+            this.showEdit();
+        }
     }
     protected isDisabled() {
         return this.disabled ? '' : undefined;

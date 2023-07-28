@@ -26,6 +26,7 @@ import { Tree } from './tree';
                 [active]="active"
                 [enableSelection]="enableSelection"
                 [enableMultiSelection]="enableMultiSelection"
+                [disableClickSelection]="disableClickSelection"
                 [dataProvider]="flatDataProvider"
                 [filterFunction]="_filterFunction"
                 [itemRenderer]="itemWrapperRenderer"
