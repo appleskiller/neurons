@@ -717,8 +717,8 @@ export class DatePickerPanel {
             this.viewTime = date.getTime();
             const minMonth = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(this.minTime)).getMonth();
             const maxMonth = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(this.maxTime)).getMonth();
-            const minTime = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(minYear, minMonth, 1, 0, 0, 0));
-            const maxTime = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(maxYear, maxMonth, 1, 0, 0, 0));
+            const minTime = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(minYear, minMonth, 1, 0, 0, 0)).getTime();
+            const maxTime = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(maxYear, maxMonth, 1, 0, 0, 0)).getTime();
             const minRangeTime = isRangeSelection ? (new Date(selectedDates[0].getFullYear(), selectedDates[0].getMonth(), 1, 0, 0, 0)).getTime() : null;
             const maxRangeTime = isRangeSelection ? (new Date(selectedDates[1].getFullYear(), selectedDates[1].getMonth(), 1, 0, 0, 0)).getTime() : null;
             this.monthPopupRef.setState({
@@ -780,8 +780,8 @@ export class DatePickerPanel {
             this.viewTime = date.getTime();
             const minMonth = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(this.minTime)).getMonth();
             const maxMonth = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(this.maxTime)).getMonth();
-            const minTime = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(minYear, minMonth, 1, 0, 0, 0));
-            const maxTime = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(maxYear, maxMonth, 1, 0, 0, 0));
+            const minTime = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(minYear, minMonth, 1, 0, 0, 0)).getTime();
+            const maxTime = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(maxYear, maxMonth, 1, 0, 0, 0)).getTime();
             const minRangeTime = isRangeSelection ? (new Date(selectedDates[0].getFullYear(), selectedDates[0].getMonth(), 1, 0, 0, 0)).getTime() : null;
             const maxRangeTime = isRangeSelection ? (new Date(selectedDates[1].getFullYear(), selectedDates[1].getMonth(), 1, 0, 0, 0)).getTime() : null;
             this.monthPopupRef.setState({
@@ -1057,8 +1057,8 @@ export class DatePickerPanel {
         const maxYear = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(this.maxTime)).getFullYear();
         const minMonth = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(this.minTime)).getMonth();
         const maxMonth = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(this.maxTime)).getMonth();
-        const minTime = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(minYear, minMonth, 1, 0, 0, 0));
-        const maxTime = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(maxYear, maxMonth, 1, 0, 0, 0));
+        const minTime = this.minTime === Number.NEGATIVE_INFINITY ? Number.NEGATIVE_INFINITY : (new Date(minYear, minMonth, 1, 0, 0, 0)).getTime();
+        const maxTime = this.maxTime === Number.POSITIVE_INFINITY ? Number.POSITIVE_INFINITY : (new Date(maxYear, maxMonth, 1, 0, 0, 0)).getTime();
         const minRangeTime = isRangeSelection ? (new Date(selectedDates[0].getFullYear(), selectedDates[0].getMonth(), 1, 0, 0, 0)).getTime() : null;
         const maxRangeTime = isRangeSelection ? (new Date(selectedDates[1].getFullYear(), selectedDates[1].getMonth(), 1, 0, 0, 0)).getTime() : null;
         // 3 * 4

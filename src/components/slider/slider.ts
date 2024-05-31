@@ -1,23 +1,49 @@
-import { math, isDefined } from 'neurons-utils';
+import { math, isDefined, isArray } from 'neurons-utils';
 
 export class Slider {
     min: number = 0;
     max: number = 100;
-    value: number = 0;
+    values: number[] = [50];
     step: number = 1;
     normalizeValue: boolean = true;
+
+    protected updateValue(value: number, valueIndex: number): boolean {
+        this.values = this.values || [];
+        const old = this.values[valueIndex];
+        value = Math.min(this.max, Math.max(this.min, value));
+        this.values[valueIndex] = value;
+        return value !== old;
+    }
     
-    protected setValue(value: number) {
-        if (typeof value === 'string') { value = parseFloat(value); }
-        this.value = Math.min(this.max, Math.max(this.min, value));
+    protected setValue(values: number[]) {
+        this.values = values.map(value => {
+            if (typeof value === 'string') { value = parseFloat(value); }
+            return Math.min(this.max, Math.max(this.min, value));
+        })
     }
-    protected plus() {
+    protected plus(valueIndex?: number) {
         const step = (!this.step && this.step !== 0) ? 1 : this.step;
-        this.setValue(math.plus(this.value, step));
+        if (!isDefined(valueIndex)) {
+            this.setValue(this.values.map(value => {
+                return math.plus(value, step);
+            }));
+        } else {
+            const value = this.values[valueIndex];
+            this.values[valueIndex] = math.plus(value, step);
+            this.setValue(this.values.concat());
+        }
     }
-    protected minus() {
+    protected minus(valueIndex?: number) {
         const step = (!this.step && this.step !== 0) ? 1 : this.step;
-        this.setValue(math.minus(this.value, step));
+        if (!isDefined(valueIndex)) {
+            this.setValue(this.values.map(value => {
+                return math.minus(value, step);
+            }));
+        } else {
+            const value = this.values[valueIndex];
+            this.values[valueIndex] = math.minus(value, step);
+            this.setValue(this.values.concat());
+        }
     }
     protected position2value(pos: number, distance: number): number {
         if (!pos || !distance) return 0;
@@ -41,6 +67,11 @@ export class Slider {
     }
     protected value2position(value: number, distance: number): number {
         if (!value || !distance) return 0;
-        return distance * (value - this.min) / (this.max - this.min)
+        const pos = distance * (value - this.min) / (this.max - this.min);
+        return isNaN(pos) ? 0 : pos;
+    }
+    protected value2positions(values: number[], distance: number): number[] {
+        if (!values) return [];
+        return values.map(value => this.value2position(value, distance));
     }
 }

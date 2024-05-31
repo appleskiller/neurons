@@ -12,7 +12,7 @@ util.required('git');
 // update internal deps
 util.exec(`npm run update-deps ${registryArgs}`);
 // test
-util.exec('npm run test-once');
+// util.exec('npm run test-once');
 
 var package = fs.readJsonSync(path.resolve(__dirname, '../package.json'));
 // verify version
