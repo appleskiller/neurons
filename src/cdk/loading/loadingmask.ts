@@ -19,9 +19,10 @@ import { Button } from '../../components/button/button';
             </div>
             <div class="ne-retry-container" [class.active]="showRetry">
                 <div class="ne-retry-message">{{retryMessage}}</div>
-                <ne-button mode="raised" color="primary" (click)="onRetryClick($event)">重试</ne-button>
+                <ne-button mode="flat" color="primary" (click)="onRetryClick($event)">重试</ne-button>
+                <ne-button *if="!hideRefresh" class="ne-retry-refresh" mode="flat" color="rgba(125, 125, 125, 0.06)" (click)="onRefresh($event)">刷新</ne-button>
             </div>
-            <span class="ne-text-link ne-cancel-retry" [class.active]="!!showLoading || !!showRetry" (click)="onCancelRetry($event)">取消</span>
+            <span *if="!hideCancel" class="ne-text-link ne-cancel-retry" [class.active]="!!showLoading || !!showRetry" (click)="onCancelRetry($event)">取消</span>
         </div>
     `,
     style: `
@@ -76,6 +77,7 @@ import { Button } from '../../components/button/button';
                 bottom: 0;
                 left: 0;
                 right: 0;
+                max-width: 480px;
                 height: 80px;
                 text-align: center;
                 display: none;
@@ -86,6 +88,17 @@ import { Button } from '../../components/button/button';
         
                 .ne-retry-message {
                     margin-bottom: 16px;
+                    max-height: 80px;
+                    overflow: auto;
+                    padding: 2px 12px;
+                    box-sizing: border-box;
+                }
+                .ne-button {
+                    width: 88px;
+                    padding: 6px 18px;
+                }
+                .ne-retry-refresh {
+                    margin-left: 12px;
                 }
             }
         
@@ -120,7 +133,11 @@ import { Button } from '../../components/button/button';
     ]
 })
 export class LoadingMask {
+    @Property() hideCancel: boolean;
+    @Property() hideRefresh: boolean;
     @Property() retryMessage: string;
+    @Property() retryMessage: string;
+    @Property() retryDetail: string;
     @Property() retryFunction: any;
     @Property() cancelFunction: any;
 
@@ -158,5 +175,8 @@ export class LoadingMask {
         this.showRetry = false;
         this.retryMessage = '';
         this.cancelFunction && this.cancelFunction();
+    }
+    onRefresh(e) {
+        window && window.location && window.location.reload();
     }
 }

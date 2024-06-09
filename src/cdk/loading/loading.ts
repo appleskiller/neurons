@@ -9,6 +9,8 @@ import { errorToMessage } from '../../binding/common/exception';
 
 export interface ILoadingOption {
     backgroundColor?: string;
+    hideCancel?: boolean;
+    hideRefresh?: boolean;
 }
 
 export interface ILoadingService {
@@ -101,9 +103,13 @@ export class LoadingService implements ILoadingService {
                     reject(new Error('canceled!'));
                 },
                 backgroundColor: option && option.backgroundColor ? option.backgroundColor : '',
+                hideCancel: option && option.hideCancel && !!option.hideCancel,
+                hideRefresh: option && option.hideRefresh && !!option.hideRefresh,
             }
             popupRef = this._popupManager.open(`
                 <ne-loading-mask
+                    [hideCancel]="hideCancel"
+                    [hideRefresh]="hideRefresh"
                     [retryMessage]="retryMessage"
                     [retryFunction]="retryFunction"
                     [cancelFunction]="cancelFunction"
