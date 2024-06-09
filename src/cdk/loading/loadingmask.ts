@@ -136,7 +136,6 @@ export class LoadingMask {
     @Property() hideCancel: boolean;
     @Property() hideRefresh: boolean;
     @Property() retryMessage: string;
-    @Property() retryMessage: string;
     @Property() retryDetail: string;
     @Property() retryFunction: any;
     @Property() cancelFunction: any;
