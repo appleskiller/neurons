@@ -100,6 +100,7 @@ import { Button } from '../../components/button/button';
                 .ne-retry-refresh {
                     margin-left: 12px;
                     color: black;
+                    background-color: rgba(125, 125,125, 0.06);
                 }
             }
         
