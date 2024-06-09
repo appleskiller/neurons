@@ -19,8 +19,8 @@ import { Button } from '../../components/button/button';
             </div>
             <div class="ne-retry-container" [class.active]="showRetry">
                 <div class="ne-retry-message">{{retryMessage}}</div>
-                <ne-button mode="flat" color="primary" (click)="onRetryClick($event)">重试</ne-button>
-                <ne-button *if="!hideRefresh" class="ne-retry-refresh" mode="flat" color="rgba(125, 125, 125, 0.06)" (click)="onRefresh($event)">刷新</ne-button>
+                <ne-button mode="raised" color="primary" (click)="onRetryClick($event)">重试</ne-button>
+                <ne-button *if="!hideRefresh" class="ne-retry-refresh" mode="flat" (click)="onRefresh($event)">刷新</ne-button>
             </div>
             <span *if="!hideCancel" class="ne-text-link ne-cancel-retry" [class.active]="!!showLoading || !!showRetry" (click)="onCancelRetry($event)">取消</span>
         </div>
