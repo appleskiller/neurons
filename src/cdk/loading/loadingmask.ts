@@ -99,6 +99,7 @@ import { Button } from '../../components/button/button';
                 }
                 .ne-retry-refresh {
                     margin-left: 12px;
+                    color: black;
                 }
             }
         
