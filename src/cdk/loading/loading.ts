@@ -142,7 +142,7 @@ export class LoadingService implements ILoadingService {
             }
             popupRef = this._popupManager.open(`
                 <ne-loading-mask
-                    *if="hidden"
+                    *if="!hidden"
                     [hideCancel]="hideCancel"
                     [hideRefresh]="hideRefresh"
                     [retryMessage]="retryMessage"
