@@ -6,7 +6,7 @@ import { PopupManager } from '../popup/manager';
 import { createElement } from 'neurons-dom';
 import { LoadingMask } from './loadingmask';
 import { errorToMessage } from '../../binding/common/exception';
-import { alert } from '../../components';
+import { alert } from '../../components/dialog';
 
 export interface ILoadingOption {
     mode?: 'alert' | 'modal';
