@@ -109,7 +109,7 @@ export class LoadingService implements ILoadingService {
                 hideCancel: option && option.hideCancel && !!option.hideCancel,
                 hideRefresh: option && option.hideRefresh && !!option.hideRefresh,
             }
-            if (option.mode === 'alert') {
+            if (option && option.mode === 'alert') {
                 popupRef = alert({
                     title: option.alertTitle ? option.alertTitle : '请求异常',
                     body: {
