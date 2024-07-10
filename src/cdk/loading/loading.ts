@@ -6,8 +6,11 @@ import { PopupManager } from '../popup/manager';
 import { createElement } from 'neurons-dom';
 import { LoadingMask } from './loadingmask';
 import { errorToMessage } from '../../binding/common/exception';
+import { alert } from '../../components';
 
 export interface ILoadingOption {
+    mode?: 'alert' | 'modal';
+    alertTitle?: string;
     backgroundColor?: string;
     hideCancel?: boolean;
     hideRefresh?: boolean;
@@ -106,30 +109,48 @@ export class LoadingService implements ILoadingService {
                 hideCancel: option && option.hideCancel && !!option.hideCancel,
                 hideRefresh: option && option.hideRefresh && !!option.hideRefresh,
             }
-            popupRef = this._popupManager.open(`
-                <ne-loading-mask
-                    [hideCancel]="hideCancel"
-                    [hideRefresh]="hideRefresh"
-                    [retryMessage]="retryMessage"
-                    [retryFunction]="retryFunction"
-                    [cancelFunction]="cancelFunction"
-                    [style.background-color]="backgroundColor"
-                />
-            `, {
-                popupMode: 'modal',
-                panelClass: 'ne-loading-mask-panel',
-                popupContainer: container || null,
-                disableAnimation: true,
-                hasOverlay: false,
-                autoClose: true,
-                disableClose: true,
-                state: state,
-                width: '100%',
-                height: '100%',
-                requirements: [
-                    LoadingMask
-                ]
-            });
+            if (option.mode === 'alert') {
+                popupRef = alert({
+                    title: option.alertTitle ? option.alertTitle : '请求异常',
+                    body: {
+                        template: `'
+                            <div style="padding: 2px 12px; color: red;">{{retryMessage}}</div>
+                        `,
+                        state: state
+                    },
+                    okLabel: '重试',
+                    cancelLabel: '关闭',
+                    hideCancelButton: state.hideCancel,
+                    onOk: () => {
+                        state.retryFunction();
+                    }
+                })
+            } else {
+                popupRef = this._popupManager.open(`
+                    <ne-loading-mask
+                        [hideCancel]="hideCancel"
+                        [hideRefresh]="hideRefresh"
+                        [retryMessage]="retryMessage"
+                        [retryFunction]="retryFunction"
+                        [cancelFunction]="cancelFunction"
+                        [style.background-color]="backgroundColor"
+                    />
+                `, {
+                    popupMode: 'modal',
+                    panelClass: 'ne-loading-mask-panel',
+                    popupContainer: container || null,
+                    disableAnimation: true,
+                    hasOverlay: false,
+                    autoClose: true,
+                    disableClose: true,
+                    state: state,
+                    width: '100%',
+                    height: '100%',
+                    requirements: [
+                        LoadingMask
+                    ]
+                });
+            }
             state.retryFunction();
         });
     }
