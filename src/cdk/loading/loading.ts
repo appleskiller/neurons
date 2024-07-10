@@ -77,9 +77,11 @@ export class LoadingService implements ILoadingService {
             let isCanceled = false;
             const state = {
                 retryMessage: '',
+                hidden: false,
                 retryFunction: () => {
                     popupRef && popupRef.panel.changeState({
                         state: {
+                            hidden: false,
                             retryMessage: '',
                         }
                     })
@@ -95,6 +97,7 @@ export class LoadingService implements ILoadingService {
                             if (option && option.mode === 'alert') {
                                 popupRef && popupRef.panel.changeState({
                                     state: {
+                                        hidden: true,
                                         retryMessage: '',
                                     }
                                 })
@@ -139,6 +142,7 @@ export class LoadingService implements ILoadingService {
             }
             popupRef = this._popupManager.open(`
                 <ne-loading-mask
+                    *if="hidden"
                     [hideCancel]="hideCancel"
                     [hideRefresh]="hideRefresh"
                     [retryMessage]="retryMessage"
