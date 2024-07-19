@@ -1,5 +1,5 @@
 import { register } from "../demos";
-import { bind, Binding, Property, Emitter, Inject } from "../../../src";
+import { bind, Binding, Property, Emitter, Inject, NeComponent, BINDING_TOKENS } from "../../../src";
 import { randomStrings, randomTexts } from '../utils';
 import { IEmitter, emitter } from 'neurons-emitter';
 
@@ -293,6 +293,58 @@ register({
                         use: 'ABC'
                     }]
                 });
+            }
+        }, {
+            title: 'JS组件',
+            bootstrap: container => {
+                NeComponent({
+                    selector: 'js-comp-test',
+                    template: `
+                        <div class="js-comp-test">
+                            <span #el>{{text}}</span>
+                            <button (click)="onClick()">点击</button>
+                        </div>
+                    `,
+                    style: `
+                        .js-comp-test {
+                            button {
+                                font-size: 18px;
+                            }
+                        }
+                    `,
+                    properties: {
+                        text: 'text',
+                    },
+                    elements: {
+                        el: 'el',
+                    },
+                    emitters: {
+                        change: 'change'
+                    },
+                    injects: {
+                        cdr: BINDING_TOKENS.CHANGE_DETECTOR,
+                    }
+                }, class JSComponentTest {
+                    cdr;
+                    el;
+                    change;
+                    text = '';
+                    onInit() {
+                        console.log('js component: onInit called!');
+                        console.log('js component el: ', this.el);
+                        console.log('js component cdr : ', this.cdr);
+                    }
+                    onClick() {
+                        this.change.emit('clicked!');
+                    }
+                })
+
+                bind(`<js-comp-test [text]="text" (change)="onChange($event)"></js-comp-test>`, {container: container, state: {
+                    text: 'JS组件测试',
+                    onChange: e => {
+                        console.log("js component click: ", e);
+                    }
+                }})
             }
         }
     ]

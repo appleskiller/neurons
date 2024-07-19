@@ -82,6 +82,7 @@ export interface IAttributeBindingDecoratorOption {
     properties?: { [aliasName: string]: PropertyName };
     emitters?: { [propertyName: string]: EventName };
     injects?: { [propertyName: string]: InjectToken };
+    elements?: { [propertyName: string]: TemplateId };
 }
 export interface IAttributeBindingMetadata extends IAttributeBindingDecoratorOption {
     Clazz?: ClassLike;

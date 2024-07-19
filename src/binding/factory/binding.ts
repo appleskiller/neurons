@@ -61,6 +61,10 @@ function injectInstance(
 ) {
     const emitterRequired = metadata.emitters = metadata.emitters || {};
     const injectRequired = metadata.injects = metadata.injects || {};
+    const elementsRequired = metadata.elements = metadata.elements || {};
+    // 处理元素访问
+    instance.templateElementRequired = instance.templateElementRequired || {};
+    Object.assign(instance.templateElementRequired, elementsRequired);
     // 处理事件注入作为输出
     if (emitterRequired) {
         instance['__emitter'] = new EventEmitter();
@@ -102,11 +106,9 @@ function resolveBindingMetadata(selector, metadata: IBindingMetadata): IBindingM
         const propertyRequired = metadata.properties = metadata.properties || {};
         const emitterRequired = metadata.emitters = metadata.emitters || {};
         const injectRequired = metadata.injects = metadata.injects || {};
-        const elementsRequired = metadata.elements = metadata.elements || {};
         Object.assign(propertyRequired, metadata.Clazz.prototype['propertyRequired'] || {});
         Object.assign(emitterRequired, metadata.Clazz.prototype['emitterRequired'] || {});
         Object.assign(injectRequired, metadata.Clazz.prototype['injectRequired'] || {});
-        Object.assign(elementsRequired, metadata.Clazz.prototype['elementsRequired'] || {});
         complementedMetadata[selector] = true;
     }
     return metadata;

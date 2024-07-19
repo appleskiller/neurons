@@ -50,11 +50,12 @@ export function bootstrap(
 }
 
 // For Javascript
-export function NeComponent(definition: IUIBindingDefinition, clazz: ClassLike) {
+export function NeComponent(definition: IUIBindingDefinition, clazz: ClassLike): ClassLike {
     bindingFactory.register(definition.selector, definition, clazz);
     // 插入组件样式
     if (definition && definition.style) {
         const id = uniqueId('ne_ui_style');
         internalThemeManager.addStyles(id, definition.style);
     }
+    return clazz;
 }
