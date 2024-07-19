@@ -44,6 +44,7 @@ export type BindingTemplate = string;
 export type BindingStatement = string;
 export type LogicBindingSelector = string;
 export type AttributeBindingSelector = string;
+export type TemplateId = string;
 /**
  * binding definition {'key': value}
  * - 'key': value 常规赋值。仅执行一次的赋值操作，value为实际值而非求值语句
@@ -59,9 +60,11 @@ export interface IUIBindingDecoratorOption {
     style?: string;
 
     requirements?: ClassLike[];
+
     properties?: { [aliasName: string]: PropertyName };
     emitters?: { [propertyName: string]: EventName };
     injects?: { [propertyName: string]: InjectToken };
+    elements?: { [propertyName: string]: TemplateId };
 }
 
 export interface IBindingMetadata extends IUIBindingDecoratorOption {
