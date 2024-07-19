@@ -45,6 +45,8 @@ export {
     bind,
     bootstrap,
     parseTemplate,
+
+    NeComponent,
 } from './binding';
 export { HTMLASTNodeType } from './binding/compiler/parser/template';
 // -------------------------------------------------------------------

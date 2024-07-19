@@ -1,10 +1,11 @@
-import { IBindingDefinition, BindingSelector, BindingTemplate, IUIStateStatic, IUIState, IBindingRef, IElementOptions, IBootstrapOptions } from './common/interfaces';
+import { IBindingDefinition, BindingSelector, BindingTemplate, IUIStateStatic, IUIState, IBindingRef, IElementOptions, IBootstrapOptions, IUIBindingDefinition } from './common/interfaces';
 import { bindingFactory } from './factory/factory';
-import { isBrowser } from 'neurons-utils';
+import { isBrowser, uniqueId } from 'neurons-utils';
 import { nativeApi } from './common/domapi';
 import { Provider, IInjector, ClassLike } from 'neurons-injector';
 import "./elements";
 import { IHTMLASTRoot, parseHTML } from './compiler/parser/template';
+import { internalThemeManager } from '../cdk/theme/manager';
 
 export { BINDING_TOKENS, bindingInjector } from './factory/injector';
 export { Element, Property, Binding, Inject, Emitter, Style } from './factory/decorator';
@@ -45,5 +46,15 @@ export function bootstrap(
         });
     } else {
         // TODO
+    }
+}
+
+// For Javascript
+export function NeComponent(definition: IUIBindingDefinition, clazz: ClassLike) {
+    bindingFactory.register(definition.selector, definition, clazz);
+    // 插入组件样式
+    if (definition && definition.style) {
+        const id = uniqueId('ne_ui_style');
+        internalThemeManager.addStyles(id, definition.style);
     }
 }
