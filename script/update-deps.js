@@ -5,7 +5,7 @@ var util = require('./util');
 var semver = require('semver');
 
 var args = util.parseArgs();
-var registry = args.registry === 'taobao' ? 'https://registry.npm.taobao.org' : 'https://registry.npmjs.org';
+var registry = args.registry === 'taobao' ? 'https://registry.npmmirror.com' : 'https://registry.npmjs.org';
 
 var package = fs.readJsonSync(path.resolve(__dirname, '../package.json'));
 // verify and update version

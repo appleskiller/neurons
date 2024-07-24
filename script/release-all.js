@@ -2,7 +2,7 @@
 const util = require('./util');
 
 var args = util.parseArgs();
-var registry = args.registry === 'taobao' ? 'https://registry.npm.taobao.org' : 'https://registry.npmjs.org';
+var registry = args.registry === 'taobao' ? 'https://registry.npmmirror.com' : 'https://registry.npmjs.org';
 var registryArgs = args.registry === 'taobao' ? '-- --registry taobao' : '';
 
 // util.cd('../neurons-xml');
