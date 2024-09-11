@@ -1,5 +1,5 @@
 import { register } from "../demos";
-import { bind, Binding, Property, Emitter, Inject, NeComponent, BINDING_TOKENS } from "../../../src";
+import { bind, Binding, Property, Emitter, Inject, NeComponent, BINDING_TOKENS, HttpClient } from "../../../src";
 import { randomStrings, randomTexts } from '../utils';
 import { IEmitter, emitter } from 'neurons-emitter';
 
